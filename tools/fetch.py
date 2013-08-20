@@ -128,29 +128,37 @@ if __name__ == "__main__":
                         cmdfile=None,)
 
     parser.add_option("", "--cmd", dest="cmdfile", metavar="<cmdname>",
-                        help="This looks for a script named 'scripts/<cmdname>.sh' and writes logs to 'logs/<cmdname>'.")
+                        help=("This looks for a script named "+
+                              "'scripts/<cmdname>.sh' and writes logs to "+
+                              "'logs/<cmdname>'."))
     parser.add_option("", "--cmdline", dest="cmdline", metavar="<cmdline>",
-                        help="Uses string as explicit command to run on nodes. Writes logs to --outdir <outdir>.")
+                        help=("Uses string as explicit command to run on "+
+                              "nodes. Writes logs to --outdir <outdir>."))
     parser.add_option("", "--rerun", dest="rerun", metavar="ext[=val]",
-                        help="Rerun fetch with the files indicated by the "+
-                             "extension given to --rerun. For example, --rerun "+
-                             "status=255, would rerun fetch on all files in "+
-                             "--outdir that end with .status and have a value of 255")
+                        help=("Rerun fetch with the files indicated by the "+
+                              "extension given to --rerun. For example, "+
+                              "--rerun status=255, would rerun fetch on all "+
+                              "files in --outdir that end with .status and "+
+                              "have a value of 255"))
     parser.add_option("", "--outdir", dest="outdir", metavar="dirname",
                         help="Name of directory to place output.  If unset, "+
                              "automatically set to 'logs/<cmd>/'")
     parser.add_option("", "--nodelist", dest="nodelist", metavar="FILE", 
-                        help="Provide the input file for the list of objects")
+                        help=("Provide the input file for the list of objects,"+
+                              " or explicit list 'host1,host2,host3' etc."))
     parser.add_option("", "--list", dest="list",  action="store_true",
-                        help="List the nodes the command would use; do nothing else.")
+                        help=("List the nodes the command would use; do "+
+                              "nothing else."))
     parser.add_option("", "--timeout", dest="timeout", metavar="120",
                         help="Stop trying to execute after <timeout> seconds.")
     parser.add_option("", "--threadcount", dest="threadcount", metavar="20",
                         help="Number of simultaneous threads.")
     parser.add_option("", "--external", dest="external",  action="store_true",
-                        help="Run commands external to the server. The default is internal.")
+                        help=("Run commands external to the server. The "+
+                              "default is internal."))
     parser.add_option("", "--template", dest="template", 
-                        help="Command template for external commands; substitutes [] with hostname.")
+                        help=("Command template for external commands; "+
+                              "substitutes [] with hostname."))
 
     (config, args) = parser.parse_args()
 
@@ -197,9 +205,12 @@ if __name__ == "__main__":
         os.system(cmd)
         nodelist = vxargs.getListFromFile(open(filename,'r'))
 
-    elif config.nodelist is not None and \
-         os.path.exists(str(config.nodelist)) and os.path.isfile(config.nodelist):
-        nodelist = vxargs.getListFromFile(open(config.nodelist,'r'))
+    elif config.nodelist is not None:
+        if os.path.exists(config.nodelist) and os.path.isfile(config.nodelist):
+            nodelist = vxargs.getListFromFile(open(config.nodelist,'r'))
+        elif not os.path.exists(str(config.nodelist)): 
+            # NOTE: explicit list on command line "host1,host2,host3"
+            nodelist = [ (host,'') for host in config.nodelist.split(",") ]
 
     elif config.rerun is not None and os.path.isdir(outdir):
         if config.rerun:
