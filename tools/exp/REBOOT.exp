@@ -1,0 +1,98 @@
+#!/usr/bin/expect
+
+set timeout 60
+set host [lindex $argv 0]
+set user [lindex $argv 1]
+set password [lindex $argv 2]
+set model [lindex $argv 3]
+set method "ssh"
+set dryrun [lindex $argv 4]
+set prompt "\\$|system>|/.*>|</>hpiLO->" 
+
+log_user 1
+if { "$method" == "ssh" } {
+    #send_user "spawn ssh -o StrictHostKeyChecking=no \
+    #                     -o PasswordAuthentication=yes \
+    #                     -o PubkeyAuthentication=no $user@$host\n"
+    set cont 0
+    for { set retry 0 } { $retry < 2 } { incr retry 1 } {
+
+        # NOTE: For unknown reason, some DRAC modules work only with
+        #       stderr redirected to stdout, others only work without it.
+        if { $retry == 0 } {
+            spawn ssh -o StrictHostKeyChecking=no \
+                      -o PasswordAuthentication=yes \
+                      -o PubkeyAuthentication=no $user@$host 
+        } else {
+            spawn ssh -o StrictHostKeyChecking=no \
+                      -o PasswordAuthentication=yes \
+                      -o PubkeyAuthentication=no $user@$host 2>&1
+        }
+
+        expect {
+            "Are you sure you want to continue connecting (yes/no)? " { 
+                send "yes\n" ; 
+                exp_continue 
+            }
+            "password: " { 
+                send "$password\n" ; 
+                exp_continue 
+            }
+            "Permission denied" { 
+                send_user "$model ssh: username/password: $expect_out(0,string)";
+                exit 1
+            }
+            "Could not resolve hostname" { 
+                send_user "$model ssh: $expect_out(0,string)"; 
+                exit 1
+            }
+            "Connection timed out" { 
+                send_user "$model ssh: $expect_out(0,string)"; 
+                exit 1
+            }
+            -re "Received disconnect.*" { 
+                send_user "$model ssh: $expect_out(0,string)"; 
+                exit 1
+            }
+            -re $prompt { 
+                send "\r"; 
+            } 
+            timeout { 
+                send_user "$model ssh: timeout\n" ; 
+                exit 1; 
+            }
+            eof { 
+                if { $cont == 1 } { 
+                    send_user "$model ssh failed twice\n"; 
+                    exit 1;
+                };
+                set cont 1
+            }
+        }
+        if { $cont == 0 } { break; }
+    }
+
+    if { "$model" == "DRAC" } {
+        if { "$dryrun" == "True" } {
+            expect -re $prompt { send "racadm serveraction powerstatus\r"; }
+        } else {
+            expect -re $prompt { send "racadm serveraction powercycle\r"; }
+        }
+    } elseif { "$model" == "IMM" } {
+        if { "$dryrun" == "True" } {
+            expect -re $prompt { send "power state\r"; }
+        } else {
+            expect -re $prompt { send "power cycle\r"; }
+        }
+    } elseif { "$model" == "HPiLO" } {
+        if { "$dryrun" == "True" } {
+            expect -re $prompt { send "power\r"; }
+        } else {
+            expect -re $prompt { send "power reset\r"; }
+        }
+    }
+
+    expect -re $prompt { send "exit\r"; } 
+
+    expect eof { send_user "" }
+}
