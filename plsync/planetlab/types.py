@@ -260,10 +260,16 @@ class Site(dict):
 
         super(Site, self).__init__(**kwargs)
 
-    def sync(self, onhost=None, skipinterfaces=False, getbootimages=False):
+    def sync(self, onhost=None, skipnodes=False, skipinterfaces=False,
+             getbootimages=False):
         """ Do whatever is necessary to validate this site in the myplc DB.
             Actions may include creating a new Site() entry in myPLC DB, 
             creating people listed as PIs, creating nodes and PCUs.  
+
+            onhost - string, limit actions on site to a single host
+            skipnodes - if True, skipnodes entirely
+            skipinterfaces - if True, skip configuration of interfaces
+            getbootimages - if True, also download node bootimages to .iso
         """
         MakeSite(self['login_base'], self['sitename'], self['sitename'])
         SyncLocation(self['login_base'], self['location'])
@@ -272,9 +278,10 @@ class Site(dict):
             email = person[2]
             AddPersonToSite(email,p_id,"tech",self['login_base'])
             AddPersonToSite(email,p_id,"pi",self['login_base'])
-        for hostname,node in self['nodes'].iteritems():
-            if onhost is None or hostname == onhost:
-                node.sync(skipinterfaces, getbootimages)
+        if not skipnodes:
+            for hostname,node in self['nodes'].iteritems():
+                if onhost is None or hostname == onhost:
+                    node.sync(skipinterfaces, getbootimages)
 
 def makesite(name, v4prefix, v6prefix, city, country, 
              latitude, longitude, pi_list, **kwargs):

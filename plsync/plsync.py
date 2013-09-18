@@ -85,6 +85,7 @@ def main():
                         slicelist="slice_list",
                         skipsliceips=False, 
                         skipinterfaces=False,
+                        skipnodes=False,
                         createslice=False,
                         getbootimages=False,
                         url=session.API_URL, debug=False, verbose=False, )
@@ -116,7 +117,11 @@ def main():
                 help=("dont try to create new Interfaces or update existing "+
                       "Interfaces. This permits IPv6 maniuplation without "+
                       "changing legacy IPv4 configuration in DB.") )
-    parser.add_option("", "--createslice", action="store_true", dest="createslice", 
+    parser.add_option("", "--skipnodes", dest="skipnodes",
+                action="store_true",
+                help=("dont create nodes during site sync (saves time)"))
+    parser.add_option("", "--createslice", action="store_true",
+                dest="createslice",
                 help=("Normally, slices are assumed to exist. This option "+
                       "creates them first. Useful for testing."))
     parser.add_option("", "--getbootimages", dest="getbootimages", 
@@ -163,8 +168,8 @@ def main():
             if (options.syncsite == "all" or 
                 options.syncsite == site['name']):
                 print "Syncing: site", site['name']
-                site.sync(options.ondest, options.skipinterfaces, 
-                          options.getbootimages)
+                site.sync(options.ondest, options.skipnodes,
+                          options.skipinterfaces, options.getbootimages)
 
     elif options.syncslice is not None and options.syncsite is None:
         print options.syncslice
