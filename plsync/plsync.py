@@ -112,6 +112,9 @@ def main():
     parser.add_option("", "--url", dest="url", 
                 default=session.API_URL,
                 help="PLC url to contact")
+    parser.add_option("", "--plcconfig", dest="plcconfig",
+                default=session.PLC_CONFIG,
+                help="path to file containing plc login information.")
 
     parser.add_option("", "--on", metavar="hostname", dest="ondest", 
                 default=None,
@@ -196,7 +199,8 @@ def main():
     slice_list =  getattr(__import__(options.slicesname), options.slicelist)
 
     print "setup plc session"
-    session.setup_global_session(options.url, options.debug, options.verbose)
+    session.setup_global_session(options.url, options.debug, options.verbose,
+                                 options.plcconfig)
 
     # always setup the configuration for everything (very fast)
     print "loading slice & site configuration"
