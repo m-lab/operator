@@ -260,28 +260,30 @@ class Site(dict):
 
         super(Site, self).__init__(**kwargs)
 
-    def sync(self, onhost=None, skipnodes=False, skipinterfaces=False,
-             getbootimages=False):
+    def sync(self, onhost=None, addpis=False, addnodes=False,
+             addinterfaces=False, getbootimages=False):
         """ Do whatever is necessary to validate this site in the myplc DB.
             Actions may include creating a new Site() entry in myPLC DB, 
             creating people listed as PIs, creating nodes and PCUs.  
 
             onhost - string, limit actions on site to a single host
-            skipnodes - if True, skipnodes entirely
-            skipinterfaces - if True, skip configuration of interfaces
+            addpis - if True, add/confirm pis
+            addnodes - if True, add/confirm nodes
+            addinterfaces - if True, add interface configuration to nodes
             getbootimages - if True, also download node bootimages to .iso
         """
         MakeSite(self['login_base'], self['sitename'], self['sitename'])
         SyncLocation(self['login_base'], self['location'])
-        for person in self['pi']:
-            p_id = MakePerson(*person)
-            email = person[2]
-            AddPersonToSite(email,p_id,"tech",self['login_base'])
-            AddPersonToSite(email,p_id,"pi",self['login_base'])
-        if not skipnodes:
+        if addpis:
+            for person in self['pi']:
+                p_id = MakePerson(*person)
+                email = person[2]
+                AddPersonToSite(email,p_id,"tech",self['login_base'])
+                AddPersonToSite(email,p_id,"pi",self['login_base'])
+        if addnodes:
             for hostname,node in self['nodes'].iteritems():
                 if onhost is None or hostname == onhost:
-                    node.sync(skipinterfaces, getbootimages)
+                    node.sync(addinterfaces, getbootimages)
 
 def makesite(name, v4prefix, v6prefix, city, country, 
              latitude, longitude, pi_list, **kwargs):
@@ -452,7 +454,7 @@ class Node(dict):
 
         return attr
 
-    def sync(self, skipinterfaces=False, getbootimages=False):
+    def sync(self, addinterfaces=False, getbootimages=False):
         """Create and or verify that Node object & PCU & interface is created in
         myplc db"""
 
@@ -460,7 +462,7 @@ class Node(dict):
         MakePCU(self['login_base'], node_id, self['pcu'].fields())
         PutNodeInNodegroup(self.hostname(), node_id, self['nodegroup'])
         interface = self.interface()
-        if not skipinterfaces:
+        if addinterfaces:
             SyncInterface(self.hostname(), node_id, interface,
                           interface['is_primary'])
             if self['nodegroup'] == 'MeasurementLabLXC':
@@ -472,7 +474,7 @@ class Node(dict):
         if not self['exclude_ipv6']:
             SyncInterfaceTags(node_id, interface, self.v6interface_tags())
 
-        if not skipinterfaces and self['nodegroup'] != 'MeasurementLabLXC':
+        if addinterfaces and self['nodegroup'] != 'MeasurementLabLXC':
             for ip in self.iplist():
                 interface['ip'] = ip
                 interface['is_primary'] = False
@@ -580,8 +582,8 @@ class Slice(dict):
         return ((isinstance(self['ipv6'], list) and hostname in self['ipv6']) or
                 (isinstance(self['ipv6'], str) and "all" == self['ipv6']) )
         
-    def sync(self, hostname_or_site=None, skipwhitelist=False, 
-             skipsliceips=False, createslice=False):
+    def sync(self, hostname_or_site=None, addwhitelist=False,
+             addsliceips=False, createslice=False):
         """ Create and/or verify the object in the myplc DB """
         # NOTE: USERS  ARE NOT ADDED TO SLICES HERE.
         if createslice:
@@ -595,11 +597,11 @@ class Slice(dict):
             if ( hostname_or_site is None or 
                  hostname_or_site == h    or 
                  hostname_or_site in h ):
-                if not skipwhitelist:
+                if addwhitelist:
                     # add this slice to whitelist of all hosts.
                     WhitelistSliceOnNode(self['name'], h)
                     #RemoveSliceFromNode(self['name'], h)
-                if not skipsliceips:
+                if addsliceips:
                     attr = node.get_interface_attr(self)
                     if attr:
                         SyncSliceAttribute(self['name'], attr)
