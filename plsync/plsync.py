@@ -10,27 +10,62 @@ def usage():
         and applies them to the PLC database adding or updating objects, 
         tags, and other values when appropriate.
 
-    TODO:
-        Implement common operations:
-
-        ./plsync.py --syncsite xyz --getbootimages 
-                This would setup the basic networking, and download boot images.
-                Subsequent calls should assume these are done already.
-
-    Examples:
+    Add a New Site:
         ./plsync.py --dryrun ....
                 Only perform Get* api calls.  Absolutely no changes are made
                 to the PLC DB. HIGHLY recommended before changes.
 
-        ./plsync.py --syncsite nuq01
-                Creates site, nodes, and pcus for the given site name.
+        ./plsync.py --syncsite nuq01 --allsteps --getbootimages
+                Creating a new site requires admin permission.  First, edit
+                sites.py to add details for nuq01. Next, run this command to
+                create site, nodes, PCUs and configuration.  As well, this
+                command downloads the boot images for the new site to PWD.
+                Downloading the boot image should occur *only once*.  Every
+                time you download the boot image, the node key in the PLC db
+                is re-written. If the key in the db is out of sync with the
+                key on the server, then nodes will fail to authenticate or
+                boot.
 
-        ./plsync.py --syncslice <slicename> --skipsliceips --skipwhitelist
-                Useful for updating a slice attributes for a single slice.  For
+        ./plsync.py --syncslice all --on nuq01 --allsteps
+                Use the standard set of slices defined in slices.py and add
+                their configuration to the servers at site 'nuq01'.  Perform
+                all configuration steps (i.e. add slice ips, and add
+                whitelist).
+
+    Add New Operator (rare):
+        ./plsync.py --syncsite all --addpis
+                Adding a new operator to all M-Lab sites requires admin
+                permission.  Add the new operator email address to sites.py in
+                the variable 'pi_list'.  Finally, run this command.  The
+                operator account should already exist in the PlanetLab
+                database, and after completion will have permission to act on
+                M-Lab servers or PCUs at all M-Lab sites.
+
+    Alternate Boot Server:
+        ./plsync.py --url https://boot-test.measurementlab.net/PLCAPI/ ...
+                The default API target for plsync is PlanetLab's PLCAPI server.
+                To direct plsync to a different target use '--url <url>'
+
+    Configure a Single Slice:
+        ./plsync.py --syncslice <slicename> --allsteps
+                Add the new slice specification to slices.py. Next, run this
+                command.  By default, syncslice will apply to *all* sites. If
+                you would like to limit the sites, specify "--on <sitename>'
+
+                Also, useful to update slice attributes for a single slice.  For
                 instance, to disable a slice prior to deletion from M-Lab, you
                 could add the attribute 'enabled=0' to slices.py and run this
-                command.
+                command.  Or, to increase the disk quota. disk_max='80000000'
 
+    Add IPv6 to Slice on a Single Server:
+        ./plsync.py --syncslice iupui_ndt --allstesps \\
+                    --on mlab1.nuq0t.measurement-lab.org --allsteps
+                In slices.py update Slice() definition to include ipv6="all".
+                Then, resync the slice configuration for a given hostname.
+                This command is useful for staging updates, rather than
+                applying them globally.
+
+    Other Examples:
         ./plsync.py --syncslice all --on nuq01
                 Associates all slices with machines at given site. Also, 
                 updates global slice attributes.  Should only be run after 
@@ -41,35 +76,26 @@ def usage():
                 sites that do not exist.  This will take a very long time
                 due to the delays for every RPC call to the PLC api.
 
-        ./plsync.py --syncsite nuq01 --on mlab4.nuq01.measurement-lab.org
-                Resync the node configuration for given hostname.
+                This command would be useful once migrating to a new
+                boot-server.  This would populate the entire db based on the
+                current configuration in sites.py & slices.py (which should be
+                identical to PlanetLab's db).
 
-        ./plsync.py --syncslice ooni_probe --skipwhitelist
-                Like "--syncslice all" except only applied to the given
-                slicename.  --skipwhitelist assumes that the slice was
-                previously whitelisted, so doing it again is unnecessary.
-
-        ./plsync.py --syncslice ooni_probe --on mlab4.nuq01.measurement-lab.org
-                Performs the --syncslice operations, but only on the given
-                target machine.  This is useful for applying IPv6 address
-                updates (or other slice attributes) to only a few machines, 
-                instead of all of them.  Global slice attributes will also be 
-                applied, despite "--on <hostname>".
-
-                In this example, ooni_probe must be explicitly permitted to
-                receive an ipv6 on mlab4.nuq01 in slices.py. 
-    Comments:
+    Future Notes:
         Since an external sites & slices list was necessary while M-Lab was
         part of PlanetLab to differentiate mlab from non-mlab, 
-        it may be possible to eliminate sites.py now. That really only
+        it may be possible to eliminate sites.py and slices.py. That really only
         needs to run once and subsequent slice operations could query the DB
         for a list of current sites or hosts.  More intelligent update 
-        functions could to re-assign nodes to nodegroups, assign which hosts 
+        functions could re-assign nodes to nodegroups, assign which hosts
         are in the ipv6 pool, etc. just a thought.
 
         Keeping slices.py as a concise description of what and how slices
         are deployed to M-Lab is probably still helpful to see everything in
-        one place.
+        one place.  But, this could be saved in the form of a list of commands
+        to plsync.py with explicit arguments for the values currently
+        contained in slices.py.  This would make plsync.py just another
+        command line tool and separate config from function more clearly.
 """
 
 def main():
@@ -77,68 +103,94 @@ def main():
     from optparse import OptionParser
     parser = OptionParser(usage=usage())
 
-    parser.set_defaults(syncsite=None, syncslice=None,
-                        ondest=None, skipwhitelist=False, 
-                        sitesname="sites",
-                        slicesname="slices",
-                        sitelist="site_list",
-                        slicelist="slice_list",
-                        skipsliceips=False, 
-                        skipinterfaces=False,
-                        createslice=False,
-                        getbootimages=False,
-                        url=session.API_URL, debug=False, verbose=False, )
-
     parser.add_option("", "--dryrun", dest="debug", action="store_true",
-                        help=("Only issues 'Get*' calls to the API.  "+
-                              "Commits nothing to the API"))
+                default=False,
+                help="only issues 'Get*' calls to the API. Commits nothing.")
     parser.add_option("", "--verbose", dest="verbose", action="store_true",
-                        help="Print all the PLC API calls being made.")
+                default=False,
+                help="print all the PLC API calls being made.")
     parser.add_option("", "--url", dest="url", 
-                        help="PLC url to contact")
+                default=session.API_URL,
+                help="PLC url to contact")
 
     parser.add_option("", "--on", metavar="hostname", dest="ondest", 
-                        help="only act on the given host")
+                default=None,
+                help="only act on the given hostname (or sitename)")
 
     parser.add_option("", "--syncsite", metavar="site", dest="syncsite", 
-                help="only sync sites, nodes, pcus, if needed. (saves time)")
+                default=None,
+                help="sync the given site, nodes, and pcus. Can be 'all'")
     parser.add_option("", "--syncslice", metavar="slice", dest="syncslice", 
-                help="only sync slices and attributes of slices. (saves time)")
+                default=None,
+                help="sync the given slice and its attributes. Can be 'all'")
 
-    parser.add_option("", "--skipwhitelist", dest="skipwhitelist", 
-                action="store_true", 
-                help=("dont try to white list the given slice. (saves time)"))
-    parser.add_option("", "--skipsliceips", dest="skipsliceips", 
+    parser.add_option("-A", "--allsteps", dest="allsteps",
                 action="store_true",
-                help="dont try to assign ips to slice. (saves time)")
-    parser.add_option("", "--skipinterfaces", dest="skipinterfaces", 
+                default=False,
+                help="perform all the following 'add' steps (in context)")
+    parser.add_option("", "--addnodes", dest="addnodes",
                 action="store_true",
-                help=("dont try to create new Interfaces or update existing "+
-                      "Interfaces. This permits IPv6 maniuplation without "+
-                      "changing legacy IPv4 configuration in DB.") )
-    parser.add_option("", "--createslice", action="store_true", dest="createslice", 
-                help=("Normally, slices are assumed to exist. This option "+
-                      "creates them first. Useful for testing."))
-    parser.add_option("", "--getbootimages", dest="getbootimages", 
+                default=False,
+                help=("[syncsite] create nodes during site sync"))
+    parser.add_option("", "--addinterfaces", dest="addinterfaces",
                 action="store_true",
-                help=("Download the ISO boot images for Nodes. This is a"+
+                default=False,
+                help=("[syncsite] create/update ipv4 Interfaces. Omitting "+
+                      "this option only syncs ipv6 configuration (which is "+
+                      "treated differently in the DB)") )
+    parser.add_option("", "--addpis", dest="addpis",
+                action="store_true",
+                default=False,
+                help=("[syncsite] add PIs to sites"))
+
+    parser.add_option("", "--addwhitelist", dest="addwhitelist",
+                action="store_true",
+                default=False,
+                help=("[syncslice] add the given slice to whitelists."))
+    parser.add_option("", "--addsliceips", dest="addsliceips",
+                default=False,
+                action="store_true",
+                help="[syncslice] assign IPs (v4 and/or v6) to slices")
+
+    parser.add_option("", "--createslice", action="store_true",
+                dest="createslice",
+                default=False,
+                help=("normally, slices are assumed to exist. This option "+
+                      "creates them first. Useful for testing. Users are not "+
+                      "assigned to new slices."))
+    parser.add_option("", "--getbootimages", dest="getbootimages",
+                action="store_true",
+                default=False,
+                help=("download the ISO boot images for Nodes. This is a"+
                       " destructive operation if ISOs have previously been "+
                       "downloaded."))
 
-    parser.add_option("", "--sitesname", metavar="sites", dest="sitesname", 
-                help="The name of the module with Site() definitions")
-    parser.add_option("", "--slicesname", metavar="slices", dest="slicesname", 
-                help="The name of the module with Slice() definitions")
+    parser.add_option("", "--sitesname", metavar="sites", dest="sitesname",
+                default="sites",
+                help="the name of the module with Site() definitions")
+    parser.add_option("", "--slicesname", metavar="slices", dest="slicesname",
+                default="slices",
+                help="the name of the module with Slice() definitions")
 
-    parser.add_option("", "--sitelist", metavar="site_list", dest="sitelist", 
-                help="The site list variable name.")
-    parser.add_option("", "--slicelist", metavar="slice_list", dest="slicelist", 
-                help="The slice list variable name.")
+    parser.add_option("", "--sitelist", metavar="site_list", dest="sitelist",
+                default="site_list",
+                help="the site list variable name.")
+    parser.add_option("", "--slicelist", metavar="slice_list", dest="slicelist",
+                default="slice_list",
+                help="the slice list variable name.")
 
     (options, args) = parser.parse_args()
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
+
+    # NOTE: if allsteps is given, set all steps to True
+    if options.allsteps:
+        options.addwhitelist=True
+        options.addsliceips=True
+        options.addinterfaces=True
+        options.addnodes=True
+        options.addpis=True
 
     site_list =  getattr(__import__(options.sitesname), options.sitelist)
     slice_list =  getattr(__import__(options.slicesname), options.slicelist)
@@ -163,7 +215,10 @@ def main():
             if (options.syncsite == "all" or 
                 options.syncsite == site['name']):
                 print "Syncing: site", site['name']
-                site.sync(options.ondest, options.skipinterfaces, 
+                site.sync(options.ondest,
+                          options.addpis,
+                          options.addnodes,
+                          options.addinterfaces,
                           options.getbootimages)
 
     elif options.syncslice is not None and options.syncsite is None:
@@ -172,10 +227,10 @@ def main():
             if (options.syncslice == "all" or 
                 options.syncslice == sslice['name']):
                 print "Syncing: slice", sslice['name']
-                sslice.sync(options.ondest, 
-                           options.skipwhitelist, 
-                           options.skipsliceips,
-                           options.createslice)
+                sslice.sync(options.ondest,
+                            options.addwhitelist,
+                            options.addsliceips,
+                            options.createslice)
 
     else:
         print usage()
