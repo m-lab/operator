@@ -1,22 +1,44 @@
 #!/usr/bin/env python
 
+import ConfigParser
 import getpass
-import xmlrpclib
 import os
 import sys
+import xmlrpclib
 
+API_URL = "https://boot.planet-lab.org/PLCAPI/"
+PLC_CONFIG="/etc/planetlab.conf"
 SESSION_DIR=os.environ['HOME'] + "/.ssh"
 SESSION_FILE=SESSION_DIR + "/mlab_session"
-API_URL = "https://boot.planet-lab.org/PLCAPI/"
 
 api = None
 
-def setup_global_session(url, debug, verbose):
+def setup_global_session(url, debug, verbose, plcconfig=None):
     global api
     global API_URL
     API_URL=url
-    api = getapi(debug, verbose)
+    api = getapi(debug, verbose, plcconfig)
     return api
+
+def read_plc_config(filename):
+    """ Use python's ConfigParser() to extract user credentials from filename.
+    File should include:
+        [MyPLC]
+        username=
+        password=
+    Args:
+        filename - full path to config file
+    Returns:
+        (username, password) tuple
+    Raises:
+        ConfigParser.NoSectionError - when MyPLC section does not exist.
+        ConfigParser.NoOptionError  - when value is not specified in section.
+    """
+    config = ConfigParser.SafeConfigParser()
+    config.read(filename)
+    un = config.get("MyPLC", "username")
+    pw = config.get("MyPLC", "password")
+    return (un, pw)
 
 class API:
     def __init__(self, auth, url, debug=False, verbose=False):
@@ -53,12 +75,16 @@ class API:
         #return lambda *params : call_method(*params)
         #return call_method(*params)
 
-def refreshsession():
+def refreshsession(plcconfig=None):
     # Either read session from disk or create it and save it for later
-    print "PLC Username: ",
-    sys.stdout.flush()
-    username = sys.stdin.readline().strip()
-    password = getpass.getpass("PLC Password: ")
+    if plcconfig is not None and os.path.exists(plcconfig):
+        print "Using credentials from: ", plcconfig
+        (username, password) = read_plc_config(plcconfig)
+    else:
+        print "PLC Username: ",
+        sys.stdout.flush()
+        username = sys.stdin.readline().strip()
+        password = getpass.getpass("PLC Password: ")
     auth = {'Username' : username,
             'AuthMethod' : 'password',
             'AuthString' : password}
@@ -71,9 +97,6 @@ def refreshsession():
     session_map = parse_sessions(SESSION_FILE, fail_on_open=False)
     session_map[API_URL] = session
     write_sessions(SESSION_FILE, session_map)
-    #f = open(SESSION_FILE, 'w')
-    #print >>f, session
-    #f.close()
 
 def write_sessions(session_file, session_map):
     f = open(SESSION_FILE, 'w')
@@ -108,7 +131,7 @@ def parse_sessions(session_file, fail_on_open=True):
             session_map[url] = session
     return session_map
 
-def getapi(debug=False, verbose=False):
+def getapi(debug=False, verbose=False, plcconfig=None):
     global api
     api = xmlrpclib.ServerProxy(API_URL, allow_none=True)
     auth = None
@@ -118,19 +141,16 @@ def getapi(debug=False, verbose=False):
             auth = {}
             auth['AuthMethod'] = 'session'
             session_map = parse_sessions(SESSION_FILE)
-            #print session_map
             auth['session'] = session_map[API_URL]
             authorized = api.AuthCheck(auth)
             if not authorized:
                 print "Need to refresh your PLC session file: %s" % SESSION_FILE
                 sys.stdout.flush()
-                refreshsession()
+                refreshsession(plcconfig)
         except:
-            #import traceback
-            #traceback.print_exc()
             print "Need to setup a new PLC session file: %s" % SESSION_FILE
             sys.stdout.flush()
-            refreshsession()
+            refreshsession(plcconfig)
 
     assert auth is not None
     return API(auth, API_URL, debug, verbose)
