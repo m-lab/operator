@@ -23,6 +23,8 @@ def system(cmd):
                            stderr=sys.stderr, shell=True)
 
 REBOOT_MESSAGE="""
+NOTE: please send this message to ops@measurementlab.net:
+
 Around %(ts)s we rebooted this server due to the system not responding:
 
     %(hostname)s
