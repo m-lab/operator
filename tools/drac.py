@@ -22,6 +22,14 @@ def system(cmd):
     return subprocess.call(cmd, stdout=sys.stdout, 
                            stderr=sys.stderr, shell=True)
 
+REBOOT_MESSAGE="""
+Around %(ts)s we rebooted this server due to the system not responding:
+
+    %(hostname)s
+
+Once the reboot completes, all services on this system should return to normal.
+"""
+
 def usage():
     return """
     usage:
@@ -384,6 +392,10 @@ def main():
             else:
                 print "%s is an unsupported PCU model" % model
                 continue
+            ts = time.strftime("%b %d %H:%M UTC", time.gmtime())
+            msg = REBOOT_MESSAGE % {'ts' : ts, 'hostname' : hostname }
+            # TODO: add option to --send this message to ops@ list
+            print msg
 
     elif command == "resetpassword":
         ## NOTE: be extra verbose for password resets, in case something goes
