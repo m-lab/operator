@@ -22,6 +22,16 @@ def system(cmd):
     return subprocess.call(cmd, stdout=sys.stdout, 
                            stderr=sys.stderr, shell=True)
 
+REBOOT_MESSAGE="""
+NOTE: please send this message to ops@measurementlab.net:
+
+Around %(ts)s we rebooted this server due to the system not responding:
+
+    %(hostname)s
+
+Once the reboot completes, all services on this system should return to normal.
+"""
+
 def usage():
     return """
     usage:
@@ -384,6 +394,17 @@ def main():
             else:
                 print "%s is an unsupported PCU model" % model
                 continue
+            ts = time.strftime("%b %d %H:%M UTC", time.gmtime())
+            msg = REBOOT_MESSAGE % {'ts' : ts, 'hostname' : hostname }
+            # TODO: add option to --send this message to ops@ list
+            print msg
+
+    elif command == "rebootdrac":
+        # After a shell login, some pcus can be "reset". i.e.
+        # TODO: IMM can be soft reset using 'resetsp'
+        # TODO: DRAC can be soft reset using 'racreset soft'
+        # TODO: HPiLO can be soft reset using 'reset /map1'
+        pass
 
     elif command == "resetpassword":
         ## NOTE: be extra verbose for password resets, in case something goes
