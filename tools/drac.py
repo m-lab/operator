@@ -399,6 +399,13 @@ def main():
             # TODO: add option to --send this message to ops@ list
             print msg
 
+    elif command == "rebootdrac":
+        # After a shell login, some pcus can be "reset". i.e.
+        # TODO: IMM can be soft reset using 'resetsp'
+        # TODO: DRAC can be soft reset using 'racreset soft'
+        # TODO: HPiLO can be soft reset using 'reset /map1'
+        pass
+
     elif command == "resetpassword":
         ## NOTE: be extra verbose for password resets, in case something goes
         ##       wrong, to see where.
