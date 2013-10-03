@@ -109,10 +109,17 @@ def MakeSite(loginbase,name,abbreviated_name,
     if len(site) == 0:
         print "MakeSite(%s,%s,%s)"%(loginbase,name,abbreviated_name)
         # NOTE: max_slices defaults to zero
-        site_id = s.api.AddSite({"name":name,
+        try:
+            site_id = s.api.AddSite({"name":name,
                      "abbreviated_name":abbreviated_name,
                      "login_base": loginbase,
                      "url" : url, 'max_slices' : 10})
+        except xmlrpclib.Fault, e:
+            print "Error: AddSite() requires ADMIN role."
+            print "Error: contact support@planet-lab.org for assistance"
+            print e
+            sys.exit(1)
+
     elif len(site) == 1:
         print "Confirmed: %s is in DB" % loginbase
         site_id = site[0]['site_id']
@@ -139,7 +146,7 @@ def MakePerson(first_name, last_name, email):
         personid=-1
     return personid
 
-def AddPersonToSite(email,personid,role,loginbase):
+def AddPersonToSite(email,personid,loginbase):
     site = s.api.GetSites({"login_base":loginbase})
     if len(site) != 1:
         print ("WARNING: problem with getting site info for loginbase=%s" % 
@@ -150,11 +157,16 @@ def AddPersonToSite(email,personid,role,loginbase):
         if personid not in site['person_ids']:
             print ("Added %s (%d) to site %d (%s)" % 
                     (email, personid, siteid, loginbase))
-            s.api.AddPersonToSite(personid,siteid)
-            s.api.AddRoleToPerson(role,personid)
+            try:
+                s.api.AddPersonToSite(personid,siteid)
+            except xmlrpclib.Fault, e:
+                print "Error: AddPersonToSite() requires ADMIN role."
+                print "Error: contact support@planet-lab.org for assistance"
+                print e
+                sys.exit(1)
         else:
-            print ("Confirmed %s (%d) is %s for site %s" % 
-                    (email, personid, role, loginbase))
+            print ("Confirmed %s (%d) is on site %s" %
+                    (email, personid, loginbase))
 
 def MakeNode(login_base, hostname):
     node_list = s.api.GetNodes(hostname)
@@ -421,9 +433,16 @@ def MakeSlice(slicename):
     """
     sl = s.api.GetSlices({'name' : slicename})
     if len(sl) == 0:
-        slice_id = s.api.AddSlice({'name' : slicename, 
+        try:
+            slice_id = s.api.AddSlice({'name' : slicename,
                     'url' : 'http://www.measurementlab.net', 
                     'description' : 'Fake description for testing'})
+        except xmlrpclib.Fault, e:
+            print "Error: AddSlice() failed."
+            print "Error: do you have 'pi' role?"
+            print e
+            sys.exit(1)
+
         print "Adding:    Slice %s:%s" % (slicename, slice_id)
     elif len(sl) == 1:
         slice_id = sl[0]['slice_id']
@@ -670,8 +689,14 @@ def WhitelistSliceOnNode(slicename, hostname):
                 # then this slice is not on this node's whitelist
                 print ("Adding %s to whitelist on host: %s" %
                         (sslice['name'], node['hostname']))
-                s.api.AddSliceToNodesWhitelist(sslice['slice_id'],
+                try:
+                    s.api.AddSliceToNodesWhitelist(sslice['slice_id'],
                                                [node['hostname']])
+                except xmlrpclib.Fault, e:
+                    print "Error: AddSliceToNodesWhitelist() needs ADMIN role."
+                    print "Error: contact support@planet-lab.org for assistance"
+                    print e
+                    sys.exit(1)
             else:
                 print ("Confirmed: %s is whitelisted on %s" %
                         (sslice['name'], node['hostname']))

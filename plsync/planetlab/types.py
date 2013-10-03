@@ -278,8 +278,7 @@ class Site(dict):
             for person in self['pi']:
                 p_id = MakePerson(*person)
                 email = person[2]
-                AddPersonToSite(email,p_id,"tech",self['login_base'])
-                AddPersonToSite(email,p_id,"pi",self['login_base'])
+                AddPersonToSite(email,p_id,self['login_base'])
         if addnodes:
             for hostname,node in self['nodes'].iteritems():
                 if onhost is None or hostname == onhost:
