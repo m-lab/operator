@@ -5,6 +5,11 @@ import pprint
 import time
 import base64
 
+def print_role_error(fname, rolename, exception):
+    print "Error: %s requires %s role." % (fname, rolename)
+    print "Error: contact support@planet-lab.org for assistance"
+    print exception
+
 def SyncSiteTag(sitename, site_id, tagname, value):
     """ SyncSiteTag() - either add, confirm, or update the tagname->value
 
@@ -115,9 +120,7 @@ def MakeSite(loginbase,name,abbreviated_name,
                      "login_base": loginbase,
                      "url" : url, 'max_slices' : 10})
         except xmlrpclib.Fault, e:
-            print "Error: AddSite() requires ADMIN role."
-            print "Error: contact support@planet-lab.org for assistance"
-            print e
+            print_role_error("AddSite()", "ADMIN", e)
             sys.exit(1)
 
     elif len(site) == 1:
@@ -160,9 +163,7 @@ def AddPersonToSite(email,personid,loginbase):
             try:
                 s.api.AddPersonToSite(personid,siteid)
             except xmlrpclib.Fault, e:
-                print "Error: AddPersonToSite() requires ADMIN role."
-                print "Error: contact support@planet-lab.org for assistance"
-                print e
+                print_role_error("AddPersonToSite()", "ADMIN", e)
                 sys.exit(1)
         else:
             print ("Confirmed %s (%d) is on site %s" %
@@ -438,9 +439,7 @@ def MakeSlice(slicename):
                     'url' : 'http://www.measurementlab.net', 
                     'description' : 'Fake description for testing'})
         except xmlrpclib.Fault, e:
-            print "Error: AddSlice() failed."
-            print "Error: do you have 'pi' role?"
-            print e
+            print_role_error("AddSlice()", ">= PI", e)
             sys.exit(1)
 
         print "Adding:    Slice %s:%s" % (slicename, slice_id)
@@ -693,9 +692,7 @@ def WhitelistSliceOnNode(slicename, hostname):
                     s.api.AddSliceToNodesWhitelist(sslice['slice_id'],
                                                [node['hostname']])
                 except xmlrpclib.Fault, e:
-                    print "Error: AddSliceToNodesWhitelist() needs ADMIN role."
-                    print "Error: contact support@planet-lab.org for assistance"
-                    print e
+                    print_role_error("AddSliceToNodesWhitelist()", "ADMIN", e)
                     sys.exit(1)
             else:
                 print ("Confirmed: %s is whitelisted on %s" %
