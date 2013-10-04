@@ -271,6 +271,7 @@ class Site(dict):
             addnodes - if True, add/confirm nodes
             addinterfaces - if True, add interface configuration to nodes
             getbootimages - if True, also download node bootimages to .iso
+            createusers - if True, also create declared users not found in db
         """
         MakeSite(self['login_base'], self['sitename'], self['sitename'])
         SyncLocation(self['login_base'], self['location'])
