@@ -74,8 +74,10 @@ Network.legacy_network_remap = legacy_network_remap
 
 pi_list = [('Stephen', 'Stuart', 'sstuart@google.com'),
            ('Thomas',  'Gideon', 'gideon@newamerica.net'),
+           ('Josh',    'King', 'joshking@newamerica.net'),
            ('Jordan',  'McCarthy', 'mccarthy@opentechinstitute.org'),
            ('Chris',   'Ritzo', 'critzo@opentechinstitute.org'),
+           ('Josh',    'Bailey', 'joshb@google.com'),
            ('Tiziana', 'Refice', 'tiziana@google.com')]
 
 site_list = [
@@ -120,7 +122,7 @@ site_list = [
     makesite('wlg01','103.10.233.0',   '2404:2000:3000::',     'Wellington', 'NZ', -41.327200, 174.805000, pi_list, nodegroup='MeasurementLabCentos'),
 
     # Site for M-Lab testing machines
-    makesite('nuq0t','64.9.225.192',   '2604:CA00:F000:3::',   None, None, 0,0, pi_list, count=4),
+    makesite('nuq0t','64.9.225.192',   '2604:CA00:F000:3::',   None, None, 0,0, pi_list, count=4), 
    # NOTE: mlc servers need special handling
    #Site(name='mlc',   net=Network(v4='64.9.225.64',     v6='2604:CA00:F000:5::'), domain="measurementlab.net", count=3),  
 ]
