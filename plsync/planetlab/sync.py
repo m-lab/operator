@@ -1,4 +1,3 @@
-
 import session as s
 import sys
 import pprint
@@ -23,7 +22,7 @@ def handle_xmlrpclib_Fault(funcname, exception):
     Exits:
         if exception.faultCode is due to a PLC Authentication Failure.
     """
-    if ( type(exception) == xmlrpclib.Fault and
+    if (type(exception) == xmlrpclib.Fault and
          exception.faultCode == PLCAuthenticationFailureCode):
         print "Error: %s requires a different role." % funcname
         print "Error: Consider contacting support@planet-lab.org for assistance"
