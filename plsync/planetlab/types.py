@@ -202,7 +202,7 @@ class Site(dict):
             count - the number of nodes at the site (default: 3)
             nodegroup - the nodegroup with which to associate new nodes at 
                         this site.  (default: MeasurementLab)
-            pi - a list of people to add as PI's for a new site.
+            users - a list of people to add as PI's for a new site.
                  (default: Stephen Stuart)
             login_base_prefix - a constant prefix for to prepend to 'name' 
                                 (default: mlab).
@@ -221,8 +221,8 @@ class Site(dict):
             kwargs['count'] = 3
         if 'nodegroup' not in kwargs:
             kwargs['nodegroup'] = 'MeasurementLab'
-        if 'pi' not in kwargs:
-            kwargs['pi'] = [ ("Stephen","Stuart","sstuart@google.com") ]
+        if 'users' not in kwargs:
+            kwargs['users'] = [ ("Stephen","Stuart","sstuart@google.com") ]
         if 'login_base_prefix' not in kwargs:
             kwargs['login_base_prefix'] = 'mlab'
         if 'location' not in kwargs:
@@ -260,32 +260,31 @@ class Site(dict):
 
         super(Site, self).__init__(**kwargs)
 
-    def sync(self, onhost=None, addpis=False, addnodes=False,
-             addinterfaces=False, getbootimages=False):
+    def sync(self, onhost=None, addusers=False, addnodes=False,
+             addinterfaces=False, getbootimages=False, createusers=False):
         """ Do whatever is necessary to validate this site in the myplc DB.
             Actions may include creating a new Site() entry in myPLC DB, 
-            creating people listed as PIs, creating nodes and PCUs.  
+            adding or deleting people in user list, creating nodes and PCUs.
 
             onhost - string, limit actions on site to a single host
-            addpis - if True, add/confirm pis
+            addusers - if True, add/confirm users
             addnodes - if True, add/confirm nodes
             addinterfaces - if True, add interface configuration to nodes
             getbootimages - if True, also download node bootimages to .iso
+            createusers - if True, also create declared users not found in db
         """
         MakeSite(self['login_base'], self['sitename'], self['sitename'])
         SyncLocation(self['login_base'], self['location'])
-        if addpis:
-            for person in self['pi']:
-                p_id = MakePerson(*person)
-                email = person[2]
-                AddPersonToSite(email,p_id,self['login_base'])
+        if addusers:
+            SyncPersonsOnSite(self['users'], self['login_base'], createusers)
+
         if addnodes:
             for hostname,node in self['nodes'].iteritems():
                 if onhost is None or hostname == onhost:
                     node.sync(addinterfaces, getbootimages)
 
 def makesite(name, v4prefix, v6prefix, city, country, 
-             latitude, longitude, pi_list, **kwargs):
+             latitude, longitude, user_list, **kwargs):
     v6gw=None               # use default
     if 'v6gw' in kwargs:    # but, if provided
         v6gw=kwargs['v6gw'] # save for Network() object below
@@ -297,7 +296,7 @@ def makesite(name, v4prefix, v6prefix, city, country,
     return Site(name=name, 
                 net=Network(v4=v4prefix, v6=v6prefix, v6gw=v6gw),
                 location=location,
-                pi=pi_list,
+                users=user_list,
                 **kwargs)
 
 class PCU(dict):

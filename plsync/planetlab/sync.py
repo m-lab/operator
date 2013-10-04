@@ -161,32 +161,74 @@ def MakePerson(first_name, last_name, email):
         print "Adding person %s" % email
         fields = {"first_name":first_name, "last_name":last_name, 
                   "email":email, "password":"clara_abcdefg"}
-        personid = s.api.AddPerson(fields)
+        try:
+            s.api.AddPerson(fields)
+        except xmlrpclib.Fault, e:
+            handle_xmlrpclib_Fault("AddPerson()", e)
         s.api.UpdatePerson(personid, {'enabled': True})
-    elif len(persons)==1:
-        personid=persons[0]['person_id']
-    else:
-        personid=-1
-    return personid
+    return
 
-def AddPersonToSite(email,personid,loginbase):
-    site = s.api.GetSites({"login_base":loginbase})
-    if len(site) != 1:
-        print ("WARNING: problem with getting site info for loginbase=%s" % 
-                loginbase)
-    else:
-        site = site[0]
-        siteid = site["site_id"]
-        if personid not in site['person_ids']:
-            print ("Added %s (%d) to site %d (%s)" % 
-                    (email, personid, siteid, loginbase))
-            try:
-                s.api.AddPersonToSite(personid,siteid)
-            except xmlrpclib.Fault, e:
-                handle_xmlrpclib_Fault("AddPersonToSite()", e)
-        else:
-            print ("Confirmed %s (%d) is on site %s" %
-                    (email, personid, loginbase))
+def GetPersonsOnSite(loginbase):
+    site_list = s.api.GetSites({"login_base":loginbase})
+    if len(site_list) == 0:
+        raise Exception("WARNING: no site found for %s" % loginbase)
+    if len(site_list) > 1:
+        raise Exception("WARNING: multiple sites found for %s" % loginbase)
+
+    site = site_list[0]
+    person_list = s.api.GetPersons(site['person_ids'])
+    return person_list
+
+def DeletePersonFromSite(email, loginbase):
+    print "Deleting %s from site %s" % (email, loginbase)
+    try:
+        s.api.DeletePersonFromSite(email, loginbase)
+    except xmlrpclib.Fault, e:
+        handle_xmlrpclib_Fault("DeletePersonFromSite()", e)
+
+def AddPersonToSite(email,loginbase):
+    print "Adding %s to site %s" % (email, loginbase)
+    try:
+        s.api.AddPersonToSite(email,loginbase)
+    except xmlrpclib.Fault, e:
+        handle_xmlrpclib_Fault("AddPersonToSite()", e)
+
+def SyncPersonsOnSite(user_list, loginbase, createusers=False):
+    """ A user in user_list is in one of three categories:
+    1) declared in user_list and a member of site - confirmed users
+    2) declared in user_list but not a member of site - users to add
+    3) not declared in user_list and a member of site - users to delete
+
+    This function adds declared users not yet a member of the site and deletes
+    undeclared users that are a member of the site.
+    """
+    members_of_site = GetPersonsOnSite(loginbase)
+    member_emails = [ p['email'] for p in members_of_site ]
+    delcared_emails = [ email for fn,ln,email in user_list ]
+
+    def is_a_current_member(x):
+        return x[2] in member_emails
+    def is_not_a_current_member(x):
+        return x[2] not in member_emails
+    def is_not_a_declared_user(x):
+        return x not in delcared_emails
+
+    persons_confirmed = filter(is_a_current_member, user_list)
+    persons_to_add = filter(is_not_a_current_member, user_list)
+    emails_to_delete = filter(is_not_a_declared_user, member_emails)
+
+    for person in persons_confirmed:
+        print "Confirmed %s is member of site %s" % (person[2], loginbase)
+
+    for person in persons_to_add:
+        if createusers: MakePerson(*person)
+        email = person[2]
+        AddPersonToSite(email,loginbase)
+
+    for email in emails_to_delete:
+        DeletePersonFromSite(email,loginbase)
+
+    return
 
 def MakeNode(login_base, hostname):
     node_list = s.api.GetNodes(hostname)
