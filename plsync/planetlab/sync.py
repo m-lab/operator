@@ -5,10 +5,32 @@ import pprint
 import time
 import base64
 
-def print_role_error(fname, rolename, exception):
-    print "Error: %s requires %s role." % (fname, rolename)
-    print "Error: contact support@planet-lab.org for assistance"
-    print exception
+# NOTE: PLCAPI xmlrpclib.Fault codes are define in:
+# http://git.planet-lab.org/?p=plcapi.git;a=blob;f=PLC/Faults.py
+PLCAuthenticationFailureCode=103
+
+def handle_xmlrpclib_Fault(funcname, exception):
+    """ Checks if exception.faultCode is due to a PLC authentication/role
+    failure and exits if so.  Otherwise, the last exception is re-raised.
+
+    Args:
+        funcname - string, name of function that produced this fault
+        exception - Exception, produced by xmlrpclib.Fault
+    Returns:
+        Never returns, either raises exception or exits.
+    Raises:
+        Exception
+    Exits:
+        if exception.faultCode is due to a PLC Authentication Failure.
+    """
+    if ( type(exception) == xmlrpclib.Fault and
+         exception.faultCode == PLCAuthenticationFailureCode):
+        print "Error: %s requires a different role." % funcname
+        print "Error: Consider contacting support@planet-lab.org for assistance"
+        print exception
+        sys.exit(1)
+    # NOTE: if we have not exited, re-raise the last exception
+    raise
 
 def SyncSiteTag(sitename, site_id, tagname, value):
     """ SyncSiteTag() - either add, confirm, or update the tagname->value
@@ -120,8 +142,7 @@ def MakeSite(loginbase,name,abbreviated_name,
                      "login_base": loginbase,
                      "url" : url, 'max_slices' : 10})
         except xmlrpclib.Fault, e:
-            print_role_error("AddSite()", "ADMIN", e)
-            sys.exit(1)
+            handle_xmlrpclib_Fault("AddSite()", e)
 
     elif len(site) == 1:
         print "Confirmed: %s is in DB" % loginbase
@@ -163,8 +184,7 @@ def AddPersonToSite(email,personid,loginbase):
             try:
                 s.api.AddPersonToSite(personid,siteid)
             except xmlrpclib.Fault, e:
-                print_role_error("AddPersonToSite()", "ADMIN", e)
-                sys.exit(1)
+                handle_xmlrpclib_Fault("AddPersonToSite()", e)
         else:
             print ("Confirmed %s (%d) is on site %s" %
                     (email, personid, loginbase))
@@ -439,8 +459,7 @@ def MakeSlice(slicename):
                     'url' : 'http://www.measurementlab.net', 
                     'description' : 'Fake description for testing'})
         except xmlrpclib.Fault, e:
-            print_role_error("AddSlice()", ">= PI", e)
-            sys.exit(1)
+            handle_xmlrpclib_Fault("AddSlice()", e)
 
         print "Adding:    Slice %s:%s" % (slicename, slice_id)
     elif len(sl) == 1:
@@ -692,8 +711,7 @@ def WhitelistSliceOnNode(slicename, hostname):
                     s.api.AddSliceToNodesWhitelist(sslice['slice_id'],
                                                [node['hostname']])
                 except xmlrpclib.Fault, e:
-                    print_role_error("AddSliceToNodesWhitelist()", "ADMIN", e)
-                    sys.exit(1)
+                    handle_xmlrpclib_Fault("AddSliceToNodesWhitelist()", e)
             else:
                 print ("Confirmed: %s is whitelisted on %s" %
                         (sslice['name'], node['hostname']))
