@@ -33,7 +33,7 @@ def usage():
                 whitelist).
 
     Add New Operator (rare):
-        ./plsync.py --syncsite all --addpis
+        ./plsync.py --syncsite all --addusers
                 Adding a new operator to all M-Lab sites requires admin
                 permission.  Add the new operator email address to sites.py in
                 the variable 'pi_list'.  Finally, run this command.  The
@@ -141,10 +141,16 @@ def main():
                 help=("[syncsite] create/update ipv4 Interfaces. Omitting "+
                       "this option only syncs ipv6 configuration (which is "+
                       "treated differently in the DB)") )
-    parser.add_option("", "--addpis", dest="addpis",
+    parser.add_option("", "--addusers", dest="addusers",
                 action="store_true",
                 default=False,
                 help=("[syncsite] add PIs to sites"))
+    parser.add_option("", "--createusers", action="store_true",
+                dest="createusers",
+                default=False,
+                help=("normally, users are assumed to exist. This option "+
+                      "creates them first and gives them a default password. "+
+                      "Useful for testing. Users are not assigned to slices."))
 
     parser.add_option("", "--addwhitelist", dest="addwhitelist",
                 action="store_true",
@@ -193,7 +199,7 @@ def main():
         options.addsliceips=True
         options.addinterfaces=True
         options.addnodes=True
-        options.addpis=True
+        options.addusers=True
 
     site_list =  getattr(__import__(options.sitesname), options.sitelist)
     slice_list =  getattr(__import__(options.slicesname), options.slicelist)
@@ -220,10 +226,11 @@ def main():
                 options.syncsite == site['name']):
                 print "Syncing: site", site['name']
                 site.sync(options.ondest,
-                          options.addpis,
+                          options.addusers,
                           options.addnodes,
                           options.addinterfaces,
-                          options.getbootimages)
+                          options.getbootimages,
+                          options.createusers)
 
     elif options.syncslice is not None and options.syncsite is None:
         print options.syncslice
