@@ -73,7 +73,12 @@ Network.legacy_network_remap = legacy_network_remap
 # net  : v4 & v6 network prefixes and definitions.
 
 pi_list = [('Stephen', 'Stuart', 'sstuart@google.com'),
-           ('Stephen', 'Soltesz', 'soltesz@cs.princeton.edu')]
+           ('Thomas',  'Gideon', 'gideon@newamerica.net'),
+           ('Josh',    'King', 'joshking@newamerica.net'),
+           ('Jordan',  'McCarthy', 'mccarthy@opentechinstitute.org'),
+           ('Chris',   'Ritzo', 'critzo@opentechinstitute.org'),
+           ('Josh',    'Bailey', 'joshb@google.com'),
+           ('Tiziana', 'Refice', 'tiziana@google.com')]
 
 site_list = [
     makesite('akl01','163.7.129.0',    '2404:0138:4009::',     'Auckland', 'NZ', -36.850000, 174.783000, pi_list, nodegroup='MeasurementLabCentos'),
