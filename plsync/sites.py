@@ -4,8 +4,8 @@ import pprint
 from planetlab.types import *
 
 # NOTE: The legacy network remap is used to re-order the automatically
-#   generated, sequential list of ipaddresses to a legacy order to preserve 
-#   pre-existing slice-and-IP assignments.  Otherwise, slices would be assigned 
+#   generated, sequential list of ipaddresses to a legacy order to preserve
+#   pre-existing slice-and-IP assignments.  Otherwise, slices would be assigned
 #   to new IPs, and for now, we wish to preserve the slice-node-ip mapping.
 # An appropriate time to remove this and re-assign IPs to slices would be
 #   after a major update & reinstallation, such as LXC kernel update.
@@ -89,6 +89,7 @@ site_list = [
     makesite('atl01','4.71.254.128',   '2001:1900:3001:C::',   'Atlanta GA', 'US', 33.636700, -84.428100, user_list, nodegroup='MeasurementLabCentos'),
     makesite('ath01','83.212.4.0',     '2001:648:2ffc:2101::', 'Athens', 'GR', 37.936400, 23.944400, user_list, nodegroup='MeasurementLabCentos'),
     makesite('ath02','83.212.5.128',   '2001:648:2ffc:2102::', 'Athens', 'GR', 37.936400, 23.944400, user_list, nodegroup='MeasurementLabCentos'),
+    makesite('bog01','186.113.12.0',   '2001:13f8::',          'Bogota', 'CO', 4.583333, -74.066667, user_list, nodegroup='MeasurementLabCentos'),
     makesite('dfw01','38.107.216.0',   '2001:550:2000::',      'Dallas TX', 'US', 32.896900, -97.038100, user_list, nodegroup='MeasurementLabCentos'),
     makesite('dub01','193.1.12.192',   '2001:770:B5::',        'Dublin', 'IE', 53.433300, -6.250000, user_list, nodegroup='MeasurementLabCentos'),
     makesite('ham01','80.239.142.192', '2001:2030:0000:0019::','Hamburg', 'DE', 53.633300, 9.983330, user_list, nodegroup='MeasurementLabCentos'),
