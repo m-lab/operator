@@ -372,9 +372,9 @@ def main():
             sys.exit(1)
 
         for hostname,user,passwd,model in pcu_fields:
-            #if model != "DRAC":
-            #    print "%s is an unsupported PCU model" % model
-            #    continue
+            if model != "DRAC":
+                print "%s is an unsupported PCU model" % model
+                continue
 
             system("expect %s/exp/GETSYSINFO.exp %s %s '%s'" %
                    (PREFIX, hostname, user, passwd))
