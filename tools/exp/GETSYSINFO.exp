@@ -7,6 +7,10 @@ set password [lindex $argv 2]
 set method "ssh"
 set dryrun "True"
 
+set drac_prompt "\\$|/.*>|.*$user.*#"
+set imm_prompt  "system>"
+set hpilo_prompt "</>hpiLO->"
+
 log_user 1
 if { "$method" == "ssh" } {
     #send_user "spawn ssh -o StrictHostKeyChecking=no \
@@ -20,7 +24,7 @@ if { "$method" == "ssh" } {
         if { $retry == 0 } {
             spawn ssh -o StrictHostKeyChecking=no \
                       -o PasswordAuthentication=yes \
-                      -o PubkeyAuthentication=no $user@$host 
+                      -o PubkeyAuthentication=no $user@$host
         } else {
             spawn ssh -o StrictHostKeyChecking=no \
                       -o PasswordAuthentication=yes \
@@ -28,51 +32,76 @@ if { "$method" == "ssh" } {
         }
 
         expect {
-            "Are you sure you want to continue connecting (yes/no)? " { 
-                send "yes\n" ; exp_continue 
+            "Are you sure you want to continue connecting (yes/no)? " {
+                send "yes\n" ; exp_continue
             }
-            "password: " { 
-                send "$password\n" ; exp_continue 
+            "password: " {
+                send "$password\n" ; exp_continue
             }
-            "Permission denied" { 
+            "Permission denied" {
                 send_user "DRAC ssh: username/password: $expect_out(0,string)";
                 exit 1
             }
-            "Could not resolve hostname" { 
-                send_user "DRAC ssh: $expect_out(0,string)"; 
+            "Could not resolve hostname" {
+                send_user "DRAC ssh: $expect_out(0,string)";
                 exit 1
             }
-            "Connection timed out" { 
-                send_user "DRAC ssh: $expect_out(0,string)"; 
+            "Connection timed out" {
+                send_user "DRAC ssh: $expect_out(0,string)";
                 exit 1
             }
-            -re "Received disconnect.*" { 
-                send_user "DRAC ssh: $expect_out(0,string)"; 
+            -re "Received disconnect.*" {
+                send_user "DRAC ssh: $expect_out(0,string)";
                 exit 1
             }
-            -re "\\$|/.*>|.*$user.*#" { 
-                send "\r"; 
-            } 
-            timeout {   
-                send_user "DRAC ssh: timeout\n" ; 
-                exit 1; 
+
+            # NOTE: if we see one of these prompts, just continue
+            -re $imm_prompt { send "\r"; }
+            -re $hpilo_prompt { send "\r"; }
+            -re $drac_prompt { send "\r"; }
+
+            timeout {
+                send_user "DRAC ssh: timeout\n" ;
+                exit 1;
             }
-            eof { 
-                if { $cont == 1 } { 
-                    send_user "DRAC ssh failed twice\n"; 
-                    exit 1 ; 
+            eof {
+                if { $cont == 1 } {
+                    send_user "DRAC ssh failed twice\n";
+                    exit 1 ;
                 };
-                set cont 1 
+                set cont 1
             }
         }
         if { $cont == 0 } { break; }
     }
 
-    set prompt "\\$|/.*>" 
+    expect {
+        -re $imm_prompt {
+            send "\r";
+            send_user "IMM SYSINFO\n";
+            expect -re $imm_prompt { send "vpd sys\r"; }
+            expect -re $imm_prompt { send "vpd uefi\r"; }
+            expect -re $imm_prompt { send "vpd imm\r"; }
+        }
+        -re $hpilo_prompt {
+            send "\r";
+            send_user "HPILO SYSINFO\n";
+            expect -re $hpilo_prompt { send "show system1\r"; }
+            expect -re $hpilo_prompt { send "show system1/firmware1\r"; }
+            expect -re $hpilo_prompt { send "show map1\r"; }
+            expect -re $hpilo_prompt { send "show map1/firmware1\r"; }
+        }
+        -re $drac_prompt {
+            send_user "DRAC SYSINFO\n";
+            send "racadm getsysinfo\r";
+        }
+    }
 
-    expect -re $prompt { send "racadm getsysinfo\r"; }
-
-    expect -re "\\$|/.*>" { send "exit\r"; } 
+    expect {
+        -re $imm_prompt { send "exit\r"; }
+        -re $hpilo_prompt { send "exit\r"; }
+        -re $drac_prompt { send "exit\r"; }
+    }
 
     expect eof { send_user "" }
 }
