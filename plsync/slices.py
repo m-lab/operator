@@ -70,10 +70,11 @@ slice_list = [
     Slice(name="michigan_1",      index=10, attrs=centos_slice_attrs+web100_enable_attr, 
                                            use_initscript=True,
                                            ipv6="all"),
-    # DONAR: disabled.  Future location of mlab_utility slice
-    #Slice(name='princeton_namecast',index=11, attrs=centos_slice_attrs+[
-    #                Attr('MeasurementLabCentos',capabilities='CAP_NET_BIND_SERVICE'), ],
-    #                ipv6="all"),
+
+    Slice(name='mlab_utility',    index=11, attrs=centos_slice_attrs+[
+                                                Attr('MeasurementLabCentos', capabilities='CAP_NET_BIND_SERVICE,vxc_^28'), ],
+                                            use_initscript=True,
+                                            ipv6="all"),
 
     Slice(name="pl_netflow"),
 
@@ -84,4 +85,3 @@ slice_list = [
     Slice(name="pl_default", attrs=centos_slice_attrs+[Attr('MeasurementLabCentos', codemux='-1'),
                                                        Attr('MeasurementLabCentos', net_max_rate='-1'),])
 ]
-
