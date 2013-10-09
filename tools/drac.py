@@ -370,7 +370,7 @@ def main():
             sys.exit(1)
 
         for hostname,user,passwd,model in pcu_fields:
-            if model != "DRAC":
+            if model not in ["DRAC", "IMM", "HPiLO"]:
                 print "%s is an unsupported PCU model" % model
                 continue
 
