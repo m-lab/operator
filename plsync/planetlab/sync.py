@@ -111,7 +111,7 @@ def SyncLocation(sitename, location):
     if len(update) != 0:
         print ("UPDATE: site lat/long from %s,%s to %s" % 
                 (location['latitude'], location['longitude'], update))
-        UpdateSite(site_id, update)
+        s.api.UpdateSite(site_id, update)
 
     if 'extra' in location:
         SyncSiteTag(sitename, site_id, 'extra', location['extra'])
