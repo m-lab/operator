@@ -11,6 +11,12 @@ VERBOSE=False
 cookies = "--insecure --cookie-jar .cookies.txt --cookie .cookies.txt"
 PREFIX=os.path.dirname(os.path.realpath(__file__))
 
+def cmd_exists(cmd):
+    """ Returns: bool, True if 'cmd' is in PATH, False otherwise."""
+        return subprocess.call("type " + cmd, shell=True,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE) == 0
+
 def system(cmd):
     ## NOTE: use this rather than os.system() to catch
     ##       KeyboardInterrupt correctly.
@@ -312,6 +318,12 @@ def get_pcu_fields(host_spec, options, return_ip=False):
                 ret.append((hostname, user, passwd, model))
     return ret
 
+def handle_fatal_expect():
+    print "Error: This script depends on 'expect'."
+    print "We could not find 'expect' in PATH.  Please update PATH or"
+    print "install the 'expect' package for your system."
+    sys.exit(1)
+
 def main():
     global DEBUG
     global VERBOSE
@@ -319,6 +331,8 @@ def main():
 
     DEBUG=options.debug
     VERBOSE=options.verbose
+    if not cmd_exists("expect"):
+        handle_fatal_expect()
 
     ## NOTE: Make sure the session is setup correctly.
     ## Use os.system() b/c the custom system() function
