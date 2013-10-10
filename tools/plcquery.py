@@ -35,7 +35,7 @@ class API:
 
 def refreshsession():
     # Either read session from disk or create it and save it for later
-    print "PLC Username: ",
+    print "PLC Email: ",
     sys.stdout.flush()
     username = sys.stdin.readline().strip()
     password = getpass.getpass("PLC Password: ")
