@@ -11,6 +11,19 @@ VERBOSE=False
 cookies = "--insecure --cookie-jar .cookies.txt --cookie .cookies.txt"
 PREFIX=os.path.dirname(os.path.realpath(__file__))
 
+def cmd_exists(cmd):
+    """ Returns: bool, True if 'cmd' is in PATH, False otherwise."""
+    return subprocess.call("type " + cmd, shell=True,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE) == 0
+
+def confirm_cmd_exists(cmd):
+    if not cmd_exists(cmd):
+        print "Error: This script depends on '%s'." % cmd
+        print "We could not find '%s' in PATH. Please update PATH or" % cmd
+        print "install the package for '%s' on your system." % cmd
+        sys.exit(1)
+
 def system(cmd):
     ## NOTE: use this rather than os.system() to catch
     ##       KeyboardInterrupt correctly.
@@ -319,6 +332,7 @@ def main():
 
     DEBUG=options.debug
     VERBOSE=options.verbose
+    confirm_cmd_exists("expect")
 
     ## NOTE: Make sure the session is setup correctly.
     ## Use os.system() b/c the custom system() function
