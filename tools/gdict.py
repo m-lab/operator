@@ -20,7 +20,7 @@ def usage():
   Summary:
 
     gdict.py is a scriptable, key-values store that permits queries and
-    updates using Google Drive Spreadsheets as a storge backend.
+    updates using Google Drive Spreadsheets as a storage backend.
 
     gdict.py is designed for scripting and as an automation aid. By using
     Google Spreadsheets, the key-values data can be easily viewed, updated by
