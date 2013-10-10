@@ -17,6 +17,13 @@ def cmd_exists(cmd):
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE) == 0
 
+def confirm_cmd_exists(cmd):
+    if not cmd_exists(cmd):
+        print "Error: This script depends on '%s'." % cmd
+        print "We could not find '%s' in PATH. Please update PATH or" % cmd
+        print "install the package for '%s' on your system." % cmd
+        sys.exit(1)
+
 def system(cmd):
     ## NOTE: use this rather than os.system() to catch
     ##       KeyboardInterrupt correctly.
@@ -318,12 +325,6 @@ def get_pcu_fields(host_spec, options, return_ip=False):
                 ret.append((hostname, user, passwd, model))
     return ret
 
-def handle_fatal_missing_command(cmd):
-    print "Error: This script depends on '%s'." % cmd
-    print "We could not find '%s' in PATH. Please update PATH or" % cmd
-    print "install the package for '%s' on your system." % cmd
-    sys.exit(1)
-
 def main():
     global DEBUG
     global VERBOSE
@@ -331,8 +332,7 @@ def main():
 
     DEBUG=options.debug
     VERBOSE=options.verbose
-    if not cmd_exists("expect"):
-        handle_fatal_missing_command("expect")
+    confirm_cmd_exists("expect")
 
     ## NOTE: Make sure the session is setup correctly.
     ## Use os.system() b/c the custom system() function
