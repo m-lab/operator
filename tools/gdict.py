@@ -514,8 +514,7 @@ def main():
     db = get_db(client, config.sheetname, config.create)
     table = get_table(db, config.table, config.columns, config.create)
 
-    # NOTE: look up columns automatically (if not given)
-    #if not config.columns and (config.show or config.update):
+    # NOTE: look up sheet column names for future reference
     if config.show or config.update:
         table.LookupFields()
         config.headers = table.fields
