@@ -13,7 +13,7 @@ PREFIX=os.path.dirname(os.path.realpath(__file__))
 
 def cmd_exists(cmd):
     """ Returns: bool, True if 'cmd' is in PATH, False otherwise."""
-        return subprocess.call("type " + cmd, shell=True,
+    return subprocess.call("type " + cmd, shell=True,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE) == 0
 
@@ -318,10 +318,10 @@ def get_pcu_fields(host_spec, options, return_ip=False):
                 ret.append((hostname, user, passwd, model))
     return ret
 
-def handle_fatal_expect():
-    print "Error: This script depends on 'expect'."
-    print "We could not find 'expect' in PATH.  Please update PATH or"
-    print "install the 'expect' package for your system."
+def handle_fatal_missing_command(cmd):
+    print "Error: This script depends on '%s'." % cmd
+    print "We could not find '%s' in PATH. Please update PATH or" % cmd
+    print "install the package for '%s' on your system." % cmd
     sys.exit(1)
 
 def main():
@@ -332,7 +332,7 @@ def main():
     DEBUG=options.debug
     VERBOSE=options.verbose
     if not cmd_exists("expect"):
-        handle_fatal_expect()
+        handle_fatal_missing_command("expect")
 
     ## NOTE: Make sure the session is setup correctly.
     ## Use os.system() b/c the custom system() function
