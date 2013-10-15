@@ -2,6 +2,7 @@
 
 import pprint
 from planetlab.types import *
+from users import user_list
 
 # NOTE: The legacy network remap is used to re-order the automatically
 #   generated, sequential list of ipaddresses to a legacy order to preserve
