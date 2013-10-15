@@ -565,9 +565,9 @@ def SyncPersonsOnSlice(slicename, user_list):
     role on their PlanetLab account.  The roles 'user' and 'tech' cannot add a
     user to a slice.
 
-    Syncing persons to a Slice() is *add only*. This is different than adding
-    persons to a site.  This is b/c different sets of people are associated with
-    each slice.
+    Syncing persons to a Slice() is *add only*. This is different from syncing
+    persons to a site.  This is due to slices having multiple sets of people
+    associated with each slice.
 
     Args:
         slicename - string, name of slice
