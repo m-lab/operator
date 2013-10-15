@@ -64,10 +64,14 @@ def usage():
         c2,v2\\n
         c3,v3\\n
     
-    All of these values will be assocaited with the --key given on the command
+    All of these values will be associated with the --key given on the command
     line. Every existing column name will be updated with the corresponding
     value.  Non-existent columns will be ignored.  Values for recurring column
-    names are concatenated with a space into a single value.
+    names are concatenated with a space into a single value. There are three
+    pre-defined values for:
+       {ts} -- the current timestamp as an integer
+       {date} -- the current date in the form YYYY-MM-DD
+       {date_ts} -- the current date with time in the form YYYY-MM-DDTHH:MM
 
     To indicate error, the script should have a non-zero exit value. Any
     message to stderr is reported to the user, and any output to stdout is
@@ -478,11 +482,12 @@ def parse_raw_values(value_raw, separator=','):
     return new_data
 
 def command_wrapper(current_data, command_format):
-    # NOTE: Schedule downtime for 2 days
+    # NOTE: setup pre-defined values available to all commands
     date_ts = time.strftime("%Y-%m-%dT%H:%M")
     date = time.strftime("%Y-%m-%d")
     ts = int(time.time())
 
+    # NOTE: set missing data to 'blank' rather than 'None'
     args = current_data.copy()
     for k,v in args.iteritems():
         if v is None:
