@@ -29,7 +29,8 @@ centos_slice_attrs = [ Attr(None, vsys='slice_restart'),
 web100_enable_attr = [ Attr('MeasurementLabCentos', capabilities='vxc_^28') ]
 initscript_attr    = [ ]
 
-mlab4s_only = ['mlab4.nuq01', 'mlab4.nuq02', 'mlab4.prg01']
+mlab4s_only = ['mlab4.nuq01', 'mlab4.nuq02', 'mlab4.prg01', 
+               'mlab1.nuq0t', 'mlab2.nuq0t', 'mlab3.nuq0t', 'mlab4.nuq0t']
 
 # name  : the slice name
 # index : the index into the iplist for each node to assign to this slice
