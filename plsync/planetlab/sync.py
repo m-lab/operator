@@ -168,6 +168,17 @@ def MakePerson(first_name, last_name, email):
         s.api.UpdatePerson(personid, {'enabled': True})
     return
 
+def GetPersonsOnSlice(slicename):
+    slice_list = s.api.GetSlices(slicename)
+    if len(slice_list) == 0:
+        raise Exception("WARNING: no slice found for %s" % slicename)
+    if len(slice_list) > 1:
+        raise Exception("WARNING: multiple slices found for %s" % slicename)
+
+    sslice = slice_list[0]
+    person_list = s.api.GetPersons(sslice['person_ids'])
+    return person_list
+
 def GetPersonsOnSite(loginbase):
     site_list = s.api.GetSites({"login_base":loginbase})
     if len(site_list) == 0:
@@ -192,6 +203,13 @@ def AddPersonToSite(email,loginbase):
         s.api.AddPersonToSite(email,loginbase)
     except xmlrpclib.Fault, e:
         handle_xmlrpclib_Fault("AddPersonToSite()", e)
+
+def AddPersonToSlice(email,slicename):
+    print "Adding %s to slice %s" % (email, slicename)
+    try:
+        s.api.AddPersonToSlice(email,slicename)
+    except xmlrpclib.Fault, e:
+        handle_xmlrpclib_Fault("AddPersonToSlice()", e)
 
 def SyncPersonsOnSite(user_list, loginbase, createusers=False):
     """ A user in user_list is in one of three categories:
@@ -540,6 +558,50 @@ def AddSliceTag(slicename, key, value, node, nodegroup):
 
     # catch-all unreachable.
     return None
+
+def SyncPersonsOnSlice(slicename, user_list):
+    """ SyncSliceUsers takes the users specified and adds them to the slicename.
+    For this operation to succeed, the caller should have the 'admin' or 'pi'
+    role on their PlanetLab account.  The roles 'user' and 'tech' cannot add a
+    user to a slice.
+
+    Syncing persons to a Slice() is *add only*. This is different than adding
+    persons to a site.  This is b/c different sets of people are associated with
+    each slice.
+
+    Args:
+        slicename - string, name of slice
+        user_list - list of triples (first,last,email)
+    Returns:
+        None
+    """
+    members_of_slice = GetPersonsOnSlice(slicename)
+    member_emails = [ p['email'] for p in members_of_slice ]
+    delcared_emails = [ email for fn,ln,email in user_list ]
+
+    def is_a_current_member(x):
+        return x[2] in member_emails
+    def is_not_a_current_member(x):
+        return x[2] not in member_emails
+
+    persons_confirmed = filter(is_a_current_member, user_list)
+    persons_to_add = filter(is_not_a_current_member, user_list)
+
+    # NOTE: do not remove users. -- this is an add-only operation.
+    # NOTE: could be added in the future if preferable.
+    # NOTE: this is not unreasonable.
+    #def is_not_a_declared_user(x):
+    #    return x not in delcared_emails
+    #emails_to_delete = filter(is_not_a_declared_user, member_emails)
+
+    for person in persons_confirmed:
+        print "Confirmed %s is member of slice %s" % (person[2], slicename)
+
+    for person in persons_to_add:
+        email = person[2]
+        AddPersonToSlice(email,slicename)
+
+    return
 
 def SyncSliceAttribute(slicename, attr):
     """ SyncSliceAttribute() assigns the given attributes to the slice.
