@@ -2,6 +2,7 @@
 
 import pprint
 from planetlab.types import *
+from users import user_list
 
 # The CentOS build adds new functionality to slices through vsys capabilities
 # for restart, update and yum configuration.  These attributes should be added
@@ -40,39 +41,53 @@ mlab4s_only = ['mlab4.nuq01', 'mlab4.nuq02', 'mlab4.prg01']
 slice_list = [
 
     Slice(name='gt_partha',       index=0, attrs=centos_slice_attrs+web100_enable_attr, 
+                                           users=user_list,
                                            use_initscript=True, 
                                            ipv6=mlab4s_only ),
     Slice(name='iupui_ndt',       index=1, attrs=centos_slice_attrs+web100_enable_attr+[
                                                 Attr('MeasurementLabCentos',    disk_max='60000000') ], 
+                                           users=user_list,
                                            use_initscript=True,
                                            ipv6=mlab4s_only ),
     Slice(name='iupui_npad',      index=2, attrs=centos_slice_attrs+web100_enable_attr+[
                                                 Attr('MeasurementLabCentos',    disk_max='10000000'),
                                                 Attr(None,    vsys='web100_proc_write'), ],
+                                           users=user_list,
                                            use_initscript=True,
                                            ipv6="all"),
     Slice(name='mpisws_broadband',index=3, attrs=centos_slice_attrs+[
                                                 Attr('MeasurementLabCentos', capabilities='CAP_NET_RAW,vxc_^28'),
                                                 Attr('MeasurementLabCentos', disk_max='35000000'), ], 
+                                           users=user_list,
                                            use_initscript=True,
                                            ipv6=mlab4s_only),
-    #Slice(name="mlab_mitate",    index=4, attrs=centos_slice_attrs+web100_enable_attr, ipv6="all"),
-    Slice(name="uw_geoloc4",      index=5, attrs=centos_slice_attrs+web100_enable_attr, ipv6=mlab4s_only),
+    #Slice(name="mlab_mitate",    index=4, attrs=centos_slice_attrs+web100_enable_attr, users=user_list, ipv6="all"),
+    Slice(name="uw_geoloc4",      index=5, attrs=centos_slice_attrs+web100_enable_attr, 
+                                           users=user_list,
+                                           ipv6=mlab4s_only),
     Slice(name="mlab_ooni",       index=6, attrs=centos_slice_attrs+[
                                                 Attr(None,      capabilities='CAP_NET_BIND_SERVICE,CAP_NET_RAW') ], 
+                                           users=user_list,
                                            ipv6="all"),
-    Slice(name="samknows_ispmon", index=7, attrs=centos_slice_attrs+web100_enable_attr, ipv6=mlab4s_only),
-    Slice(name="gt_bismark",      index=8, attrs=centos_slice_attrs+web100_enable_attr, ipv6=mlab4s_only),
+    Slice(name="samknows_ispmon", index=7, attrs=centos_slice_attrs+web100_enable_attr,
+                                           users=user_list,
+                                           ipv6=mlab4s_only),
+    Slice(name="gt_bismark",      index=8, attrs=centos_slice_attrs+web100_enable_attr,
+                                           users=user_list,
+                                           ipv6=mlab4s_only),
     Slice(name="mlab_neubot",     index=9, attrs=centos_slice_attrs+[
                                                 Attr('MeasurementLabCentos', capabilities='CAP_NET_BIND_SERVICE,vxc_^28'), ], 
+                                           users=user_list,
                                            use_initscript=True,
                                            ipv6="all"),
     Slice(name="michigan_1",      index=10, attrs=centos_slice_attrs+web100_enable_attr, 
+                                           users=user_list,
                                            use_initscript=True,
                                            ipv6="all"),
 
     Slice(name='mlab_utility',    index=11, attrs=centos_slice_attrs+[
                                                 Attr('MeasurementLabCentos', capabilities='CAP_NET_BIND_SERVICE,vxc_^28'), ],
+                                            users=user_list,
                                             use_initscript=True,
                                             ipv6="all"),
 

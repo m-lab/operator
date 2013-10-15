@@ -241,6 +241,7 @@ def main():
                 sslice.sync(options.ondest,
                             options.addwhitelist,
                             options.addsliceips,
+                            options.addusers,
                             options.createslice)
 
     else:
