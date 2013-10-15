@@ -125,7 +125,7 @@ site_list = [
     makesite('wlg01','103.10.233.0',   '2404:2000:3000::',     'Wellington', 'NZ', -41.327200, 174.805000, user_list, nodegroup='MeasurementLabCentos'),
 
     # Site for M-Lab testing machines
-    makesite('nuq0t','64.9.225.192',   '2604:CA00:F000:3::',   None, None, 0,0, user_list, count=4),
+    makesite('nuq0t','64.9.225.192',   '2604:CA00:F000:3::',   None, None, 0,0, user_list, count=4, nodegroup='MeasurementLabCentos'),
    # NOTE: mlc servers need special handling
    #Site(name='mlc',   net=Network(v4='64.9.225.64',     v6='2604:CA00:F000:5::'), domain="measurementlab.net", count=3),
 ]
