@@ -527,6 +527,8 @@ class Slice(dict):
       Optional:
         index - int, the index in the 12-slots for slices with IPv4 addresses.
         attrs - [], a list of Attr() objects with attributes for this slice.
+        users - [], a list of three-tuples with (first, last, email) of users 
+                    that should already exist and be associated with this slice
         use_initscript - bool, default is False.  If True, use the
                     mlab_generic_initscript for this slice.  The initscript
                     sets up the slice yum repos on first-creation to
@@ -550,6 +552,12 @@ class Slice(dict):
         if 'name' not in kwargs:
             raise Exception(("The first argument should be the name "+
                              "of a NodeGroup, hostname, or None"))
+        if 'users' not in kwargs:
+            if 'index' in kwargs:
+                raise Exception("An indexed slice must have a users list")
+            else:    
+                # NOTE: but non-indexed slices don't need a users list.
+                kwargs['users'] = None
         if 'index' not in kwargs:
             kwargs['index'] = None
         if 'use_initscript' not in kwargs:
@@ -581,13 +589,16 @@ class Slice(dict):
                 (isinstance(self['ipv6'], str) and "all" == self['ipv6']) )
         
     def sync(self, hostname_or_site=None, addwhitelist=False,
-             addsliceips=False, createslice=False):
+             addsliceips=False, addusers=False, createslice=False):
         """ Create and/or verify the object in the myplc DB """
-        # NOTE: USERS  ARE NOT ADDED TO SLICES HERE.
+        # NOTE: USERS ARE NOW ADDED TO SLICES HERE.
         if createslice:
             print "Making slice! %s" % self['name']
             MakeSlice(self['name'])
         SyncSliceExpiration(self['name'])
+
+        if addusers:
+            SyncPersonsOnSlice(self['name'], self['users'])
 
         for attr in self['attrs']:
             SyncSliceAttribute(self['name'], attr)
