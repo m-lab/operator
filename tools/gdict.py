@@ -57,6 +57,12 @@ def usage():
     value in column c1 as the first argument:
         --results "command {c1}"
 
+    The following characters are reserved: '_', '{', '}'
+       '_' is interpreted by the gdata module when used in column names.
+           However, underscore can be anywhere else.
+       '{' and '}' are used in string formatting. They are replaced and the
+           --result "command format" should not include extra braces.
+
     To indicate success, the script should have an exit value of zero. To have
     new values added to the current key, the script should print column,value
     pairs separated by newline to stdout.
@@ -494,7 +500,9 @@ def command_wrapper(current_data, command_format):
             args[k] = ''
     args.update({'ts' : ts, 'date_ts' : date_ts, 'date' : date})
 
-    cmd = command_format.format(** args)
+    command_format = command_format.replace("{", "%(")
+    command_format = command_format.replace("}", ")s")
+    cmd = command_format % args
     p = subprocess.Popen(cmd,
                          shell=True,
                          stdout=subprocess.PIPE,
