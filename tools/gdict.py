@@ -494,7 +494,9 @@ def command_wrapper(current_data, command_format):
             args[k] = ''
     args.update({'ts' : ts, 'date_ts' : date_ts, 'date' : date})
 
-    cmd = command_format.format(** args)
+    command_format = command_format.replace("{", "%(")
+    command_format = command_format.replace("}", ")s")
+    cmd = command_format % args
     p = subprocess.Popen(cmd,
                          shell=True,
                          stdout=subprocess.PIPE,
