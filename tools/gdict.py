@@ -58,8 +58,10 @@ def usage():
         --results "command {c1}"
 
     The following characters are reserved: '_', '{', '}'
-       '_' Interpreted by gdata, column names should not use this character.
-       '{' or '}' Used in string formatting, there are no literal braces.
+       '_' is interpreted by the gdata module when used in column names.
+           However, underscore can be anywhere else.
+       '{' and '}' are used in string formatting. They are replaced and the
+           --result "command format" should not include extra braces.
 
     To indicate success, the script should have an exit value of zero. To have
     new values added to the current key, the script should print column,value
