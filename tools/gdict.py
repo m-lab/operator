@@ -57,6 +57,10 @@ def usage():
     value in column c1 as the first argument:
         --results "command {c1}"
 
+    The following characters are reserved: '_', '{', '}'
+       '_' Interpreted by gdata, column names should not use this character.
+       '{' or '}' Used in string formatting, there are no literal braces.
+
     To indicate success, the script should have an exit value of zero. To have
     new values added to the current key, the script should print column,value
     pairs separated by newline to stdout.
