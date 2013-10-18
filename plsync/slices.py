@@ -63,9 +63,9 @@ mlab4s_only = ['mlab4.nuq01', 'mlab4.nuq02', 'mlab4.prg01',
                'mlab1.nuq0t', 'mlab2.nuq0t', 'mlab3.nuq0t', 'mlab4.nuq0t']
 
 # name  : the slice name (expected to exist in planetlab database already)
-# index : the index into the iplist for each node to assign to this slice
-#         m-lab has 12 slots, numbered from 0 to 11.
-#         NOTE: while it is possible for multiple slices to share an index=,
+# index : the index into the iplist for each node to assign to this slice.
+#         M-Lab has 12 slots, numbered from 0 to 11.
+#         NOTE: While it is possible for multiple slices to share an index,
 #         (and thus their IPs), it is not possible from inside one vm to see
 #         what ports are occupied by the other vm. Connection attempts to bind
 #         just fail.
