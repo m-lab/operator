@@ -575,6 +575,10 @@ def SyncPersonsOnSlice(slicename, user_list):
     Returns:
         None
     """
+    if type(user_list) is not list:
+        print "No user_list provided for adding to %s" % slicename
+        return
+
     members_of_slice = GetPersonsOnSlice(slicename)
     member_emails = [ p['email'] for p in members_of_slice ]
     delcared_emails = [ email for fn,ln,email in user_list ]
