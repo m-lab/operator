@@ -395,7 +395,7 @@ def main():
                 print "%s is an unsupported PCU model" % model
                 continue
             ts = time.strftime("%b %d %H:%M UTC", time.gmtime())
-            msg = REBOOT_MESSAGE % {'ts' : ts, 'hostname' : hostname }
+            msg = REBOOT_MESSAGE % {'ts' : ts, 'hostname' : host_spec }
             # TODO: add option to --send this message to ops@ list
             print msg
 
