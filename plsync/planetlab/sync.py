@@ -1,9 +1,35 @@
-
 import session as s
 import sys
 import pprint
 import time
 import base64
+
+# NOTE: PLCAPI xmlrpclib.Fault codes are define in:
+# http://git.planet-lab.org/?p=plcapi.git;a=blob;f=PLC/Faults.py
+PLCAuthenticationFailureCode=103
+
+def handle_xmlrpclib_Fault(funcname, exception):
+    """ Checks if exception.faultCode is due to a PLC authentication/role
+    failure and exits if so.  Otherwise, the last exception is re-raised.
+
+    Args:
+        funcname - string, name of function that produced this fault
+        exception - Exception, produced by xmlrpclib.Fault
+    Returns:
+        Never returns, either raises exception or exits.
+    Raises:
+        Exception
+    Exits:
+        if exception.faultCode is due to a PLC Authentication Failure.
+    """
+    if (type(exception) == xmlrpclib.Fault and
+         exception.faultCode == PLCAuthenticationFailureCode):
+        print "Error: %s requires a different role." % funcname
+        print "Error: Consider contacting support@planet-lab.org for assistance"
+        print exception
+        sys.exit(1)
+    # NOTE: if we have not exited, re-raise the last exception
+    raise
 
 def SyncSiteTag(sitename, site_id, tagname, value):
     """ SyncSiteTag() - either add, confirm, or update the tagname->value
@@ -85,7 +111,7 @@ def SyncLocation(sitename, location):
     if len(update) != 0:
         print ("UPDATE: site lat/long from %s,%s to %s" % 
                 (location['latitude'], location['longitude'], update))
-        UpdateSite(site_id, update)
+        s.api.UpdateSite(site_id, update)
 
     if 'extra' in location:
         SyncSiteTag(sitename, site_id, 'extra', location['extra'])
@@ -109,10 +135,14 @@ def MakeSite(loginbase,name,abbreviated_name,
     if len(site) == 0:
         print "MakeSite(%s,%s,%s)"%(loginbase,name,abbreviated_name)
         # NOTE: max_slices defaults to zero
-        site_id = s.api.AddSite({"name":name,
+        try:
+            site_id = s.api.AddSite({"name":name,
                      "abbreviated_name":abbreviated_name,
                      "login_base": loginbase,
                      "url" : url, 'max_slices' : 10})
+        except xmlrpclib.Fault, e:
+            handle_xmlrpclib_Fault("AddSite()", e)
+
     elif len(site) == 1:
         print "Confirmed: %s is in DB" % loginbase
         site_id = site[0]['site_id']
@@ -131,30 +161,92 @@ def MakePerson(first_name, last_name, email):
         print "Adding person %s" % email
         fields = {"first_name":first_name, "last_name":last_name, 
                   "email":email, "password":"clara_abcdefg"}
-        personid = s.api.AddPerson(fields)
+        try:
+            s.api.AddPerson(fields)
+        except xmlrpclib.Fault, e:
+            handle_xmlrpclib_Fault("AddPerson()", e)
         s.api.UpdatePerson(personid, {'enabled': True})
-    elif len(persons)==1:
-        personid=persons[0]['person_id']
-    else:
-        personid=-1
-    return personid
+    return
 
-def AddPersonToSite(email,personid,role,loginbase):
-    site = s.api.GetSites({"login_base":loginbase})
-    if len(site) != 1:
-        print ("WARNING: problem with getting site info for loginbase=%s" % 
-                loginbase)
-    else:
-        site = site[0]
-        siteid = site["site_id"]
-        if personid not in site['person_ids']:
-            print ("Added %s (%d) to site %d (%s)" % 
-                    (email, personid, siteid, loginbase))
-            s.api.AddPersonToSite(personid,siteid)
-            s.api.AddRoleToPerson(role,personid)
-        else:
-            print ("Confirmed %s (%d) is %s for site %s" % 
-                    (email, personid, role, loginbase))
+def GetPersonsOnSlice(slicename):
+    slice_list = s.api.GetSlices(slicename)
+    if len(slice_list) == 0:
+        raise Exception("WARNING: no slice found for %s" % slicename)
+    if len(slice_list) > 1:
+        raise Exception("WARNING: multiple slices found for %s" % slicename)
+
+    sslice = slice_list[0]
+    person_list = s.api.GetPersons(sslice['person_ids'])
+    return person_list
+
+def GetPersonsOnSite(loginbase):
+    site_list = s.api.GetSites({"login_base":loginbase})
+    if len(site_list) == 0:
+        raise Exception("WARNING: no site found for %s" % loginbase)
+    if len(site_list) > 1:
+        raise Exception("WARNING: multiple sites found for %s" % loginbase)
+
+    site = site_list[0]
+    person_list = s.api.GetPersons(site['person_ids'])
+    return person_list
+
+def DeletePersonFromSite(email, loginbase):
+    print "Deleting %s from site %s" % (email, loginbase)
+    try:
+        s.api.DeletePersonFromSite(email, loginbase)
+    except xmlrpclib.Fault, e:
+        handle_xmlrpclib_Fault("DeletePersonFromSite()", e)
+
+def AddPersonToSite(email,loginbase):
+    print "Adding %s to site %s" % (email, loginbase)
+    try:
+        s.api.AddPersonToSite(email,loginbase)
+    except xmlrpclib.Fault, e:
+        handle_xmlrpclib_Fault("AddPersonToSite()", e)
+
+def AddPersonToSlice(email,slicename):
+    print "Adding %s to slice %s" % (email, slicename)
+    try:
+        s.api.AddPersonToSlice(email,slicename)
+    except xmlrpclib.Fault, e:
+        handle_xmlrpclib_Fault("AddPersonToSlice()", e)
+
+def SyncPersonsOnSite(user_list, loginbase, createusers=False):
+    """ A user in user_list is in one of three categories:
+    1) declared in user_list and a member of site - confirmed users
+    2) declared in user_list but not a member of site - users to add
+    3) not declared in user_list and a member of site - users to delete
+
+    This function adds declared users not yet a member of the site and deletes
+    undeclared users that are a member of the site.
+    """
+    members_of_site = GetPersonsOnSite(loginbase)
+    member_emails = [ p['email'] for p in members_of_site ]
+    delcared_emails = [ email for fn,ln,email in user_list ]
+
+    def is_a_current_member(x):
+        return x[2] in member_emails
+    def is_not_a_current_member(x):
+        return x[2] not in member_emails
+    def is_not_a_declared_user(x):
+        return x not in delcared_emails
+
+    persons_confirmed = filter(is_a_current_member, user_list)
+    persons_to_add = filter(is_not_a_current_member, user_list)
+    emails_to_delete = filter(is_not_a_declared_user, member_emails)
+
+    for person in persons_confirmed:
+        print "Confirmed %s is member of site %s" % (person[2], loginbase)
+
+    for person in persons_to_add:
+        if createusers: MakePerson(*person)
+        email = person[2]
+        AddPersonToSite(email,loginbase)
+
+    for email in emails_to_delete:
+        DeletePersonFromSite(email,loginbase)
+
+    return
 
 def MakeNode(login_base, hostname):
     node_list = s.api.GetNodes(hostname)
@@ -421,9 +513,13 @@ def MakeSlice(slicename):
     """
     sl = s.api.GetSlices({'name' : slicename})
     if len(sl) == 0:
-        slice_id = s.api.AddSlice({'name' : slicename, 
+        try:
+            slice_id = s.api.AddSlice({'name' : slicename,
                     'url' : 'http://www.measurementlab.net', 
                     'description' : 'Fake description for testing'})
+        except xmlrpclib.Fault, e:
+            handle_xmlrpclib_Fault("AddSlice()", e)
+
         print "Adding:    Slice %s:%s" % (slicename, slice_id)
     elif len(sl) == 1:
         slice_id = sl[0]['slice_id']
@@ -462,6 +558,54 @@ def AddSliceTag(slicename, key, value, node, nodegroup):
 
     # catch-all unreachable.
     return None
+
+def SyncPersonsOnSlice(slicename, user_list):
+    """ SyncSliceUsers takes the users specified and adds them to the slicename.
+    For this operation to succeed, the caller should have the 'admin' or 'pi'
+    role on their PlanetLab account.  The roles 'user' and 'tech' cannot add a
+    user to a slice.
+
+    Syncing persons to a Slice() is *add only*. This is different from syncing
+    persons to a site.  This is due to slices having multiple sets of people
+    associated with each slice.
+
+    Args:
+        slicename - string, name of slice
+        user_list - list of triples (first,last,email)
+    Returns:
+        None
+    """
+    if type(user_list) is not list:
+        print "No user_list provided for adding to %s" % slicename
+        return
+
+    members_of_slice = GetPersonsOnSlice(slicename)
+    member_emails = [ p['email'] for p in members_of_slice ]
+    delcared_emails = [ email for fn,ln,email in user_list ]
+
+    def is_a_current_member(x):
+        return x[2] in member_emails
+    def is_not_a_current_member(x):
+        return x[2] not in member_emails
+
+    persons_confirmed = filter(is_a_current_member, user_list)
+    persons_to_add = filter(is_not_a_current_member, user_list)
+
+    # NOTE: do not remove users. -- this is an add-only operation.
+    # NOTE: could be added in the future if preferable.
+    # NOTE: this is not unreasonable.
+    #def is_not_a_declared_user(x):
+    #    return x not in delcared_emails
+    #emails_to_delete = filter(is_not_a_declared_user, member_emails)
+
+    for person in persons_confirmed:
+        print "Confirmed %s is member of slice %s" % (person[2], slicename)
+
+    for person in persons_to_add:
+        email = person[2]
+        AddPersonToSlice(email,slicename)
+
+    return
 
 def SyncSliceAttribute(slicename, attr):
     """ SyncSliceAttribute() assigns the given attributes to the slice.
@@ -670,8 +814,11 @@ def WhitelistSliceOnNode(slicename, hostname):
                 # then this slice is not on this node's whitelist
                 print ("Adding %s to whitelist on host: %s" %
                         (sslice['name'], node['hostname']))
-                s.api.AddSliceToNodesWhitelist(sslice['slice_id'],
+                try:
+                    s.api.AddSliceToNodesWhitelist(sslice['slice_id'],
                                                [node['hostname']])
+                except xmlrpclib.Fault, e:
+                    handle_xmlrpclib_Fault("AddSliceToNodesWhitelist()", e)
             else:
                 print ("Confirmed: %s is whitelisted on %s" %
                         (sslice['name'], node['hostname']))
