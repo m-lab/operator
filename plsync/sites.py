@@ -123,7 +123,7 @@ site_list = [
     makesite('tun01','41.231.21.0',    '2001:4350:3000:1::',   'Tunis', 'TN', 36.851600, 10.229100, user_list, nodegroup='MeasurementLabCentos'),
     makesite('vie01','213.208.152.0',  '2a01:190:1700:38::',   'Vienna', 'AT', 48.269000, 16.410700, user_list, nodegroup='MeasurementLabCentos'),
     makesite('wlg01','103.10.233.0',   '2404:2000:3000::',     'Wellington', 'NZ', -41.327200, 174.805000, user_list, nodegroup='MeasurementLabCentos'),
-    makesite('yyz01','162.219.48.0',   '2620:010A:800F::',     'Toronto',  , 'CA', 43.6767, -79.6306, user_list, nodegroup='MeasurementLabCentos'),
+    makesite('yyz01','162.219.48.0',   '2620:010A:800F::',     'Toronto' , 'CA', 43.6767, -79.6306, user_list, nodegroup='MeasurementLabCentos'),
 
     # Site for M-Lab testing machines
     makesite('nuq0t','64.9.225.192',   '2604:CA00:F000:3::',   None, None, 0,0, user_list, count=4, nodegroup='MeasurementLabCentos'),
