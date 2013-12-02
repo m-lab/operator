@@ -9,6 +9,20 @@ import getpass
 DEBUG=False
 VERBOSE=False
 cookies = "--insecure --cookie-jar .cookies.txt --cookie .cookies.txt"
+PREFIX=os.path.dirname(os.path.realpath(__file__))
+
+def cmd_exists(cmd):
+    """ Returns: bool, True if 'cmd' is in PATH, False otherwise."""
+    return subprocess.call("type " + cmd, shell=True,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE) == 0
+
+def confirm_cmd_exists(cmd):
+    if not cmd_exists(cmd):
+        print "Error: This script depends on '%s'." % cmd
+        print "We could not find '%s' in PATH. Please update PATH or" % cmd
+        print "install the package for '%s' on your system." % cmd
+        sys.exit(1)
 
 def system(cmd):
     ## NOTE: use this rather than os.system() to catch
@@ -294,7 +308,7 @@ def get_pcu_fields(host_spec, options, return_ip=False):
         passwd = getpass.getpass("DRAC passwd: ")
         ret = [(pcuname, options.user, passwd, "DRAC")]
     else:
-        cmd=("./plcquery.py --action=get --type pcu --filter hostname=%s "+
+        cmd=(PREFIX+"/plcquery.py --action=get --type pcu --filter hostname=%s "+
              "--fields hostname,username,password,model,ip") % pcuname
         if DEBUG: print cmd
         lines= os.popen(cmd, 'r').readlines()
@@ -318,13 +332,14 @@ def main():
 
     DEBUG=options.debug
     VERBOSE=options.verbose
+    confirm_cmd_exists("expect")
 
     ## NOTE: Make sure the session is setup correctly.
     ## Use os.system() b/c the custom system() function
     ## doesn't flush stdout correctly. :-/
     if not options.promptpassword:
         print "Verifying PLC Session...\n"
-        cmd="./plcquery.py --action=checksession"
+        cmd=PREFIX+"/plcquery.py --action=checksession"
         if DEBUG:
             print cmd
         else:
@@ -336,7 +351,8 @@ def main():
         print " 'help' or 'racadm help' for a list of available commands."
         print " 'exit' will exit the shell and 'drac.py' script.\n"
         for hostname,user,passwd,model in pcu_fields:
-            system("expect exp/SHELL.exp %s %s '%s'" % (hostname, user, passwd))
+            system("expect %s/exp/SHELL.exp %s %s '%s'" %
+                   (PREFIX, hostname, user, passwd))
 
     elif command in ["console6", "console5"]:
         pcu_fields = get_pcu_fields(host_spec, options)
@@ -370,12 +386,12 @@ def main():
             sys.exit(1)
 
         for hostname,user,passwd,model in pcu_fields:
-            if model != "DRAC":
+            if model not in ["DRAC", "IMM", "HPiLO"]:
                 print "%s is an unsupported PCU model" % model
                 continue
 
-            system("expect exp/GETSYSINFO.exp %s %s '%s'" %
-                        (hostname, user, passwd) )
+            system("expect %s/exp/GETSYSINFO.exp %s %s '%s'" %
+                   (PREFIX, hostname, user, passwd))
 
     elif command == "reboot":
         pcu_fields = get_pcu_fields(host_spec, options)
@@ -385,8 +401,8 @@ def main():
 
         for hostname,user,passwd,model in pcu_fields:
             if model in ["DRAC", "IMM", "HPiLO"]:
-                system("expect exp/REBOOT.exp %s %s '%s' %s %s" % 
-                        (hostname, user, passwd, model, options.debug) )
+                system("expect %s/exp/REBOOT.exp %s %s '%s' %s %s" %
+                       (PREFIX, hostname, user, passwd, model, options.debug))
             elif model == "OpenIPMI":
                 cmd = "ipmitool -I lanplus -H %s -U %s -P '%s' power cycle"
                 cmd = cmd % (hostname, user, passwd) 
@@ -395,7 +411,7 @@ def main():
                 print "%s is an unsupported PCU model" % model
                 continue
             ts = time.strftime("%b %d %H:%M UTC", time.gmtime())
-            msg = REBOOT_MESSAGE % {'ts' : ts, 'hostname' : hostname }
+            msg = REBOOT_MESSAGE % {'ts' : ts, 'hostname' : host_spec }
             # TODO: add option to --send this message to ops@ list
             print msg
 
@@ -425,8 +441,8 @@ def main():
             print "Unsupported PCU model '%s' for password reset." % model
             sys.exit(1)
 
-        cmd = ("expect exp/RESET_PASSWORD.exp %s %s '%s' '%s'" %
-               (hostname, user, passwd, newpasswd))
+        cmd = ("expect %s/exp/RESET_PASSWORD.exp %s %s '%s' '%s'" %
+               (PREFIX, hostname, user, passwd, newpasswd))
         # Always print, even if DEBUG is not on
         if not DEBUG: print cmd
         ret = system(cmd)
@@ -436,7 +452,7 @@ def main():
             sys.exit(1)
 
         print "Updating password in PLC database."
-        cmd = ("./plcquery.py --action=update --type pcu "+
+        cmd = (PREFIX+"/plcquery.py --action=update --type pcu "+
                "--filter 'hostname=%s' "+
                "--fields 'password=%s'") % (hostname, newpasswd)
         # Always print, even if DEBUG is not on
