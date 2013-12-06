@@ -114,7 +114,7 @@ site_list = [
     makesite('par01','80.239.168.192', '2001:2030:0000:001A::','Paris', 'FR', 48.858400, 2.349010, user_list, nodegroup='MeasurementLabCentos'),
     makesite('prg01','212.162.51.64',  '2001:4C08:2003:4::',   'Prague', 'CZ', 50.083300, 14.416700, user_list, count=4, nodegroup='MeasurementLabCentos'),
     makesite('sea01','38.102.0.64',    '2001:550:3200:1::',    'Seattle WA', 'US', 47.448900, -122.309000, user_list, nodegroup='MeasurementLabCentos'),
-    makesite('sin01','180.87.97.64',    None,                  'Singapore', 'SG', 1.3000, 103.8000, user_list, nodegroup='MeasurementLabCentos'),
+    makesite('sin01','180.87.97.64',   '2405:2000:301::',      'Singapore', 'SG', 1.3000, 103.8000, user_list, nodegroup='MeasurementLabCentos'),
     makesite('svg01','81.167.39.0',    '2a01:798:0:13::',      'Stavanger', 'NO', 58.876700, 5.637780, user_list, nodegroup='MeasurementLabCentos'),
     makesite('syd01','203.5.76.128',   '2001:388:00d0::',      'Sydney', 'AU', -33.946100, 151.177000, user_list, nodegroup='MeasurementLabCentos'),
     makesite('syd02','175.45.79.0',    '2402:7800:0:12::',     'Sydney', 'AU', -33.946100, 151.177000, user_list, nodegroup='MeasurementLabCentos'),
