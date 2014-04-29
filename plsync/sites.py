@@ -73,15 +73,6 @@ Network.legacy_network_remap = legacy_network_remap
 # name : site prefix, used to generate PL site name, hostnames, etc
 # net  : v4 & v6 network prefixes and definitions.
 
-# NOTE: User roles are not managed here.  Visit PlanetLab to change user roles.
-user_list = [('Stephen', 'Stuart', 'sstuart@google.com'),
-           ('Thomas',  'Gideon', 'gideon@newamerica.net'),
-           ('Josh',    'King', 'joshking@newamerica.net'),
-           ('Jordan',  'McCarthy', 'mccarthy@opentechinstitute.org'),
-           ('Chris',   'Ritzo', 'critzo@opentechinstitute.org'),
-           ('Josh',    'Bailey', 'joshb@google.com'),
-           ('Tiziana', 'Refice', 'tiziana@google.com')]
-
 site_list = [
     makesite('akl01','163.7.129.0',    '2404:0138:4009::',     'Auckland', 'NZ', -36.850000, 174.783000, user_list, nodegroup='MeasurementLabCentos'),
     makesite('ams01','213.244.128.128','2001:4C08:2003:2::',   'Amsterdam', 'NL', 52.308600, 4.763890, user_list, nodegroup='MeasurementLabCentos'),
