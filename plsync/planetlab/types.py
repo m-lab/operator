@@ -290,9 +290,12 @@ def makesite(name, v4prefix, v6prefix, city, country,
         v6gw=kwargs['v6gw'] # save for Network() object below
         del kwargs['v6gw']  # and don't pass to Site()
     location=None
-    if city is not None:
-        # NOTE: only create Location() if city* is specified.
-        location = Location(city, country, latitude, longitude)
+    if city is not None and latitude is not None and longitude is not None:
+        # NOTE: only create Location() if city, lat, and long are specified.
+        location = Location(city, country, round(latitude, 4) , round(longitude, 4))
+    #Don't allow site to be created without this info--unless it's a test site
+    elif name.find("0t") < 0:
+        raise Exception("city, latititude and/or longitude were not specified")
     return Site(name=name, 
                 net=Network(v4=v4prefix, v6=v6prefix, v6gw=v6gw),
                 location=location,

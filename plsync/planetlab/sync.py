@@ -56,7 +56,7 @@ def SyncSiteTag(sitename, site_id, tagname, value):
         else:
             print ("UPDATE: site tag on %s from tag(%s->%s) to %s" % 
                    (sitename, tagname, tag['value'], value))
-            return s.api.UpdateSiteTag(tag['site_tag_id'], tagname, value)
+            return s.api.UpdateSiteTag(tag['site_tag_id'], value)
     else:
         print "Error: SyncSiteTag()"
         print "Error: This should never happen, but here we are."
@@ -103,10 +103,10 @@ def SyncLocation(sitename, location):
 
     # NOTE: always update latitude/longitude, 
     update = {}
-    if location['latitude'] != sites[0]['latitude']:
-        update['latitude'] = location['latitude']
-    if location['longitude'] != sites[0]['longitude']:
-        update['longitude'] = location['longitude']
+    if location['latitude'] != round(sites[0]['latitude'], 4):
+        update['latitude'] = round(location['latitude'], 4)
+    if location['longitude'] != round(sites[0]['longitude'], 4):
+        update['longitude'] = round(location['longitude'], 4)
 
     if len(update) != 0:
         print ("UPDATE: site lat/long from %s,%s to %s" % 
