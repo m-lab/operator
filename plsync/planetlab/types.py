@@ -227,6 +227,8 @@ class Site(dict):
             kwargs['login_base_prefix'] = 'mlab'
         if 'location' not in kwargs:
             kwargs['location'] = None
+        if 'arch' not in kwargs:
+            kwargs['arch'] = ''
 
         if kwargs['net'] is not None:
             if kwargs['net']['v4'] is not None:
@@ -254,7 +256,7 @@ class Site(dict):
                     exclude_ipv6=False
                 n = Node(name=kwargs['name'], index=i, net=kwargs['net'], 
                          pcu=p, nodegroup=kwargs['nodegroup'],
-                         exclude_ipv6=exclude_ipv6,
+                         arch=kwargs['arch'], exclude_ipv6=exclude_ipv6,
                          login_base=kwargs['login_base'])
                 kwargs['nodes'][n.hostname()] = n
 
@@ -278,10 +280,10 @@ class Site(dict):
         if addusers:
             SyncPersonsOnSite(self['users'], self['login_base'], createusers)
 
-        if addnodes:
+        if addnodes or getbootimages:
             for hostname,node in self['nodes'].iteritems():
                 if onhost is None or hostname == onhost:
-                    node.sync(addinterfaces, getbootimages)
+                    node.sync(addnodes, addinterfaces, getbootimages)
 
 def makesite(name, v4prefix, v6prefix, city, country, 
              latitude, longitude, user_list, **kwargs):
@@ -455,14 +457,17 @@ class Node(dict):
 
         return attr
 
-    def sync(self, addinterfaces=False, getbootimages=False):
+    def sync(self, addnodes=False, addinterfaces=False, getbootimages=False):
         """Create and or verify that Node object & PCU & interface is created in
         myplc db"""
 
         node_id = MakeNode(self['login_base'], self.hostname())
         MakePCU(self['login_base'], node_id, self['pcu'].fields())
-        PutNodeInNodegroup(self.hostname(), node_id, self['nodegroup'])
         interface = self.interface()
+        if self['arch'] != '':
+            SyncNodeTag(self.hostname(), node_id, 'arch', self['arch'])
+        if addnodes:
+            PutNodeInNodegroup(self.hostname(), node_id, self['nodegroup'])
         if addinterfaces:
             SyncInterface(self.hostname(), node_id, interface,
                           interface['is_primary'])
