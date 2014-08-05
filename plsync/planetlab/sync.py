@@ -103,15 +103,15 @@ def SyncLocation(sitename, location):
 
     # NOTE: always update latitude/longitude, 
     update = {}
-    if location['latitude'] != round(sites[0]['latitude'], 4):
+    if sites[0]['latitude'] == None or location['latitude'] != round(sites[0]['latitude'], 4):
         update['latitude'] = round(location['latitude'], 4)
-    if location['longitude'] != round(sites[0]['longitude'], 4):
+    if sites[0]['longitude'] == None or location['longitude'] != round(sites[0]['longitude'], 4):
         update['longitude'] = round(location['longitude'], 4)
 
     if len(update) != 0:
         print ("UPDATE: site lat/long from %s,%s to %s" % 
                 (location['latitude'], location['longitude'], update))
-        # s.api.UpdateSite(site_id, update)
+        s.api.UpdateSite(site_id, update)
 
     if 'extra' in location:
         SyncSiteTag(sitename, site_id, 'extra', location['extra'])
