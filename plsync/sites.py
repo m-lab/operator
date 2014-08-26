@@ -98,6 +98,7 @@ site_list = [
     makesite('iad04','173.205.4.0',    '2001:0668:001F:0021::','Washington_DC', 'US', 38.944400, -77.455800, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
     makesite('jnb01','196.24.45.128',  '2001:4200:FFF0:4512::','Johannesburg', 'ZA', -26.203500, 28.133500, user_list, nodegroup='MeasurementLabCentos'),
     makesite('lax01','38.98.51.0',     '2001:550:6800::',      'Los Angeles_CA', 'US', 33.942500, -118.407200, user_list, nodegroup='MeasurementLabCentos'),
+    makesite('lax02','63.243.240.64',  '2001:550:A600::',      'Los Angeles_CA', 'US', 33.942500, -118.407200, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
     makesite('lax03','173.205.3.64',   '2001:0668:001F:001E::','Los Angeles_CA', 'US', 33.942500, -118.407200, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
     makesite('lax05','128.177.109.192','2001:438:fffd:2e::',   'Los Angeles_CA', 'US', 33.942500, -118.407200, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
     makesite('lba01','109.239.110.0',  '2a00:1a80:1:8::',      'Leeds', 'GB', 53.865800, -1.660560, user_list, nodegroup='MeasurementLabCentos'),
