@@ -87,7 +87,7 @@ site_list = [
     makesite('beg01','188.120.127.0',  '2001:7f8:1e:6::',      'Belgrade', 'RS', 44.821600, 20.292100, user_list, nodegroup='MeasurementLabCentos'),
     makesite('bog01','190.15.11.0',    None,                   'Bogota', 'CO', 4.5833, -74.066700, user_list, exclude=[1,2,3], nodegroup='MeasurementLabCentos'),
     makesite('den01','184.105.23.64',  '2001:470:1:250::',     'Denver_CO', 'US', 39.856100, -104.673700, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
-    makesite('den04','128.177.109.65', '2001:438:fffd:2c::',   'Denver_CO', 'US', 39.856100, -104.673700, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
+    makesite('den04','128.177.109.64', '2001:438:fffd:2c::',   'Denver_CO', 'US', 39.856100, -104.673700, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
     makesite('dfw01','38.107.216.0',   '2001:550:2000::',      'Dallas_TX', 'US', 32.896900, -97.038100, user_list, nodegroup='MeasurementLabCentos'),
     makesite('dfw02','64.86.132.64',   '2001:5a0:3f00::',      'Dallas_TX', 'US', 32.896900, -97.038100, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
     makesite('dfw05','128.177.163.64', '2001:438:fffd:30::',   'Dallas_TX', 'US', 32.896900, -97.038100, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
