@@ -109,8 +109,9 @@ def SyncLocation(sitename, location):
         update['longitude'] = round(location['longitude'], 4)
 
     if len(update) != 0:
-        print ("UPDATE: site lat/long from %s,%s to %s" % 
-                (location['latitude'], location['longitude'], update))
+        print ("UPDATE: site lat/long from %s,%s to %s,%s with %s" % 
+                (sites[0]['latitude'], sites[0]['longitude'], 
+                location['latitude'], location['longitude'], update))
         s.api.UpdateSite(site_id, update)
 
     if 'extra' in location:
