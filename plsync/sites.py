@@ -74,7 +74,7 @@ Network.legacy_network_remap = legacy_network_remap
 # net  : v4 & v6 network prefixes and definitions.
 
 site_list = [
-    makesite('acc01','196.201.2.192',    None,     'Accra', 'GH', 5.6060, -0.1681, user_list, exclude=[1,2,3], nodegroup='MeasurementLabCentos'),
+    makesite('acc01','196.201.2.192',  None,                   'Accra', 'GH', 5.6060, -0.1681, user_list, exclude=[1,2,3], nodegroup='MeasurementLabCentos'),
     makesite('akl01','163.7.129.0',    '2404:0138:4009::',     'Auckland', 'NZ', -36.850000, 174.783000, user_list, nodegroup='MeasurementLabCentos'),
     makesite('ams01','213.244.128.128','2001:4C08:2003:2::',   'Amsterdam', 'NL', 52.308600, 4.763890, user_list, nodegroup='MeasurementLabCentos'),
     makesite('ams02','72.26.217.64',   '2001:48c8:7::',        'Amsterdam', 'NL', 52.308600, 4.763890, user_list, nodegroup='MeasurementLabCentos'),
