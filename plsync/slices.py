@@ -112,8 +112,10 @@ slice_list = [
                                            users=user_list,
                                            ipv6=mlab4s_only),
     Slice(name="mlab_ooni",       index=6, attrs=centos_slice_attrs+[
-                                                Attr(None,      capabilities='CAP_NET_BIND_SERVICE,CAP_NET_RAW') ], 
+                                                #Attr(None,      capabilities='CAP_NET_BIND_SERVICE,CAP_NET_RAW') ], 
+                                                Attr('MeasurementLabCentos', capabilities='CAP_NET_BIND_SERVICE,CAP_NET_RAW') ], 
                                            users=user_list,
+                                           use_initscript=True,
                                            ipv6="all"),
     Slice(name="samknows_ispmon", index=7, attrs=centos_slice_attrs+web100_enable_attr,
                                            users=user_list,
