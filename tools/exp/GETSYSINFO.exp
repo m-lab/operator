@@ -22,11 +22,13 @@ if { "$method" == "ssh" } {
         # NOTE: For unknown reason, some DRAC modules work only with
         #       stderr redirected to stdout, others only work without it.
         if { $retry == 0 } {
-            spawn ssh -o StrictHostKeyChecking=no \
+            spawn ssh -o Port 806
+                      -o StrictHostKeyChecking=no \
                       -o PasswordAuthentication=yes \
                       -o PubkeyAuthentication=no $user@$host
         } else {
-            spawn ssh -o StrictHostKeyChecking=no \
+            spawn ssh -o Port 806
+                      -o StrictHostKeyChecking=no \
                       -o PasswordAuthentication=yes \
                       -o PubkeyAuthentication=no $user@$host 2>&1
         }
