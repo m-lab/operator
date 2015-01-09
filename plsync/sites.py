@@ -86,6 +86,7 @@ site_list = [
     makesite('ath01','83.212.4.0',     '2001:648:2ffc:2101::', 'Athens', 'GR', 37.936400, 23.944400, user_list, nodegroup='MeasurementLabCentos'),
     makesite('ath02','83.212.5.128',   '2001:648:2ffc:2102::', 'Athens', 'GR', 37.936400, 23.944400, user_list, nodegroup='MeasurementLabCentos'),
     makesite('beg01','188.120.127.0',  '2001:7f8:1e:6::',      'Belgrade', 'RS', 44.821600, 20.292100, user_list, nodegroup='MeasurementLabCentos'),
+    makesite('bkk01','61.7.252.0',     '2001:c38:902f::',      'Bangkok', 'TH', 13.690400, 100.750100, user_list, arch='x86_64', nodegroup='MeasurementLabCentos'),
     makesite('bog01','190.15.11.0',    None,                   'Bogota', 'CO', 4.5833, -74.066700, user_list, exclude=[1,2,3], nodegroup='MeasurementLabCentos'),
     makesite('den01','184.105.23.64',  '2001:470:1:250::',     'Denver_CO', 'US', 39.856100, -104.673700, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
     makesite('den04','128.177.109.64', '2001:438:fffd:2c::',   'Denver_CO', 'US', 39.856100, -104.673700, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
@@ -157,7 +158,9 @@ site_list = [
     makesite('yyz01','162.219.48.0',   '2620:10a:80fd::',      'Toronto', 'CA', 43.6767, -79.6306, user_list, arch='x86_64-r420', nodegroup='MeasurementLabCentos'),
 
     # Site for M-Lab testing machines
-    makesite('nuq0t','64.9.225.192',   '2604:CA00:F000:3::',   None, None, 0,0, user_list, count=4, nodegroup='MeasurementLabCentos'),
+    makesite('nuq0t','23.228.128.0',   '2605:a601:f1ff:fffd::', None, None, 0,0, user_list, count=4, nodegroup='MeasurementLabCentos'),
+    makesite('nuq1t','23.228.128.128', '2605:a601:f1ff:ffff::','San Francisco Bay Area_CA', 'US', 37.383300, -122.066700, user_list, count=4, nodegroup='MeasurementLabCentos'),
+    makesite('iad0t','165.117.251.128', None,'Washington_DC', 'US', 38.944400, -77.455800, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
    # NOTE: mlc servers need special handling
    #Site(name='mlc',   net=Network(v4='64.9.225.64',     v6='2604:CA00:F000:5::'), domain="measurementlab.net", count=3),
 ]
