@@ -3,6 +3,7 @@ import sys
 import pprint
 import time
 import base64
+import xmlrpclib
 
 # NOTE: PLCAPI xmlrpclib.Fault codes are define in:
 # http://git.planet-lab.org/?p=plcapi.git;a=blob;f=PLC/Faults.py
@@ -473,28 +474,32 @@ def SyncInterface(hostname, node_id, interface, is_primary):
                    "ip" : interface['ip']}
     interface_found = s.api.GetInterfaces(filter_dict)
 
-    if len(interface_found) == 0:
+    coarse_filter_dict = {"node_id" : node_id, 
+                   "is_primary" : is_primary}
+    all_interfaces = s.api.GetInterfaces(coarse_filter_dict)
+
+    if len(interface_found) == 0 and len(all_interfaces) == 0:
         print ("Adding: node network %s to %s" %
                 (primary_declared['ip'], hostname))
         i_id = s.api.AddInterface(node_id, primary_declared)
-    else:
+    elif len(interface_found) == 0:
         # TODO: clear any interface settings from primary interface
-        if InterfacesAreDifferent(primary_declared, interface_found[0]):
+        if InterfacesAreDifferent(primary_declared, all_interfaces[0]):
             if len(primary_declared.keys()) == 0:
                 print ("WARNING: found primary interface for %s in "+
                         "DB, but is NOT SPECIFIED in config!") % hostname
-                pprint.pprint(interface_found[0])
+                pprint.pprint(all_interfaces[0])
             else:
                 pprint.pprint( primary_declared )
-                pprint.pprint( interface_found[0] )
+                pprint.pprint( all_interfaces[0] )
                 print "Updating: node network for %s to %s" % (
                             hostname, primary_declared)
-                s.api.UpdateInterface(interface_found[0]['interface_id'], 
+                s.api.UpdateInterface(all_interfaces[0]['interface_id'], 
                                       primary_declared)
         else:
             print ("Confirmed: node network setup for %s for %s" %
                     (hostname, interface['ip']))
-        i_id = interface_found[0]['interface_id']
+        i_id = all_interfaces[0]['interface_id']
 
     # NOTE: everything that follows is only for non-primary interfaces.
     if is_primary is not True:
