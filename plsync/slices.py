@@ -94,7 +94,7 @@ slice_list = [
                                                 Attr('MeasurementLabCentos', capabilities='CAP_NET_BIND_SERVICE,vxc_^28'), ], 
                                            users=user_list,
                                            use_initscript=True,
-                                           ipv6=mlab4s_only ),
+                                           ipv6="nuq1t" ),
     Slice(name='iupui_npad',      index=2, attrs=centos_slice_attrs+web100_enable_attr+[
                                                 Attr('MeasurementLabCentos',    disk_max='10000000'),
                                                 Attr(None,    vsys='web100_proc_write'), ],

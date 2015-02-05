@@ -7,5 +7,5 @@ user_list = [('Stephen', 'Stuart', 'sstuart@google.com'),
              ('Chris',   'Ritzo', 'critzo@opentechinstitute.org'),
              ('Josh',    'Bailey', 'joshb@google.com'),
              ('Tiziana', 'Refice', 'tiziana@google.com'),
-             ('Steph', 'Alarcon', 'steph@stephalarcon.org'),
+             ('Steph', 'Alarcon', 'salarcon@measurementlab.net'),
              ('Nathan', 'Kinkade', 'kinkade@opentechinstitute.org')]
