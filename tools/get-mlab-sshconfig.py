@@ -5,6 +5,7 @@ import xmlrpclib
 import os
 import sys
 import re
+import ssl
 
 SESSION_DIR=os.environ['HOME'] + "/.ssh"
 SESSION_FILE=SESSION_DIR + "/ssh_mlab_session"
@@ -12,6 +13,8 @@ API_URL = "https://boot.planet-lab.org/PLCAPI/"
 VERBOSE=False
 DEBUG=False
 SEVEN_DAYS=60*60*24*7
+SSL_CONTEXT = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+SSL_CONTEXT.load_verify_locations(os.path.dirname(os.path.realpath(__file__)) + "/../boot.planet-lab.org.ca")
 
 class API:
     """ API is a wrapper class around the PlanetLab API's xmlrpc calls.
@@ -20,7 +23,7 @@ class API:
     """
     def __init__(self, auth, url):
         self.auth = auth
-        self.api = xmlrpclib.Server(url, verbose=False, allow_none=True)
+        self.api = xmlrpclib.Server(url, verbose=False, allow_none=True, context=SSL_CONTEXT)
     def __repr__(self):
         return self.api.__repr__()
     def __getattr__(self, name):
@@ -56,7 +59,7 @@ def refreshsession():
     f.close()
 
 def getapi():
-    api = xmlrpclib.ServerProxy(API_URL, allow_none=True)
+    api = xmlrpclib.ServerProxy(API_URL, allow_none=True, context=SSL_CONTEXT)
     auth = None
     authorized = False
     while not authorized:
