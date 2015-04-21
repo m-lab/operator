@@ -500,9 +500,11 @@ def SyncInterface(hostname, node_id, interface, is_primary):
             print ("Confirmed: node network setup for %s for %s" %
                     (hostname, interface['ip']))
         i_id = all_interfaces[0]['interface_id']
+    else:
+        i_id = all_interfaces[0]['interface_id']
 
     # NOTE: everything that follows is only for non-primary interfaces.
-    if (is_primary is not True and len(interface_found) == 0):
+    if is_primary is not True:
         goal = {
             "alias"  : str(i_id),
             "ifname" : "eth0"
