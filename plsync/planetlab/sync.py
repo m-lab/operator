@@ -470,7 +470,6 @@ def SyncInterface(hostname, node_id, interface, is_primary):
     """
     primary_declared = interface
     filter_dict = {"node_id" : node_id, 
-                   "is_primary" : is_primary, 
                    "ip" : interface['ip']}
     interface_found = s.api.GetInterfaces(filter_dict)
 
@@ -478,12 +477,11 @@ def SyncInterface(hostname, node_id, interface, is_primary):
                    "is_primary" : is_primary}
     all_interfaces = s.api.GetInterfaces(coarse_filter_dict)
 
-    if len(interface_found) == 0 and len(all_interfaces) == 0:
+    if (len(interface_found) == 0 and not is_primary) or len(all_interfaces) == 0:
         print ("Adding: node network %s to %s" %
                 (primary_declared['ip'], hostname))
         i_id = s.api.AddInterface(node_id, primary_declared)
-    elif len(interface_found) == 0:
-        # TODO: clear any interface settings from primary interface
+    elif len(interface_found) == 0 and is_primary and len(all_interfaces) > 0:
         if InterfacesAreDifferent(primary_declared, all_interfaces[0]):
             if len(primary_declared.keys()) == 0:
                 print ("WARNING: found primary interface for %s in "+
@@ -496,6 +494,9 @@ def SyncInterface(hostname, node_id, interface, is_primary):
                             hostname, primary_declared)
                 s.api.UpdateInterface(all_interfaces[0]['interface_id'], 
                                       primary_declared)
+                # TODO: clear any interface settings from primary interface
+                for outdated_interface in s.api.GetInterfaces({"node_id" : node_id, "is_primary" : False}):
+                      s.api.DeleteInterface(outdated_interface[0]['interface_id'])
         else:
             print ("Confirmed: node network setup for %s for %s" %
                     (hostname, interface['ip']))
