@@ -12,7 +12,7 @@ PLC_CONFIG="/etc/planetlab.conf"
 SESSION_DIR=os.environ['HOME'] + "/.ssh"
 SESSION_FILE=SESSION_DIR + "/mlab_session"
 SSL_CONTEXT = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-SSL_CONTEXT.load_verify_locations(os.path.dirname(os.path.realpath(__file__)) + "/../boot.planet-lab.org.ca")
+SSL_CONTEXT.load_verify_locations(os.path.dirname(os.path.realpath(__file__)) + "/../../boot.planet-lab.org.ca")
 
 api = None
 
