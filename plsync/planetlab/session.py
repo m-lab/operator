@@ -5,11 +5,14 @@ import getpass
 import os
 import sys
 import xmlrpclib
+import ssl
 
 API_URL = "https://boot.planet-lab.org/PLCAPI/"
 PLC_CONFIG="/etc/planetlab.conf"
 SESSION_DIR=os.environ['HOME'] + "/.ssh"
 SESSION_FILE=SESSION_DIR + "/mlab_session"
+SSL_CONTEXT = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+SSL_CONTEXT.load_verify_locations(os.path.dirname(os.path.realpath(__file__)) + "/../../boot.planet-lab.org.ca")
 
 api = None
 
@@ -45,7 +48,7 @@ class API:
         self.debug = debug
         self.verbose = verbose
         self.auth = auth
-        self.api = xmlrpclib.Server(url, verbose=False, allow_none=True)
+        self.api = xmlrpclib.Server(url, verbose=False, allow_none=True, context=SSL_CONTEXT)
     def __repr__(self):
         return self.api.__repr__()
     def __getattr__(self, name):
@@ -133,7 +136,7 @@ def parse_sessions(session_file, fail_on_open=True):
 
 def getapi(debug=False, verbose=False, plcconfig=None):
     global api
-    api = xmlrpclib.ServerProxy(API_URL, allow_none=True)
+    api = xmlrpclib.ServerProxy(API_URL, allow_none=True, context=SSL_CONTEXT)
     auth = None
     authorized = False
     while not authorized:
