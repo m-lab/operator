@@ -120,7 +120,7 @@ slice_list = [
     Slice(name="samknows_ispmon", index=7, attrs=centos_slice_attrs+web100_enable_attr,
                                            users=user_list,
                                            ipv6="all"),
-    Slice(name="gt_bismark",      index=8, attrs=centos_slice_attrs+web100_enable_attr+[
+    Slice(name="gt_bismark",      index=8, attrs=centos_slice_attrs+[
                                                 Attr('MeasurementLabCentos', capabilities='CAP_NET_BIND_SERVICE,vxc_^28'), ], 
                                            users=user_list,
                                            ipv6=mlab4s_only),
