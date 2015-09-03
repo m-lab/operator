@@ -136,7 +136,8 @@ slice_list = [
                                            ipv6="all"),
 
     Slice(name='mlab_utility',    index=11, attrs=centos_slice_attrs+[
-                                                Attr('MeasurementLabCentos', capabilities='CAP_NET_BIND_SERVICE,vxc_^28'), ],
+                                                Attr('MeasurementLabCentos', capabilities='CAP_NET_BIND_SERVICE,vxc_^28'), 
+                                                Attr(None, vsys='vs_resource_backend') ],
                                             users=user_list,
                                             use_initscript=True,
                                             ipv6="all"),
