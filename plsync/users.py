@@ -7,3 +7,4 @@ user_list = [('Stephen', 'Stuart', 'sstuart@google.com'),
              ('Josh',    'Bailey', 'joshb@google.com'),
              ('Steph', 'Alarcon', 'salarcon@measurementlab.net'),
              ('Nathan', 'Kinkade', 'kinkade@opentechinstitute.org')]
+             ('Matt', 'Mathis', 'mattmathis@google.com')]
