@@ -85,11 +85,6 @@ mlab4s_only = ['mlab4.nuq01', 'mlab4.nuq02', 'mlab4.prg01',
 #         given. For example, see lca01+npad.
 slice_list = [
 
-    Slice(name='gt_partha',       index=0, attrs=centos_slice_attrs+web100_enable_attr+[ 
-                                                Attr('MeasurementLabCentos', enabled='0'), ], 
-                                           users=user_list,
-                                           use_initscript=True, 
-                                           ipv6=mlab4s_only ),
     Slice(name='iupui_ndt',       index=1, attrs=centos_slice_attrs+[
                                                 Attr('MeasurementLabCentos',    disk_max='60000000'),
                                                 Attr('MeasurementLabCentos', capabilities='CAP_NET_BIND_SERVICE,vxc_^28'), ], 
