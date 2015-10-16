@@ -1,0 +1,37 @@
+
+# comment.
+_default:
+    prefix: mlab
+    domain: measurement-lab.org
+    nodegroup: MeasurementLabCentos
+    users:
+        - soltesz@google.com
+
+alk01:
+
+    servers: 4
+    ipv4: 163.7.129.0
+    ipv6: '2404:0138:4009::'
+    city: Auckland
+    country: NZ
+    lat: -36.850000
+    lon: 174.783000
+
+
+_default_experiment:
+    initscript: mlab_generic_initscript
+    attrs:
+        all:
+            - vsys: slice_restart
+            - vsys: slice_update
+            - vsys: slice_yum
+
+npad:
+    index: 2
+    planetlab_site: iupui
+    ipv6: True
+    attrs:
+        MeasurementLabCentos:
+            - capabilities: vxc_^28
+            - disk_max: 10000000
+            - vsys: web100_proc_write
