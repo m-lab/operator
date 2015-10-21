@@ -4,6 +4,9 @@ import pprint
 from sync import *
 import session
 
+MLAB_ORG_DOMAIN = 'measurement-lab.org'
+
+
 def breakdown(host_index, v4prefix):
     octet_list = v4prefix.split('.')
     assert(len(octet_list) == 4)
@@ -338,7 +341,7 @@ class PCU(dict):
 
     def hostname(self):
         """ generate the hostname for this DRAC based on index & site name """
-        return "mlab%dd.%s.measurement-lab.org" % (self['index'], self['name'])
+        return 'mlab%dd.%s.%s' % (self['index'], self['name'], MLAB_ORG_DOMAIN)
 
     def fields(self):
         """ return a dict() with the PCU values for use by myplc AddPCU() """
@@ -390,7 +393,23 @@ class Node(dict):
         return self['net']['v6'].ipv6_defaultgw()
 
     def hostname(self):
-        return "mlab%d.%s.measurement-lab.org"  % (self['index'], self['name'])
+        """Returns the Node FQDN."""
+        return '%s.%s' % (self.recordname(), MLAB_ORG_DOMAIN)
+
+    def recordname(self, decoration=''):
+        """Returns the Node resource record, e.g. hostname without domain."""
+        return 'mlab%d%s.%s' % (self['index'], decoration, self['name'])
+
+    def ipv4(self):
+        """Returns the Node primary IPv4 address."""
+        return self['net']['v4'].interface(self['index'])['ip']
+
+    def ipv6(self):
+        """Returns the Node primary IPv6 address, if enabled."""
+        if self.ipv6_is_enabled():
+            return self['net']['v6'].ipv6addr(self['index'])
+        else:
+            return ''
 
     def v6interface_tags(self):
         secondary_list = self['net']['v6'].ipv6addr_secondaries(self['index'])
@@ -577,7 +596,7 @@ class Slice(dict):
             if type(kwargs['ipv6']) == str:
                 kwargs['ipv6'] = "all"
             elif type(kwargs['ipv6']) == type([]):
-                domain = '.measurement-lab.org'
+                domain = '.' + MLAB_ORG_DOMAIN
                 kwargs['ipv6'] = [ h+domain for h in kwargs['ipv6'] ]
             else:
                 raise Exception("Unrecognized type for ipv6 parameter: %s" % 
@@ -588,6 +607,29 @@ class Slice(dict):
         kwargs['network_list'] = []
 
         super(Slice, self).__init__(**kwargs)
+
+    def dnsname(self):
+        """Returns the slice name, e.g. group_name, in DNS form e.g. name.group"""
+        fields = self['name'].split('_')
+        # When a name has multiple '_', rejoin all parts after the group name.
+        name = '.'.join(fields[1:])
+        group = fields[0]
+        return '%s.%s' % (name, group)
+
+    def hostname(self, node):
+        """Returns the FQDN for a slice on the given node."""
+        return '.'.join((self.dnsname(), node.hostname()))
+
+    def ipv4(self, node):
+        """Returns the IPv4 address for the slice on the given node."""
+        return node.iplist()[self['index']]
+
+    def ipv6(self, node):
+        """Returns the IPv6 address for the slice on the given node."""
+        if (node.ipv6_is_enabled() and self.ipv6_is_enabled(node.hostname())):
+            return node.iplistv6()[self['index']]
+        else:
+            return ""
 
     def add_node_address(self, node):
         self['network_list'].append((node.hostname(), node))
