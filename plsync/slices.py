@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import pprint
-from planetlab.types import *
+from planetlab.model import *
 from users import user_list
 # NOTE: slice attributes:
 # All slice attributes are key=value pairs.  Values are always specified as a
