@@ -76,6 +76,25 @@ class TypesTest(unittest.TestCase):
 
         self.assertItemsEqual(expected_hostnames, hostnames)
 
+    def test_slice_dnsname(self):
+        onename_slice = model.Slice(
+            name='abcdef', index=1, attrs=self.attrs, users=self.users,
+            use_initscript=True, ipv6='all')
+        twoname_slice = model.Slice(
+            name='abc_def', index=1, attrs=self.attrs, users=self.users,
+            use_initscript=True, ipv6='all')
+        multiname_slice = model.Slice(
+            name='abc_def_ghi', index=1, attrs=self.attrs, users=self.users,
+            use_initscript=True, ipv6='all')
+
+        onename = onename_slice.dnsname()
+        twoname = twoname_slice.dnsname()
+        multiname = multiname_slice.dnsname()
+
+        self.assertEqual('abcdef', onename)
+        self.assertEqual('def.abc', twoname)
+        self.assertEqual('def.ghi.abc', multiname)
+
 
 if __name__ == '__main__':
     unittest.main()

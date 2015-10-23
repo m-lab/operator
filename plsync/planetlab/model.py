@@ -612,9 +612,7 @@ class Slice(dict):
         """Returns the slice name in DNS form, e.g. group_name to name.group"""
         fields = self['name'].split('_')
         # When a name has multiple '_', rejoin all parts after the group name.
-        name = '.'.join(fields[1:])
-        group = fields[0]
-        return '%s.%s' % (name, group)
+        return '.'.join(fields[1:] + fields[:1])
 
     def hostname(self, node):
         """Returns the FQDN for a slice on the given node."""
