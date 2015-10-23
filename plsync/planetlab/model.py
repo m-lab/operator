@@ -596,8 +596,8 @@ class Slice(dict):
             if type(kwargs['ipv6']) == str:
                 kwargs['ipv6'] = "all"
             elif type(kwargs['ipv6']) == type([]):
-                domain = '.' + MLAB_ORG_DOMAIN
-                kwargs['ipv6'] = [ h+domain for h in kwargs['ipv6'] ]
+                kwargs['ipv6'] = ['%s.%s' % (host, MLAB_ORG_DOMAIN)
+                                  for host in kwargs['ipv6']]
             else:
                 raise Exception("Unrecognized type for ipv6 parameter: %s" % 
                                     type(kwargs['ipv6']))
