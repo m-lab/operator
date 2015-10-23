@@ -609,7 +609,7 @@ class Slice(dict):
         super(Slice, self).__init__(**kwargs)
 
     def dnsname(self):
-        """Returns the slice name, e.g. group_name, in DNS form e.g. name.group"""
+        """Returns the slice name in DNS form, e.g. group_name to name.group"""
         fields = self['name'].split('_')
         # When a name has multiple '_', rejoin all parts after the group name.
         name = '.'.join(fields[1:])
