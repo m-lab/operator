@@ -3,7 +3,7 @@
 import mlabconfig
 import StringIO
 import unittest
-from planetlab import types
+from planetlab import model
 import json
 
 
@@ -11,10 +11,10 @@ class MlabconfigTest(unittest.TestCase):
 
     def setUp(self):
       self.users = [('User', 'Name', 'username@gmail.com')]
-      self.sites = [types.makesite(
+      self.sites = [model.makesite(
           'abc01', '192.168.1.0', '2400:1002:4008::', 'Some City', 'US',
           36.850000, 74.783000, self.users, nodegroup='MeasurementLabCentos')]
-      self.attrs = [types.Attr('MeasurementLabCentos', disk_max='60000000')]
+      self.attrs = [model.Attr('MeasurementLabCentos', disk_max='60000000')]
 
     def assertContainsItems(self, results, expected_items):
         """Asserts that every element of expected is present in results."""
@@ -23,7 +23,7 @@ class MlabconfigTest(unittest.TestCase):
 
     def test_export_mlab_host_ips(self):
         # Setup synthetic user, site, and experiment configuration data.
-        experiments = [types.Slice(name='abc_bar', index=1, attrs=self.attrs,
+        experiments = [model.Slice(name='abc_bar', index=1, attrs=self.attrs,
                                    users=self.users, use_initscript=True,
                                    ipv6='all')]
         # Assign experiments to nodes.
