@@ -1,6 +1,9 @@
 m-lab/operator
 =============
 
+[![Build Status](https://travis-ci.org/m-lab/operator.svg?branch=master)](https://travis-ci.org/m-lab/operator)
+[![Coverage Status](https://coveralls.io/repos/m-lab/operator/badge.svg?branch=master&service=github)](https://coveralls.io/github/m-lab/operator?branch=master)
+
 m-lab/operator is a repository for tools, configuration, and notes that help
 operators manage the platform and experiments on M-Lab.
 
