@@ -150,6 +150,7 @@ class ModelTest(unittest.TestCase):
             for _, node in experiment['network_list']:
                 names.append(experiment.sitename(node))
 
+        # Guarantee that there is only one unique experiment site name.
         self.assertEqual(1, len(set(names)))
         self.assertEqual(expected_name, names[0])
 
