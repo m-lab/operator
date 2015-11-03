@@ -30,6 +30,17 @@ def pl_interface(host_index, v4prefix):
     interface['ip']         = '%s.%d' % (net_prefix, mlab_offset)
     return interface
 
+def split_prefix(v4prefix):
+    octets = v4prefix.split('.')
+    assert(len(octets) == 4)
+    net_prefix = ".".join(octets[0:3])
+    net_offset = int(octets[3])
+    return (net_prefix, net_offset)
+
+def ml_site_ipv4(v4prefix, index):
+    net_prefix, net_offset = split_prefix(v4prefix)
+    return '%s.%d' % (net_prefix, net_offset + index)
+
 def pl_v6_iplist(host_index, v6prefix, last_octet):
     mlab_offset = last_octet + ((host_index - 1) * 13) + 9
     ret = []
@@ -265,6 +276,9 @@ class Site(dict):
 
         super(Site, self).__init__(**kwargs)
 
+    def ipv4(self, index=0):
+      return ml_site_ipv4(self['net']['v4']['prefix'], index)
+
     def sync(self, onhost=None, addusers=False, addnodes=False,
              addinterfaces=False, getbootimages=False, createusers=False):
         """ Do whatever is necessary to validate this site in the myplc DB.
@@ -340,11 +354,19 @@ class PCU(dict):
         super(PCU, self).__init__(**kwargs)
 
     def hostname(self):
-        """ generate the hostname for this DRAC based on index & site name """
-        return 'mlab%dd.%s.%s' % (self['index'], self['name'], MLAB_ORG_DOMAIN)
+        """Returns the hostname for this DRAC."""
+        return '.'.join((self.recordname(), MLAB_ORG_DOMAIN))
+
+    def recordname(self):
+        """Returns the DRAC resource record, e.g. hostname without domain."""
+        return "mlab%dd.%s" % (self['index'], self['name'])
+
+    def ipv4(self):
+        """Returns the DRAC IPv4 address."""
+        return self['net']['v4'].drac(self['index'])
 
     def fields(self):
-        """ return a dict() with the PCU values for use by myplc AddPCU() """
+        """Returns a dict() with the PCU values for use by myplc AddPCU() """
         return { 'username': self['username'],
                  'password': self["password"],      # password is updated later.
                  'model'   : self['model'],
@@ -617,6 +639,14 @@ class Slice(dict):
     def hostname(self, node):
         """Returns the FQDN for a slice on the given node."""
         return '.'.join((self.dnsname(), node.hostname()))
+
+    def recordname(self, server, decoration=''):
+        """Returns the Slice resource record, e.g. hostname without domain."""
+        return '%s.%s' % (self.dnsname(), server.recordname(decoration))
+
+    def sitename(self, server, decoration=''):
+        """Returns the FQDN for a slice, without the machine name."""
+        return '%s%s.%s' % (self.dnsname(), decoration, server['name'])
 
     def ipv4(self, node):
         """Returns the IPv4 address for the slice on the given node."""
