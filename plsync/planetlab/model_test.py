@@ -29,7 +29,7 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(expected_ip, ip)
 
     def test_pcu_hostname(self):
-        expcted_hostnames = [
+        expected_hostnames = [
             'mlab1d.abc01.measurement-lab.org',
             'mlab2d.abc01.measurement-lab.org',
             'mlab3d.abc01.measurement-lab.org'
@@ -39,7 +39,7 @@ class ModelTest(unittest.TestCase):
         for node in self.sites[0]['nodes'].values():
             hostnames.append(node['pcu'].hostname())
 
-        self.assertItemsEqual(expcted_hostnames, hostnames)
+        self.assertItemsEqual(expected_hostnames, hostnames)
 
     def test_pcu_recordname(self):
         expected_names = [
