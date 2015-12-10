@@ -11,8 +11,6 @@ API_URL = "https://boot.planet-lab.org/PLCAPI/"
 PLC_CONFIG="/etc/planetlab.conf"
 SESSION_DIR=os.environ['HOME'] + "/.ssh"
 SESSION_FILE=SESSION_DIR + "/mlab_session"
-SSL_CONTEXT = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-SSL_CONTEXT.load_verify_locations(os.path.dirname(os.path.realpath(__file__)) + "/../../boot.planet-lab.org.ca")
 
 api = None
 
@@ -48,9 +46,11 @@ class API:
         self.debug = debug
         self.verbose = verbose
         self.auth = auth
-        self.api = xmlrpclib.Server(url, verbose=False, allow_none=True, context=SSL_CONTEXT)
+        self.api = get_xmlrpc_server(url)
+
     def __repr__(self):
         return self.api.__repr__()
+
     def __getattr__(self, name):
         run = True
         if self.debug and 'Get' not in name:
@@ -134,9 +134,25 @@ def parse_sessions(session_file, fail_on_open=True):
             session_map[url] = session
     return session_map
 
+
+def get_xmlrpc_server(url):
+    try:
+        context = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+    except AttributeError:
+        sys.stderr.write('WARNING: Using an unverified HTTPS context!!!\n')
+        sys.stderr.write('WARNING: Upgrade python to >= 2.7.9!!!\n')
+        raise
+
+    context.load_verify_locations(
+        os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                     "../../boot.planet-lab.org.ca"))
+    return xmlrpclib.ServerProxy(
+        url, verbose=False, allow_none=True, context=context)
+
+
 def getapi(debug=False, verbose=False, plcconfig=None):
     global api
-    api = xmlrpclib.ServerProxy(API_URL, allow_none=True, context=SSL_CONTEXT)
+    api = get_xmlrpc_server(API_URL)
     auth = None
     authorized = False
     while not authorized:
