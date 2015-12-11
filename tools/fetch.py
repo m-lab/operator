@@ -135,7 +135,7 @@ if __name__ == "__main__":
         "", "--command", dest="command", metavar="<command line>",
         help=("The command to run. If --external is false, then the command "
               "runs on nodes after login. If --external is true, then the "
-              "command is runs on the local system. In both cases, the pattern "
+              "command is run on the local system. In both cases, the pattern "
               "[] is replaced with the hostname being acted on."))
     parser.add_option("", "--rerun", dest="rerun", metavar="ext[=val]",
                         help=("Rerun fetch with the files indicated by the "+
