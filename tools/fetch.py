@@ -18,22 +18,22 @@ def usage():
     return """
     fetch.py -- run a short bash script across many machines.
 
-    The list of nodes is taken to be all MLab nodes, unless 
+    The list of nodes is taken to be all MLab nodes, unless
     otherwise specified.
 
     Most common parameters:
-    --cmd <cmdname>
-            This looks for a script named 'scripts/<cmdname>.sh' 
-            and writes logs to 'logs/<cmdname>'.
+    --script <script name>
+            This looks for a script named 'scripts/<script name>.sh'
+            and writes logs to 'logs/<script name>'.
 
-            You can also define a 'post' script to automatically 
-            run on all the output logs from <cmdname>.  If this 
-            file 'scripts/<cmdname>-post.sh' exists, it is 
+            You can also define a 'post' script to automatically
+            run on all the output logs from <script name>.  If this
+            file 'scripts/<script name>-post.sh' exists, it is
             executed with the log directory as its only argument.
 
     --rerun <extension=content>
-            Rerun a command using the log files as the source of 
-            the node list.  This is helpful for rerunning 
+            Rerun a command using the log files as the source of
+            the node list.  This is helpful for rerunning
             commands on just a few nodes based on previous runs.
 
             status=255   matches all nodes with an error
@@ -41,9 +41,10 @@ def usage():
 
     Examples:
 
-        ./fetch.py --cmd procs
-        ./fetch.py --cmd procs --rerun status=255 --list
-        ./fetch.py --cmd procs --rerun status=255
+        ./fetch.py --script procs
+        ./fetch.py --script procs --rerun status=255 --list
+        ./fetch.py --script procs --rerun status=255
+        ./fetch.py --command "ps ax" --nodelist list.txt
 """
 
 def time_to_str(t):
@@ -98,15 +99,15 @@ def vx_start_external(nodelist,outdir,cmd, timeout=0, threadcount=20):
     args = build_vx_args_external(cmd)
     vxargs.start(None, threadcount, nodelist, outdir, False, args, timeout)
 
-def build_vx_args(shell_cmd):
+def build_vx_args(shell_cmd, user):
     ssh_options="-q -o UserKnownHostsFile=junkssh -o StrictHostKeyChecking=no"
-    cmd="""ssh -p806 %s root@[] """  % ssh_options
+    cmd="""ssh -p806 %s %s@[] """  % (ssh_options, user)
     args = cmd.split()
     args.append(shell_cmd)
     return args
 
-def vx_start(nodelist,outdir,cmd, timeout=0, threadcount=20):
-    args = build_vx_args(cmd)
+def vx_start(nodelist, outdir, cmd, user, timeout=0, threadcount=20):
+    args = build_vx_args(cmd, user)
     vxargs.start(None, threadcount, nodelist, outdir, False, args, timeout)
 
 if __name__ == "__main__":
@@ -123,17 +124,19 @@ if __name__ == "__main__":
                         run=False,
                         list=False,
                         rerun=None,
-                        template=None,
-                        cmdline=None,
-                        cmdfile=None,)
+                        command=None,
+                        script=None,)
 
-    parser.add_option("", "--cmd", dest="cmdfile", metavar="<cmdname>",
+    parser.add_option("", "--script", dest="script", metavar="<script>",
                         help=("This looks for a script named "+
-                              "'scripts/<cmdname>.sh' and writes logs to "+
-                              "'logs/<cmdname>'."))
-    parser.add_option("", "--cmdline", dest="cmdline", metavar="<cmdline>",
-                        help=("Uses string as explicit command to run on "+
-                              "nodes. Writes logs to --outdir <outdir>."))
+                              "'scripts/<script>.sh' and writes logs to "+
+                              "'logs/<script>'."))
+    parser.add_option(
+        "", "--command", dest="command", metavar="<command line>",
+        help=("The command to run. If --external is false, then the command "
+              "runs on nodes after login. If --external is true, then the "
+              "command is run on the local system. In both cases, the pattern "
+              "[] is replaced with the hostname being acted on."))
     parser.add_option("", "--rerun", dest="rerun", metavar="ext[=val]",
                         help=("Rerun fetch with the files indicated by the "+
                               "extension given to --rerun. For example, "+
@@ -141,9 +144,9 @@ if __name__ == "__main__":
                               "files in --outdir that end with .status and "+
                               "have a value of 255"))
     parser.add_option("", "--outdir", dest="outdir", metavar="dirname",
-                        help="Name of directory to place output.  If unset, "+
+                        help="Name of directory to place logs.  If unset, "+
                              "automatically set to 'logs/<cmd>/'")
-    parser.add_option("", "--nodelist", dest="nodelist", metavar="FILE", 
+    parser.add_option("", "--nodelist", dest="nodelist", metavar="FILE",
                         help=("Provide the input file for the list of objects,"+
                               " or explicit list 'host1,host2,host3' etc."))
     parser.add_option("", "--list", dest="list",  action="store_true",
@@ -156,9 +159,9 @@ if __name__ == "__main__":
     parser.add_option("", "--external", dest="external",  action="store_true",
                         help=("Run commands external to the server. The "+
                               "default is internal."))
-    parser.add_option("", "--template", dest="template", 
-                        help=("Command template for external commands; "+
-                              "substitutes [] with hostname."))
+    parser.add_option(
+        "", "--user", dest="user", metavar="username", default="site_admin",
+        help="User name used to ssh into remote server.")
 
     (config, args) = parser.parse_args()
 
@@ -169,19 +172,17 @@ if __name__ == "__main__":
     auto_outdir=None
     auto_script=None
     auto_script_post=None
-    if config.cmdfile:
-        if os.path.exists(config.cmdfile):
-            f = open(config.cmdfile,'r')
+    if config.script:
+        if os.path.exists(config.script):
+            f = open(config.script, 'r')
         else:
-            auto_script = "scripts/" + config.cmdfile + ".sh"
-            auto_script_post = "scripts/" + config.cmdfile + "-post.sh"
+            auto_script = "scripts/" + config.script + ".sh"
+            auto_script_post = "scripts/" + config.script + "-post.sh"
             f = open(auto_script, 'r')
         cmd_str = f.read()
-        auto_outdir="logs/" + config.cmdfile.split(".")[0]
-    elif config.template and config.external:
-        cmd_str = config.template
-    elif config.cmdline:
-        cmd_str = config.cmdline
+        auto_outdir = "logs/" + config.script.split(".")[0]
+    elif config.command:
+        cmd_str = config.command
     else:
         parser.print_help()
         sys.exit(1)
@@ -226,10 +227,14 @@ if __name__ == "__main__":
             print n[0]
         sys.exit(0)
 
-    if config.external or config.template is not None:
-        vx_start_external(nodelist, outdir, cmd_str, int(config.timeout), int(config.threadcount))
+    if config.external:
+        vx_start_external(
+            nodelist, outdir, cmd_str, int(config.timeout),
+            int(config.threadcount))
     else:
-        vx_start(nodelist, outdir, cmd_str, int(config.timeout), int(config.threadcount))
+        vx_start(
+            nodelist, outdir, cmd_str, config.user, int(config.timeout),
+            int(config.threadcount))
 
     if auto_script_post is not None and os.path.isfile(auto_script_post):
         os.system("bash %s %s" % (auto_script_post, outdir)) 
