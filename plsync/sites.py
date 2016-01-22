@@ -63,10 +63,7 @@ legacy_network_remap = {
            3: '11,9,0,7,6,3,5,10,2,8,1,4'},
  'syd01': {1: '1,2,8,3,0,10,5,11,7,9,4,6',
            2: '2,0,3,5,6,11,1,10,8,9,7,4',
-           3: '0,2,4,6,7,1,3,11,9,10,8,5'},
- 'wlg01': {1: '0,1,2,3,4,5,6,11,8,10,7,9',
-           2: '0,1,2,3,4,5,6,11,8,10,7,9',
-           3: '0,1,2,3,4,5,6,11,8,10,7,9'}
+           3: '0,2,4,6,7,1,3,11,9,10,8,5'}
 }
 Network.legacy_network_remap = legacy_network_remap
 
@@ -74,7 +71,6 @@ Network.legacy_network_remap = legacy_network_remap
 # net  : v4 & v6 network prefixes and definitions.
 
 site_list = [
-    makesite('acc01','196.201.2.192',  None,                   'Accra', 'GH', 5.6060, -0.1681, user_list, exclude=[1,2,3], arch='x86_64', nodegroup='MeasurementLabCentos'),
     makesite('acc02','196.49.14.192',  None,                   'Accra', 'GH', 5.6060, -0.1681, user_list, exclude=[1,2,3], arch='x86_64', nodegroup='MeasurementLabCentos'),
     makesite('akl01','163.7.129.0',    '2404:0138:4009::',     'Auckland', 'NZ', -36.850000, 174.783000, user_list, nodegroup='MeasurementLabCentos'),
     makesite('ams01','213.244.128.128','2001:4C08:2003:2::',   'Amsterdam', 'NL', 52.308600, 4.763890, user_list, nodegroup='MeasurementLabCentos'),
@@ -160,7 +156,6 @@ site_list = [
     # old ipv6 2c0f:fab0:ffff:1000:: @ tun01
     makesite('tun01','41.231.21.0',    '2001:4350:3000:1::',   'Tunis', 'TN', 36.851600, 10.229100, user_list, nodegroup='MeasurementLabCentos'),
     makesite('vie01','213.208.152.0',  '2a01:190:1700:38::',   'Vienna', 'AT', 48.269000, 16.410700, user_list, nodegroup='MeasurementLabCentos'),
-    makesite('wlg01','103.10.233.0',   '2404:2000:3000::',     'Wellington', 'NZ', -41.327200, 174.805000, user_list, nodegroup='MeasurementLabCentos'),
     makesite('wlg02','163.7.129.64',   '2404:138:4009:1::',    'Wellington', 'NZ', -41.327200, 174.805000, user_list, nodegroup='MeasurementLabCentos'),
     makesite('yul01','162.219.49.0',   '2620:10a:80fe::',      'Montreal', 'CA', 45.4576, -73.7497, user_list, arch='x86_64-r420', nodegroup='MeasurementLabCentos'),
     makesite('yyc01','162.219.50.0',   '2620:10a:80ff::',      'Calgary', 'CA', 51.1315, -114.0106, user_list, arch='x86_64-r420', nodegroup='MeasurementLabCentos'),
