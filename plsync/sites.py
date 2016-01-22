@@ -159,7 +159,6 @@ site_list = [
     # old ipv6 2c0f:fab0:ffff:1000:: @ tun01
     makesite('tun01','41.231.21.0',    '2001:4350:3000:1::',   'Tunis', 'TN', 36.851600, 10.229100, user_list, nodegroup='MeasurementLabCentos'),
     makesite('vie01','213.208.152.0',  '2a01:190:1700:38::',   'Vienna', 'AT', 48.269000, 16.410700, user_list, nodegroup='MeasurementLabCentos'),
-    makesite('wlg01','103.10.233.0',   '2404:2000:3000::',     'Wellington', 'NZ', -41.327200, 174.805000, user_list, nodegroup='MeasurementLabCentos'),
     makesite('wlg02','163.7.129.64',   '2404:138:4009:1::',    'Wellington', 'NZ', -41.327200, 174.805000, user_list, nodegroup='MeasurementLabCentos'),
     makesite('yul01','162.219.49.0',   '2620:10a:80fe::',      'Montreal', 'CA', 45.4576, -73.7497, user_list, arch='x86_64-r420', nodegroup='MeasurementLabCentos'),
     makesite('yyc01','162.219.50.0',   '2620:10a:80ff::',      'Calgary', 'CA', 51.1315, -114.0106, user_list, arch='x86_64-r420', nodegroup='MeasurementLabCentos'),
