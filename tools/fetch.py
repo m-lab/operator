@@ -47,9 +47,6 @@ def usage():
         ./fetch.py --command "ps ax" --nodelist list.txt
 """
 
-def time_to_str(t):
-	return time.strftime("%Y/%m/%d %H:%M:%S", time.gmtime(t))
-
 def csv_to_hash(r):
 	ret = {}
 	for line in r:
@@ -109,6 +106,21 @@ def build_vx_args(shell_cmd, user):
 def vx_start(nodelist, outdir, cmd, user, timeout=0, threadcount=20):
     args = build_vx_args(cmd, user)
     vxargs.start(None, threadcount, nodelist, outdir, False, args, timeout)
+
+
+def update_latest_symlink(outdir, latest_symlink):
+  """Updates the 'latest' symlink to point to the given outdir."""
+  if os.path.lexists(latest_symlink):
+    try:
+      os.remove(latest_symlink)
+    except OSError as err:
+      return err
+  try:
+    os.symlink(os.path.basename(auto_outdir), latest_symlink)
+  except OSError as err:
+    return err
+  return None
+
 
 if __name__ == "__main__":
     from optparse import OptionParser
@@ -180,18 +192,25 @@ if __name__ == "__main__":
             auto_script_post = "scripts/" + config.script + "-post.sh"
             f = open(auto_script, 'r')
         cmd_str = f.read()
-        auto_outdir = "logs/" + config.script.split(".")[0]
+        suffix = time.strftime('-%Y-%m-%dT%H:%M:%S', time.gmtime(time.time()))
+        auto_outdir = 'logs/' + config.script.split('.')[0] + suffix
+        latest_symlink = 'logs/' + config.script.split('.')[0] + '-latest'
+        err = update_latest_symlink(auto_outdir, latest_symlink)
+        if err is not None:
+          sys.stderr.write('Failed to update latest symlink: %s' % err)
+          sys.exit(1)
+
     elif config.command:
         cmd_str = config.command
     else:
         parser.print_help()
         sys.exit(1)
 
-    if config.outdir == None and auto_outdir is None: 
+    if config.outdir == None and auto_outdir is None:
         outdir="default_outdir"
     elif config.outdir == None and auto_outdir is not None:
         outdir=auto_outdir
-    else: 
+    else:
         outdir=config.outdir
 
     if not os.path.exists(outdir):
