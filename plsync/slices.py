@@ -106,7 +106,7 @@ slice_list = [
     #Slice(name="mlab_mitate",    index=4, attrs=centos_slice_attrs+web100_enable_attr, users=user_list, ipv6="all"),
     Slice(name="uw_geoloc4",      index=5, attrs=centos_slice_attrs+web100_enable_attr, 
                                            users=user_list,
-                                           ipv6=mlab4s_only),
+                                           ipv6=mlab4s_only + ['mlab4.ath03', 'mlab4.mnl01', 'mlab4.nuq1t', 'mlab4.dfw02']),
     Slice(name="mlab_ooni",       index=6, attrs=centos_slice_attrs+[
                                                 #Attr(None,      capabilities='CAP_NET_BIND_SERVICE,CAP_NET_RAW') ], 
                                                 Attr('MeasurementLabCentos', capabilities='CAP_NET_BIND_SERVICE,CAP_NET_RAW') ], 
