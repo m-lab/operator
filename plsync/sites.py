@@ -61,6 +61,15 @@ Network.legacy_network_remap = legacy_network_remap
 # name : site prefix, used to generate PL site name, hostnames, etc
 # net  : v4 & v6 network prefixes and definitions.
 
+# The "arch" parameter of makesite() is a facility that PLC uses to pass the
+# correct kernel arguments when booting nodes at a given site. Currently defined
+# "arch" values are:
+#
+# i386 - none
+# x86_64 - "noapic acpi=off"
+# x86_64-r420 - "pci=nobios acpi=off"
+# x86_64-r630 - none
+
 site_list = [
     makesite('acc02','196.49.14.192',  None,                   'Accra', 'GH', 5.6060, -0.1681, user_list, exclude=[1,2,3], arch='x86_64', nodegroup='MeasurementLabCentos'),
     makesite('akl01','163.7.129.0',    '2404:0138:4009::',     'Auckland', 'NZ', -36.850000, 174.783000, user_list, nodegroup='MeasurementLabCentos'),
