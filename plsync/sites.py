@@ -61,6 +61,15 @@ Network.legacy_network_remap = legacy_network_remap
 # name : site prefix, used to generate PL site name, hostnames, etc
 # net  : v4 & v6 network prefixes and definitions.
 
+# The "arch" parameter of makesite() is a facility that PLC uses to pass the
+# correct kernel arguments when booting nodes at a given site. Currently defined
+# "arch" values are:
+#
+# i386 - none
+# x86_64 - "noapic acpi=off"
+# x86_64-r420 - "pci=nobios acpi=off"
+# x86_64-r630 - none
+
 site_list = [
     makesite('acc02','196.49.14.192',  None,                   'Accra', 'GH', 5.6060, -0.1681, user_list, exclude=[1,2,3], arch='x86_64', nodegroup='MeasurementLabCentos'),
     makesite('akl01','163.7.129.0',    '2404:138:4009::',      'Auckland', 'NZ', -36.850000, 174.783000, user_list, nodegroup='MeasurementLabCentos'),
@@ -155,8 +164,8 @@ site_list = [
     # Site for M-Lab testing machines
     makesite('nuq0t','23.228.128.0',   '2605:a601:f1ff:fffd::', None, None, 0,0, user_list, count=4, nodegroup='MeasurementLabCentos'),
     makesite('nuq1t','23.228.128.128', '2605:a601:f1ff:ffff::','San Francisco Bay Area_CA', 'US', 37.383300, -122.066700, user_list, count=4, nodegroup='MeasurementLabCentos'),
-    makesite('iad0t','165.117.251.128', None,'Washington_DC', 'US', 38.944400, -77.455800, user_list, count=4, exclude=[1,2,3,4], arch='x86_64', nodegroup='MeasurementLabCentos'),
-    makesite('iad1t','165.117.240.0', None,'Washington_DC', 'US', 38.944400, -77.455800, user_list, count=4, exclude=[1,2,3,4], arch='x86_64', nodegroup='MeasurementLabCentos'),
+    makesite('iad0t','165.117.251.128', '2610:18:8b40:200::','Washington_DC', 'US', 38.944400, -77.455800, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
+    makesite('iad1t','165.117.240.0', '2610:18:8b40:202::','Washington_DC', 'US', 38.944400, -77.455800, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
    # NOTE: mlc servers need special handling
    #Site(name='mlc',   net=Network(v4='64.9.225.64',     v6='2604:CA00:F000:5::'), domain="measurementlab.net", count=3),
 ]
