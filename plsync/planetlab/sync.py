@@ -1,3 +1,4 @@
+import model
 import session as s
 import sys
 import pprint
@@ -872,3 +873,99 @@ def GetBootimage(hostname, imagetype="iso"):
     f = open(fname, 'w')
     f.write(bindata)
     f.close()
+
+
+def SyncSlice(sslice, hostname_or_site, addwhitelist, addsliceips, addusers,
+              createslice):
+    """Creates and/or Updates a slice object in the PLC DB."""
+    if createslice:
+        print "Making slice! %s" % sslice['name']
+        MakeSlice(sslice['name'])
+    SyncSliceExpiration(sslice['name'])
+
+    if addusers:
+        SyncPersonsOnSlice(sslice['name'], sslice['users'])
+
+    for attr in sslice['attrs']:
+        SyncSliceAttribute(sslice['name'], attr)
+    for h,node in sslice['network_list']:
+        if (hostname_or_site is None or
+            hostname_or_site == h or
+            hostname_or_site in h ):
+            if addwhitelist:
+                # Add this slice to the whitelist of all hosts.
+                WhitelistSliceOnNode(sslice['name'], h)
+                #RemoveSliceFromNode(sslice['name'], h)
+            if addsliceips:
+                attr = node.get_interface_attr(sslice)
+                if attr:
+                    SyncSliceAttribute(sslice['name'], attr)
+
+            if sslice['use_initscript'] and hostname_or_site is not None:
+                # Assign the mlab_generic_initscript to slices on this node.
+                # TODO: Make this more flexible.
+                attr = model.Attr(node.hostname(),
+                                  initscript="mlab_generic_initscript")
+                SyncSliceAttribute(sslice['name'], attr)
+    return
+
+
+def SyncSite(site, onhost, addusers, addnodes, addinterfaces, getbootimages,
+             createusers):
+    """Creates and/or Updates a site object (and all children) in the PLC DB.
+
+    SyncSite may include creating a new Site() in PLC DB, adding or deleting
+    people in user list, creating nodes and PCUs.
+
+    Args:
+        site: model.Site, the site to create or update.
+        onhost: str, limit actions on site to a single host.
+        addusers: bool, if True, add/confirm users.
+        addnodes: bool, if True, add/confirm nodes.
+        addinterfaces: bool, if True, add interface configuration to nodes.
+        getbootimages: bool, if True, also download node bootimages to .iso.
+        createusers: bool, if True, also create declared users not found in db.
+    """
+    MakeSite(site['login_base'], site['sitename'], site['sitename'])
+    SyncLocation(site['login_base'], site['location'])
+    if addusers:
+        SyncPersonsOnSite(site['users'], site['login_base'], createusers)
+
+    if addnodes or getbootimages:
+        for hostname,node in site['nodes'].iteritems():
+            if onhost is None or hostname == onhost:
+                SyncNode(node, addnodes, addinterfaces, getbootimages)
+
+
+def SyncNode(node, addnodes, addinterfaces, getbootimages):
+    """Creates and/or Updates a node object (and all children) in the PLC DB."""
+
+    node_id = MakeNode(node['login_base'], node.hostname())
+    MakePCU(node['login_base'], node_id, node['pcu'].fields())
+    interface = node.interface()
+    if node['arch'] != '':
+        SyncNodeTag(node.hostname(), node_id, 'arch', node['arch'])
+    if addnodes:
+        PutNodeInNodegroup(node.hostname(), node_id, node['nodegroup'])
+    if addinterfaces:
+        SyncInterface(node.hostname(), node_id, interface,
+                      interface['is_primary'])
+        if node['nodegroup'] == 'MeasurementLabLXC':
+            # NOTE: these tags are needed on the primary interface
+            #       for the lxc build of PlanetLab
+            goal = { "ifname" : "eth0", "ovs_bridge": "public0"}
+            SyncInterfaceTags(node_id, interface, goal)
+
+    if not node['exclude_ipv6']:
+        SyncInterfaceTags(node_id, interface, node.v6interface_tags())
+
+    if addinterfaces and node['nodegroup'] != 'MeasurementLabLXC':
+        for ip in node.iplist():
+            interface['ip'] = ip
+            interface['is_primary'] = False
+            SyncInterface(node.hostname(), node_id, interface,
+                          interface['is_primary'])
+    if getbootimages:
+        GetBootimage(node.hostname(), imagetype="iso")
+
+    return
