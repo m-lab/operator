@@ -2,6 +2,7 @@
 
 import pprint
 from planetlab import session
+from planetlab import sync
 import sys
 
 def usage():
@@ -225,12 +226,9 @@ def main():
             if (options.syncsite == "all" or 
                 options.syncsite == site['name']):
                 print "Syncing: site", site['name']
-                site.sync(options.ondest,
-                          options.addusers,
-                          options.addnodes,
-                          options.addinterfaces,
-                          options.getbootimages,
-                          options.createusers)
+                sync.SyncSite(site, options.ondest, options.addusers,
+                              options.addnodes, options.addinterfaces,
+                              options.getbootimages, options.createusers)
 
     elif options.syncslice is not None and options.syncsite is None:
         print options.syncslice
@@ -238,11 +236,9 @@ def main():
             if (options.syncslice == "all" or 
                 options.syncslice == sslice['name']):
                 print "Syncing: slice", sslice['name']
-                sslice.sync(options.ondest,
-                            options.addwhitelist,
-                            options.addsliceips,
-                            options.addusers,
-                            options.createslice)
+                sync.SyncSlice(sslice, options.ondest, options.addwhitelist,
+                               options.addsliceips, options.addusers,
+                               options.createslice)
 
     else:
         print usage()

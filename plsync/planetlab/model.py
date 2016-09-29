@@ -1,8 +1,6 @@
 #!/usr/bin/python
 
 import pprint
-from sync import *
-import session
 
 MLAB_ORG_DOMAIN = 'measurement-lab.org'
 
@@ -279,28 +277,6 @@ class Site(dict):
     def ipv4(self, index=0):
       return ml_site_ipv4(self['net']['v4']['prefix'], index)
 
-    def sync(self, onhost=None, addusers=False, addnodes=False,
-             addinterfaces=False, getbootimages=False, createusers=False):
-        """ Do whatever is necessary to validate this site in the myplc DB.
-            Actions may include creating a new Site() entry in myPLC DB, 
-            adding or deleting people in user list, creating nodes and PCUs.
-
-            onhost - string, limit actions on site to a single host
-            addusers - if True, add/confirm users
-            addnodes - if True, add/confirm nodes
-            addinterfaces - if True, add interface configuration to nodes
-            getbootimages - if True, also download node bootimages to .iso
-            createusers - if True, also create declared users not found in db
-        """
-        MakeSite(self['login_base'], self['sitename'], self['sitename'])
-        SyncLocation(self['login_base'], self['location'])
-        if addusers:
-            SyncPersonsOnSite(self['users'], self['login_base'], createusers)
-
-        if addnodes or getbootimages:
-            for hostname,node in self['nodes'].iteritems():
-                if onhost is None or hostname == onhost:
-                    node.sync(addnodes, addinterfaces, getbootimages)
 
 def makesite(name, v4prefix, v6prefix, city, country, 
              latitude, longitude, user_list, **kwargs):
@@ -498,39 +474,6 @@ class Node(dict):
 
         return attr
 
-    def sync(self, addnodes=False, addinterfaces=False, getbootimages=False):
-        """Create and or verify that Node object & PCU & interface is created in
-        myplc db"""
-
-        node_id = MakeNode(self['login_base'], self.hostname())
-        MakePCU(self['login_base'], node_id, self['pcu'].fields())
-        interface = self.interface()
-        if self['arch'] != '':
-            SyncNodeTag(self.hostname(), node_id, 'arch', self['arch'])
-        if addnodes:
-            PutNodeInNodegroup(self.hostname(), node_id, self['nodegroup'])
-        if addinterfaces:
-            SyncInterface(self.hostname(), node_id, interface,
-                          interface['is_primary'])
-            if self['nodegroup'] == 'MeasurementLabLXC':
-                # NOTE: these tags are needed on the primary interface 
-                #       for the lxc build of PlanetLab
-                goal = { "ifname" : "eth0", "ovs_bridge": "public0"}
-                SyncInterfaceTags(node_id, interface, goal)
-
-        if not self['exclude_ipv6']:
-            SyncInterfaceTags(node_id, interface, self.v6interface_tags())
-
-        if addinterfaces and self['nodegroup'] != 'MeasurementLabLXC':
-            for ip in self.iplist():
-                interface['ip'] = ip
-                interface['is_primary'] = False
-                SyncInterface(self.hostname(), node_id, interface, 
-                              interface['is_primary'])
-        if getbootimages:
-            GetBootimage(self.hostname(), imagetype="iso")
-            
-        return 
 
 class Attr(dict):
     """Attr() are attributes of a slice, i.e. a key=value pair.
@@ -665,41 +608,3 @@ class Slice(dict):
     def ipv6_is_enabled(self, hostname):
         return ((isinstance(self['ipv6'], list) and hostname in self['ipv6']) or
                 (isinstance(self['ipv6'], str) and "all" == self['ipv6']) )
-        
-    def sync(self, hostname_or_site=None, addwhitelist=False,
-             addsliceips=False, addusers=False, createslice=False):
-        """ Create and/or verify the object in the myplc DB """
-        # NOTE: USERS ARE NOW ADDED TO SLICES HERE.
-        if createslice:
-            print "Making slice! %s" % self['name']
-            MakeSlice(self['name'])
-        SyncSliceExpiration(self['name'])
-
-        if addusers:
-            SyncPersonsOnSlice(self['name'], self['users'])
-
-        for attr in self['attrs']:
-            SyncSliceAttribute(self['name'], attr)
-        for h,node in self['network_list']:
-            if ( hostname_or_site is None or 
-                 hostname_or_site == h    or 
-                 hostname_or_site in h ):
-                if addwhitelist:
-                    # add this slice to whitelist of all hosts.
-                    WhitelistSliceOnNode(self['name'], h)
-                    #RemoveSliceFromNode(self['name'], h)
-                if addsliceips:
-                    attr = node.get_interface_attr(self)
-                    if attr:
-                        SyncSliceAttribute(self['name'], attr)
-
-                # NOTE: use_initscript is set and hostname_or_site is explicit
-                if self['use_initscript'] and hostname_or_site is not None:
-                    # NOTE: assign the mlab_generic_initscript to slices on 
-                    #       this node.
-                    # TODO: this needs to be waaay more flexible.
-                    attr = Attr(node.hostname(), 
-                                initscript="mlab_generic_initscript")
-                    SyncSliceAttribute(self['name'], attr)
-        return
-
