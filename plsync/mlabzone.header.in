@@ -1,0 +1,36 @@
+;
+; Primary DNS zone file
+; NOTE: this file was automatically generated!!!
+; NOTE: DO NOT EDIT
+;
+
+$ORIGIN %(domain)s.
+$TTL    %(ttl)s
+
+@       IN      SOA     %(primary_nameserver)s. %(support_email)s. (
+        %(serial)s      ; Serial
+        %(refresh)s     ; Refresh
+        %(retry)s       ; Retry
+        %(expire)s      ; Expire
+        %(minttl)s )    ; Negative caching TTL
+@       IN      NS      %(primary_nameserver)s.
+@       IN      NS      %(secondary_nameserver)s.
+
+; TODO: fix A and MX records appropriately.
+@       IN      A       128.112.139.90
+@       IN      MX 0    mail.planet-lab.org.
+*       IN      MX 0    mail.planet-lab.org.
+
+; ---------- WWW ----------
+;
+www     IN      A       128.112.139.90
+
+; TODO: can we retire DONAR?
+; ---------- DONAR -------
+;
+donar   IN      NS      utility.mlab.mlab1.lhr01.measurement-lab.org.
+donar   IN      NS      utility.mlab.mlab1.par01.measurement-lab.org.
+donar   IN      NS      utility.mlab.mlab1.lax01.measurement-lab.org.
+donar   IN      NS      utility.mlab.mlab1.lga01.measurement-lab.org.
+donar   IN      NS      utility.mlab.mlab1.syd01.measurement-lab.org.
+donar   IN      NS      utility.mlab.mlab1.hnd01.measurement-lab.org.
