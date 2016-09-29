@@ -891,7 +891,7 @@ def SyncSlice(sslice, hostname_or_site, addwhitelist, addsliceips, addusers,
     for h,node in sslice['network_list']:
         if (hostname_or_site is None or
             hostname_or_site == h or
-            hostname_or_site in h ):
+            hostname_or_site in h):
             if addwhitelist:
                 # Add this slice to the whitelist of all hosts.
                 WhitelistSliceOnNode(sslice['name'], h)
