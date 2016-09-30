@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -x
+set -e
+
+# Run unit tests and calculate code coverage.
+rm -f .coverage
+for dir in plsync ; do
+  coverage run --append --source ./ \
+      --omit third_party/docstringchecker/*.py \
+      -m unittest discover -s ${dir} -p '*_test.py' || exit 1
+done
+
+# Check that source has correct formatting.
+# TODO(soltesz): enable after major formatting cleanups.
+# yapf --diff --recursive --style google ./ --exclude=./third_party/*
+
+# Run static analysis for Python bugs/cruft.
+# TODO(soltesz): enable after major cleanups.
+# pyflakes .
+
+# Run the docstring lint checker.
+PYTHONPATH=$PYTHONPATH:$PWD/third_party/docstringchecker pylint \
+    --reports=n pysync/*.py

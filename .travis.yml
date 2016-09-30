@@ -4,6 +4,12 @@ python:
 # Install dependencies
 install:
     - pip install -r test-requirements.txt
+    - pip install coveralls
+    - pip install pyflakes==1.2.3
+    - pip install pylint==1.5.6
+    - pip install yapf==0.10.0
 # Run unit tests
 script:
-    - python -m unittest discover -s plsync/ -p '*_test.py'
+    - ./build
+after_success:
+    - coveralls
