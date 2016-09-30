@@ -14,11 +14,17 @@ import unittest
 class MlabconfigTest(unittest.TestCase):
 
     def setUp(self):
-      self.users = [('User', 'Name', 'username@gmail.com')]
-      self.sites = [model.makesite(
-          'abc01', '192.168.1.0', '2400:1002:4008::', 'Some City', 'US',
-          36.850000, 74.783000, self.users, nodegroup='MeasurementLabCentos')]
-      self.attrs = [model.Attr('MeasurementLabCentos', disk_max='60000000')]
+        self.users = [('User', 'Name', 'username@gmail.com')]
+        self.sites = [model.makesite('abc01',
+                                     '192.168.1.0',
+                                     '2400:1002:4008::',
+                                     'Some City',
+                                     'US',
+                                     36.850000,
+                                     74.783000,
+                                     self.users,
+                                     nodegroup='MeasurementLabCentos')]
+        self.attrs = [model.Attr('MeasurementLabCentos', disk_max='60000000')]
 
     def assertContainsItems(self, results, expected_items):
         """Asserts that every element of expected is present in results."""
@@ -27,8 +33,11 @@ class MlabconfigTest(unittest.TestCase):
 
     def test_export_mlab_host_ips(self):
         # Setup synthetic user, site, and experiment configuration data.
-        experiments = [model.Slice(name='abc_bar', index=1, attrs=self.attrs,
-                                   users=self.users, use_initscript=True,
+        experiments = [model.Slice(name='abc_bar',
+                                   index=1,
+                                   attrs=self.attrs,
+                                   users=self.users,
+                                   use_initscript=True,
                                    ipv6='all')]
         # Assign experiments to nodes.
         for hostname, node in self.sites[0]['nodes'].iteritems():
@@ -53,9 +62,12 @@ class MlabconfigTest(unittest.TestCase):
 
     def test_export_mlab_site_stats(self):
         output = StringIO.StringIO()
-        expected_results = [{"city": "Some City", "metro": ["abc01", "abc"],
-                             "country": "US", "site": "abc01",
-                             "longitude": 74.783, "latitude": 36.85}]
+        expected_results = [{"city": "Some City",
+                             "metro": ["abc01", "abc"],
+                             "country": "US",
+                             "site": "abc01",
+                             "longitude": 74.783,
+                             "latitude": 36.85}]
 
         mlabconfig.export_mlab_site_stats(output, self.sites)
 
@@ -104,28 +116,27 @@ class MlabconfigTest(unittest.TestCase):
 
     def test_export_experiment_records(self):
         output = StringIO.StringIO()
-        experiments = [model.Slice(name='abc_bar', index=1, attrs=self.attrs,
-                                   users=self.users, use_initscript=True,
+        experiments = [model.Slice(name='abc_bar',
+                                   index=1,
+                                   attrs=self.attrs,
+                                   users=self.users,
+                                   use_initscript=True,
                                    ipv6='all')]
         expected_results = [
-            mlabconfig.format_a_record(
-                'bar.abc.abc01', '192.168.1.11'),
-            mlabconfig.format_a_record(
-                'bar.abc.mlab2.abc01', '192.168.1.24'),
-            mlabconfig.format_a_record(
-                'bar.abcv4.abc01', '192.168.1.11'),
-            mlabconfig.format_a_record(
-                'bar.abc.mlab2v4.abc01', '192.168.1.24'),
-            mlabconfig.format_aaaa_record(
-                'bar.abc.abc01', '2400:1002:4008::11'),
-            mlabconfig.format_aaaa_record(
-                'bar.abc.abc01', '2400:1002:4008::37'),
-            mlabconfig.format_aaaa_record(
-                'bar.abc.mlab3.abc01', '2400:1002:4008::37'),
-            mlabconfig.format_aaaa_record(
-                'bar.abcv6.abc01', '2400:1002:4008::11'),
-            mlabconfig.format_aaaa_record(
-                'bar.abc.mlab1v6.abc01', '2400:1002:4008::11'),
+            mlabconfig.format_a_record('bar.abc.abc01', '192.168.1.11'),
+            mlabconfig.format_a_record('bar.abc.mlab2.abc01', '192.168.1.24'),
+            mlabconfig.format_a_record('bar.abcv4.abc01', '192.168.1.11'),
+            mlabconfig.format_a_record('bar.abc.mlab2v4.abc01', '192.168.1.24'),
+            mlabconfig.format_aaaa_record('bar.abc.abc01',
+                                          '2400:1002:4008::11'),
+            mlabconfig.format_aaaa_record('bar.abc.abc01',
+                                          '2400:1002:4008::37'),
+            mlabconfig.format_aaaa_record('bar.abc.mlab3.abc01',
+                                          '2400:1002:4008::37'),
+            mlabconfig.format_aaaa_record('bar.abcv6.abc01',
+                                          '2400:1002:4008::11'),
+            mlabconfig.format_aaaa_record('bar.abc.mlab1v6.abc01',
+                                          '2400:1002:4008::11'),
         ]
 
         mlabconfig.export_experiment_records(output, self.sites, experiments)
@@ -147,7 +158,7 @@ class MlabconfigTest(unittest.TestCase):
     @mock.patch.object(os.path, 'exists')
     @mock.patch('__builtin__.open')
     def test_get_revision_when_saved_prefix_is_old_and_revision_is_reset(
-        self, mopen, mock_exists):
+            self, mopen, mock_exists):
         prefix = '20151031'
         # All open and disk I/O is mocked out.
         # Pretend the file exists already.
@@ -170,8 +181,8 @@ class MlabconfigTest(unittest.TestCase):
 
     @mock.patch.object(os.path, 'exists')
     @mock.patch('__builtin__.open')
-    def test_get_revision_when_file_exists_increments_revision(
-        self, mopen, mock_exists):
+    def test_get_revision_when_file_exists_increments_revision(self, mopen,
+                                                               mock_exists):
         prefix = '20151031'
         # All open and disk I/O is mocked out.
         # Pretend the file exists already.
@@ -194,7 +205,7 @@ class MlabconfigTest(unittest.TestCase):
     @mock.patch.object(os.path, 'exists')
     @mock.patch('__builtin__.open')
     def test_get_revision_when_file_is_corrupt_default_values_saved(
-        self, mopen, mock_exists):
+            self, mopen, mock_exists):
         prefix = '20151031'
         # All open and disk I/O is mocked out.
         # Pretend the file exists already.
@@ -203,8 +214,7 @@ class MlabconfigTest(unittest.TestCase):
         mock_writer = mock.mock_open()
         # Open is called twice, once to read, and then to write.
         mopen.side_effect = [
-            mock.mock_open(
-                read_data='THIS IS NOT JSON').return_value,
+            mock.mock_open(read_data='THIS IS NOT JSON').return_value,
             mock_writer.return_value
         ]
 

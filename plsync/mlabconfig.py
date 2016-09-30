@@ -51,28 +51,45 @@ def parse_flags():
                         retry=ZONE_RETRY,
                         expire=ZONE_EXPIRE)
 
+    parser.add_option('',
+                      '--sites_config',
+                      metavar='sites',
+                      dest='sites_config',
+                      default='sites',
+                      help='The name of the module with Site() definitions.')
+    parser.add_option('',
+                      '--experiments_config',
+                      metavar='slices',
+                      dest='experiments_config',
+                      default='slices',
+                      help='The name of the module with Slice() definitions.')
     parser.add_option(
-        '', '--sites_config', metavar='sites', dest='sites_config',
-        default='sites', help='The name of the module with Site() definitions.')
-    parser.add_option(
-        '', '--experiments_config', metavar='slices', dest='experiments_config',
-        default='slices',
-        help='The name of the module with Slice() definitions.')
-    parser.add_option(
-        '', '--sites', metavar='sites', dest='sites', default='site_list',
+        '',
+        '--sites',
+        metavar='sites',
+        dest='sites',
+        default='site_list',
         help='The variable name of sites within the sites_config data.')
     parser.add_option(
-        '', '--experiments', metavar='experiments', dest='experiments',
+        '',
+        '--experiments',
+        metavar='experiments',
+        dest='experiments',
         default='slice_list',
         help=('The variable name of experiments within the experiments_config '
               'data.'))
-    parser.add_option(
-        '', '--format', metavar='format', dest='format', default='hostips',
-        help='Format of output.')
-    parser.add_option(
-        '', '--zoneheader', metavar='zoneheader.in', dest='zoneheader',
-        default=ZONE_HEADER_TEMPLATE,
-        help='The full path to zone header file.')
+    parser.add_option('',
+                      '--format',
+                      metavar='format',
+                      dest='format',
+                      default='hostips',
+                      help='Format of output.')
+    parser.add_option('',
+                      '--zoneheader',
+                      metavar='zoneheader.in',
+                      dest='zoneheader',
+                      default=ZONE_HEADER_TEMPLATE,
+                      help='The full path to zone header file.')
 
     (options, args) = parse_flags()
 
@@ -142,8 +159,8 @@ def export_server_records_v6(output, sites, decoration=''):
         # TODO: change site['nodes'] to a pre-sorted list type.
         for node in sorted(site['nodes'].values(), key=lambda n: n.hostname()):
             if node.ipv6_is_enabled():
-                write_aaaa_record(
-                    output, node.recordname(decoration), node.ipv6())
+                write_aaaa_record(output, node.recordname(decoration),
+                                  node.ipv6())
 
 
 def export_experiment_records(output, sites, experiments):
@@ -159,8 +176,8 @@ def export_experiment_records(output, sites, experiments):
 
 
 def export_experiment_records_v4(output, sites, experiment, decoration=''):
-    comment(output, '%s v4%s' % (experiment.dnsname(), (
-        ' decorated' if decoration else '')))
+    comment(output, '%s v4%s' % (experiment.dnsname(), (' decorated' if
+                                                        decoration else '')))
     for site in sites:
         # TODO: change site['nodes'] to a pre-sorted list type.
         for node in sorted(site['nodes'].values(), key=lambda n: n.hostname()):
@@ -172,8 +189,8 @@ def export_experiment_records_v4(output, sites, experiment, decoration=''):
 
 
 def export_experiment_records_v6(output, sites, experiment, decoration=''):
-    comment(output, '%s v6%s' % (experiment.dnsname(), (
-        ' decorated' if decoration else '')))
+    comment(output, '%s v6%s' % (experiment.dnsname(), (' decorated' if
+                                                        decoration else '')))
     for site in sites:
         # TODO: change site['nodes'] to a pre-sorted list type.
         for node in sorted(site['nodes'].values(), key=lambda n: n.hostname()):
@@ -181,8 +198,9 @@ def export_experiment_records_v6(output, sites, experiment, decoration=''):
             if (node.ipv6_is_enabled() and experiment.ipv6(node)):
                 write_aaaa_record(output, experiment.sitename(node, decoration),
                                   experiment.ipv6(node))
-                write_aaaa_record(output, experiment.recordname(
-                    node,decoration), experiment.ipv6(node))
+                write_aaaa_record(output, experiment.recordname(node,
+                                                                decoration),
+                                  experiment.ipv6(node))
 
 
 def export_mlab_zone_records(output, sites, experiments):
@@ -265,7 +283,11 @@ def export_mlab_site_stats(output, sites):
         location = site['location']
         if location is None:
             location = {
-                'city': '', 'country': '', 'latitude': None, 'longitude': None}
+                'city': '',
+                'country': '',
+                'latitude': None,
+                'longitude': None
+            }
         metro = [name, name[:-2]]
         sitestats.append({
             'site': name,
@@ -273,7 +295,8 @@ def export_mlab_site_stats(output, sites):
             'city': location['city'],
             'country': location['country'],
             'latitude': location['latitude'],
-            'longitude': location['longitude']})
+            'longitude': location['longitude']
+        })
     json.dump(sitestats, output)
 
 
@@ -283,8 +306,9 @@ def export_mlab_host_ips(output, sites, experiments):
     for site in sites:
         # TODO(soltesz): change 'nodes' to be a sorted list of node objects.
         for _, node in site['nodes'].iteritems():
-            output.write('{name},{ipv4},{ipv6}\n'.format(
-                name=node.hostname(), ipv4=node.ipv4(), ipv6=node.ipv6()))
+            output.write('{name},{ipv4},{ipv6}\n'.format(name=node.hostname(),
+                                                         ipv4=node.ipv4(),
+                                                         ipv6=node.ipv6()))
 
     # Export experiment names and addresses.
     for experiment in experiments:
@@ -293,9 +317,10 @@ def export_mlab_host_ips(output, sites, experiments):
             if experiment['index'] is None:
                 # Ignore experiments without an IP address.
                 continue
-            output.write('{name},{ipv4},{ipv6}\n'.format(
-                name=experiment.hostname(node), ipv4=experiment.ipv4(node),
-                ipv6=experiment.ipv6(node)))
+            output.write(
+                '{name},{ipv4},{ipv6}\n'.format(name=experiment.hostname(node),
+                                                ipv4=experiment.ipv4(node),
+                                                ipv6=experiment.ipv6(node)))
 
 
 def main():
