@@ -91,7 +91,7 @@ def parse_flags():
                       default=ZONE_HEADER_TEMPLATE,
                       help='The full path to zone header file.')
 
-    (options, args) = parse_flags()
+    (options, args) = parser.parse_args()
 
     # Check given parameters.
     if options.format == 'zone' and not os.path.exists(options.zoneheader):
