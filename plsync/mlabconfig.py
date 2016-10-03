@@ -16,6 +16,7 @@ ZONE_RETRY = 60 * 10
 ZONE_EXPIRE = 7 * 60 * 60 * 24
 ZONE_HEADER_TEMPLATE = 'mlabzone.header.in'
 ZONE_SERIAL_COUNTER = '/tmp/mlabconfig.serial'
+SSL_EXPERIMENTS = ['iupui_ndt']
 
 
 def usage():
@@ -123,6 +124,20 @@ def format_aaaa_record(hostname, ipv6):
     return '%-32s  IN  AAAA\t%s' % (hostname, ipv6)
 
 
+def flatten_hostname(hostname):
+    """Converts subdomains to flat names suitable for SSL certificate wildcards.
+
+    For example, convert 'ndt.iupui.mlab1.nuq1t' to 'ndt-iupui-mlab1-nuq1t'
+
+    Args:
+      hostname: str, the dotted subdomain to flatten
+
+    Returns:
+      str, the modified hostname
+    """
+    return hostname.replace('.', '-')
+
+
 def export_router_and_switch_records(output, sites):
     comment(output, 'router and switch v4 records.')
     for i, site in enumerate(sites):
@@ -174,33 +189,62 @@ def export_experiment_records(output, sites, experiments):
         export_experiment_records_v6(output, sites, experiment)
         export_experiment_records_v6(output, sites, experiment, decoration='v6')
 
+        # Create "flattened" domain names for SSL enabled experiments so that
+        # certificate wildcard matching works. See flatten_hostname().
+        if experiment['name'] in SSL_EXPERIMENTS:
+            export_experiment_records_v4(
+                output, sites, experiment, decoration='', flatnames=True)
+            export_experiment_records_v4(
+                output, sites, experiment, decoration='v4', flatnames=True)
+            export_experiment_records_v6(
+                output, sites, experiment, decoration='', flatnames=True)
+            export_experiment_records_v6(
+                output, sites, experiment, decoration='v6', flatnames=True)
 
-def export_experiment_records_v4(output, sites, experiment, decoration=''):
-    comment(output, '%s v4%s' % (experiment.dnsname(), (' decorated' if
-                                                        decoration else '')))
+
+def export_experiment_records_v4(output,
+                                 sites,
+                                 experiment,
+                                 decoration='',
+                                 flatnames=False):
+    comment(output, '%s v4%s%s' % (experiment.dnsname(), (
+        ' decorated' if decoration else ''), (' flattened'
+                                              if flatnames else '')))
     for site in sites:
         # TODO: change site['nodes'] to a pre-sorted list type.
         for node in sorted(site['nodes'].values(), key=lambda n: n.hostname()):
             # TODO: remove sitenames (or exclude mlab4's).
-            write_a_record(output, experiment.sitename(node, decoration),
-                           experiment.ipv4(node))
-            write_a_record(output, experiment.recordname(node, decoration),
-                           experiment.ipv4(node))
+            sitename = experiment.sitename(node, decoration)
+            recordname = experiment.recordname(node, decoration)
+            if flatnames:
+                write_a_record(output, flatten_hostname(recordname),
+                               experiment.ipv4(node))
+            else:
+                write_a_record(output, sitename, experiment.ipv4(node))
+                write_a_record(output, recordname, experiment.ipv4(node))
 
 
-def export_experiment_records_v6(output, sites, experiment, decoration=''):
-    comment(output, '%s v6%s' % (experiment.dnsname(), (' decorated' if
-                                                        decoration else '')))
+def export_experiment_records_v6(output,
+                                 sites,
+                                 experiment,
+                                 decoration='',
+                                 flatnames=False):
+    comment(output, '%s v6%s%s' % (experiment.dnsname(), (
+        ' decorated' if decoration else ''), (' flattened'
+                                              if flatnames else '')))
     for site in sites:
         # TODO: change site['nodes'] to a pre-sorted list type.
         for node in sorted(site['nodes'].values(), key=lambda n: n.hostname()):
             # TODO: remove sitenames (or exclude mlab4's).
             if (node.ipv6_is_enabled() and experiment.ipv6(node)):
-                write_aaaa_record(output, experiment.sitename(node, decoration),
-                                  experiment.ipv6(node))
-                write_aaaa_record(output, experiment.recordname(node,
-                                                                decoration),
-                                  experiment.ipv6(node))
+                sitename = experiment.sitename(node, decoration)
+                recordname = experiment.recordname(node, decoration)
+                if flatnames:
+                    write_aaaa_record(output, flatten_hostname(recordname),
+                                      experiment.ipv6(node))
+                else:
+                    write_aaaa_record(output, sitename, experiment.ipv6(node))
+                    write_aaaa_record(output, recordname, experiment.ipv6(node))
 
 
 def export_mlab_zone_records(output, sites, experiments):

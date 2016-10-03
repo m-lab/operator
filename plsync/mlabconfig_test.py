@@ -31,6 +31,11 @@ class MlabconfigTest(unittest.TestCase):
         for expected in expected_items:
             self.assertIn(expected, results)
 
+    def assertDoesNotContainsItems(self, results, unexpected_items):
+        """Asserts that every element of unexpected is NOT in results."""
+        for unexpected in unexpected_items:
+            self.assertNotIn(unexpected, results)
+
     def test_export_mlab_host_ips(self):
         # Setup synthetic user, site, and experiment configuration data.
         experiments = [model.Slice(name='abc_bar',
@@ -143,6 +148,46 @@ class MlabconfigTest(unittest.TestCase):
 
         results = output.getvalue().split('\n')
         self.assertContainsItems(results, expected_results)
+
+    def test_export_experiment_records_flattened(self):
+        output = StringIO.StringIO()
+        experiments = [model.Slice(name='abc_foo',
+                                   index=1,
+                                   attrs=self.attrs,
+                                   users=self.users,
+                                   use_initscript=True,
+                                   ipv6='all')]
+        expected_results = [
+            mlabconfig.format_a_record('foo-abc-mlab2-abc01', '192.168.1.24'),
+            mlabconfig.format_a_record('foo-abc-mlab2v4-abc01', '192.168.1.24'),
+            mlabconfig.format_aaaa_record('foo-abc-mlab3-abc01',
+                                          '2400:1002:4008::37'),
+            mlabconfig.format_aaaa_record('foo-abc-mlab1v6-abc01',
+                                          '2400:1002:4008::11'),
+        ]
+
+        unexpected_results = [
+            mlabconfig.format_a_record('foo-abc-abc01', '192.168.1.24'),
+            mlabconfig.format_a_record('foo-abcv4-abc01', '192.168.1.24'),
+            mlabconfig.format_aaaa_record('foo-abc-abc01',
+                                          '2400:1002:4008::37'),
+            mlabconfig.format_aaaa_record('foo-abcv6-abc01',
+                                          '2400:1002:4008::11'),
+        ]
+
+        mlabconfig.SSL_EXPERIMENTS = ['abc_foo']
+        mlabconfig.export_experiment_records(output, self.sites, experiments)
+
+        results = output.getvalue().split('\n')
+        # We are using custom functions here because of the size of the results
+        # list. The results list will contain 50+ items. Using the built-in
+        # assertItemsEqual() would require creating a very large, unwieldy
+        # expected_results list. Using the custom functions allows us to not
+        # have to verify the entirety of results, but simply assert that certain
+        # key items are in the results. This is likely sufficient because most
+        # of the items in results are redundant in form.
+        self.assertContainsItems(results, expected_results)
+        self.assertDoesNotContainsItems(results, unexpected_results)
 
     @mock.patch.object(mlabconfig, 'get_revision')
     def test_serial_rfc1912(self, mock_get_revision):
