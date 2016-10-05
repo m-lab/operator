@@ -5,6 +5,7 @@ import logging
 import optparse
 import os
 import re
+import string
 import StringIO
 import sys
 import time
@@ -17,6 +18,27 @@ ZONE_EXPIRE = 7 * 60 * 60 * 24
 ZONE_HEADER_TEMPLATE = 'mlabzone.header.in'
 ZONE_SERIAL_COUNTER = '/tmp/mlabconfig.serial'
 SSL_EXPERIMENTS = ['iupui_ndt']
+
+
+class BracketTemplate(string.Template):
+    """Process templates using variable delimiters like: {{var}}.
+
+    The default string.Template delimiter is "$". This makes it difficult to
+    make templates from shell scripts or ipxe scripts (which contain many
+    natural "$" characters).
+
+    BracketTemplate uses a beginning ("{{") and ending delimiter ("}}"), that
+    does not conflict with the syntax of these languages.
+    """
+
+    delimiter = '{{'
+    pattern = r'''
+        \{\{(?:
+        (?P<escaped>\{\{)|
+        (?P<named>[_a-z][_a-z0-9]*)\}\}|
+        (?P<braced>[_a-z][_a-z0-9]*)\}\}|
+        (?P<invalid>)
+        )'''
 
 
 def usage():
@@ -34,6 +56,12 @@ EXAMPLES:
 
     mlabconfig.py --format=zone
       (e.g. gen_zones.py)
+
+    mlabconfig.py --format=server-network-config  \
+        --template_input=file.template \
+        --template_output="$PATH/file-{{hostname}}.xyz" \
+        --select=".*iad1t.*"
+      (e.g. stage1-$HOSTNAME.ipxe)
 """
 
 
@@ -91,6 +119,26 @@ def parse_flags():
                       dest='zoneheader',
                       default=ZONE_HEADER_TEMPLATE,
                       help='The full path to zone header file.')
+    parser.add_option(
+        '',
+        '--template_input',
+        dest='template',
+        default=None,
+        help='Template to apply values. Creates a new file for every hostname.')
+    parser.add_option(
+        '',
+        '--template_output',
+        dest='filename',
+        default=None,
+        help=('Filename interpreted as a template where interpreted template '
+              'files are written.'))
+    parser.add_option(
+        '',
+        '--select',
+        dest='select',
+        default=None,
+        help=('A regular expression used to select a subset of hostnames. If '
+              'not specified, all machine names are selected.'))
 
     (options, args) = parser.parse_args()
 
@@ -359,12 +407,65 @@ def export_mlab_host_ips(output, sites, experiments):
         # TODO(soltesz): change 'network_list' to a sorted list of node objects.
         for _, node in experiment['network_list']:
             if experiment['index'] is None:
-                # Ignore experiments without an IP address.
                 continue
             output.write(
                 '{name},{ipv4},{ipv6}\n'.format(name=experiment.hostname(node),
                                                 ipv4=experiment.ipv4(node),
                                                 ipv6=experiment.ipv6(node)))
+
+
+# TODO(soltesz): this function is too specific to node network configuration.
+# Replace this function with a more general interface for accessing
+# configuration information for a site, node, slice, or otherwise.
+def export_mlab_server_network_config(output, sites, name_tmpl, input_tmpl,
+                                      select_regex):
+    """Evaluates input_tmpl with values from the server network configuration.
+
+    NOTE: Only fields returned by the model.Node.interface function are
+    supported.
+
+    If select_regex is not None, then only node hostnames that match the
+    regular expression are processed.
+
+    For every server, the input_tmpl is evaluated with the current server's
+    network interface. The result is written to a new filename based on
+    name_tmpl.
+
+    Example:
+        name_tmpl = "{{hostname}}.example"
+        input_tmpl = "The IP address is {{ip}}"
+
+        Will create files named like:
+            mlab1.abc01.measurement-lab.org.example
+            ...
+
+        That contain:
+            The IP address is 192.168.0.1
+
+    Args:
+        output: open file for writing, progress messages are written here.
+        sites: list of model.Site, where all sites are processed.
+        name_tmpl: str, the name of an output file as a template.
+        input_tmpl: open file for reading, contains the template content.
+        select_regex: str, a regular expression used to select node hostnames.
+
+    Raises:
+        IOError, could not create or write to a file.
+    """
+    template = BracketTemplate(input_tmpl.read())
+    output_name = BracketTemplate(name_tmpl)
+    for site in sites:
+        for hostname, node in site['nodes'].iteritems():
+            # TODO(soltesz): support multiple (or all) object types.
+            if select_regex and not re.search(select_regex, hostname):
+                continue
+            i = node.interface()
+            # Add 'hostname' so that it is available to templates.
+            i['hostname'] = hostname
+            filename = output_name.safe_substitute(i)
+            with open(filename, 'w') as f:
+                output.write("%s\n" % filename)
+                f.write(template.safe_substitute(i))
 
 
 def main():
@@ -385,6 +486,10 @@ def main():
         export_mlab_host_ips(sys.stdout, sites, experiments)
     elif options.format == 'sitestats':
         export_mlab_site_stats(sys.stdout, sites)
+    elif options.format == 'server-network-config':
+        with open(options.template) as template:
+            export_mlab_server_network_config(
+                sys.stdout, sites, options.filename, template, options.select)
     elif options.format == 'zone':
         with open(options.zoneheader, 'r') as header:
             if options.serial == 'auto':

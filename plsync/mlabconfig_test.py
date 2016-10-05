@@ -1,6 +1,8 @@
 """Tests for mlabconfig."""
 
+import contextlib
 import json
+import logging
 import mlabconfig
 import mock
 import optparse
@@ -9,6 +11,62 @@ from planetlab import model
 import StringIO
 import time
 import unittest
+
+
+@contextlib.contextmanager
+def OpenStringIO(sio):
+    """Creates a StringIO object that is context aware.
+
+    OpenStringIO is useful for testing functions that open and write to a file.
+
+    Example:
+        @mock.patch('__builtin__.open')
+        def test_some_function(self, mock_open):
+            output = StringIO.StringIO()
+            mock_open.return_value = OpenStringIO(output)
+
+            some_function()
+
+            self.assertEqual(output.getvalue(), 'Expected content')
+
+    Args:
+        sio: StringIO.StringIO, the instance returned by 'open'.
+    """
+    try:
+        yield sio
+    finally:
+        # Do not close the StringIO object, so testers can access getvalue().
+        pass
+
+
+class BracketTemplateTest(unittest.TestCase):
+
+    def setUp(self):
+        self.vars = {'var1': 'Spot', 'var2': 'Dog'}
+
+    def test_substitute_when_template_is_correct(self):
+        tmpl = mlabconfig.BracketTemplate('{{var1}} is a {{var2}}')
+
+        actual = tmpl.safe_substitute(self.vars)
+
+        self.assertEqual(actual, 'Spot is a Dog')
+
+    def test_substitute_when_template_is_broken(self):
+        tmpl = mlabconfig.BracketTemplate('var1}} is a {{var2')
+
+        actual = tmpl.safe_substitute(self.vars)
+
+        self.assertEqual(actual, 'var1}} is a {{var2')
+
+    def test_substitute_when_template_is_shell(self):
+        tmpl1 = mlabconfig.BracketTemplate('$var1 == {{var1}}')
+        tmpl2 = mlabconfig.BracketTemplate('${var2} == {{var2}}')
+
+        actual1 = tmpl1.safe_substitute(self.vars)
+        actual2 = tmpl2.safe_substitute(self.vars)
+
+        self.assertEqual(actual1, '$var1 == Spot')
+        self.assertEqual(actual2, '${var2} == Dog')
 
 
 class MlabconfigTest(unittest.TestCase):
@@ -25,6 +83,8 @@ class MlabconfigTest(unittest.TestCase):
                                      self.users,
                                      nodegroup='MeasurementLabCentos')]
         self.attrs = [model.Attr('MeasurementLabCentos', disk_max='60000000')]
+        # Turn off logging output during testing (unless CRITICAL).
+        logging.disable(logging.ERROR)
 
     def assertContainsItems(self, results, expected_items):
         """Asserts that every element of expected is present in results."""
@@ -278,6 +338,19 @@ class MlabconfigTest(unittest.TestCase):
         mlabconfig.export_mlab_zone_header(output, header, options)
 
         self.assertEqual(output.getvalue(), 'before; middle; after')
+
+    @mock.patch('__builtin__.open')
+    def test_export_mlab_server_network_config(self, mock_open):
+        stdout = StringIO.StringIO()
+        name_tmpl = '{{hostname}}-foo.ipxe'
+        input_tmpl = StringIO.StringIO('ip={{ip}} ; echo ${ip}')
+        file_output = StringIO.StringIO()
+        mock_open.return_value = OpenStringIO(file_output)
+
+        mlabconfig.export_mlab_server_network_config(
+            stdout, self.sites, name_tmpl, input_tmpl, 'mlab1.abc01')
+
+        self.assertEqual(file_output.getvalue(), 'ip=192.168.1.9 ; echo ${ip}')
 
 
 if __name__ == '__main__':
