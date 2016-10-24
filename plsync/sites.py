@@ -157,6 +157,7 @@ site_list = [
     makesite('yyz01','162.219.48.0',   '2620:10a:80fd::',      'Toronto', 'CA', 43.6767, -79.6306, user_list, arch='x86_64-r420', nodegroup='MeasurementLabCentos'),
 
     # Site for M-Lab testing machines
+    makesite('lga0t','4.14.159.64', '2001:1900:2100:2d::','New York_NY', 'US', 40.766700, -73.866700, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('nuq0t','23.228.128.0',   '2605:a601:f1ff:fffd::', None, None, 0,0, user_list, count=4, nodegroup='MeasurementLabCentos'),
     makesite('nuq1t','23.228.128.128', '2605:a601:f1ff:ffff::','San Francisco Bay Area_CA', 'US', 37.383300, -122.066700, user_list, count=4, nodegroup='MeasurementLabCentos'),
     makesite('iad0t','165.117.251.128', '2610:18:8b40:200::','Washington_DC', 'US', 38.944400, -77.455800, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
