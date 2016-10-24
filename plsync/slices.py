@@ -86,7 +86,7 @@ mlab4s_only = ['mlab4.nuq01', 'mlab4.nuq02', 'mlab4.prg01',
 slice_list = [
 
     Slice(name='iupui_ndt',       index=1, attrs=centos_slice_attrs+[
-                                                Attr('MeasurementLabCentos',    disk_max='60000000'),
+                                                Attr('MeasurementLabCentos',    disk_max='100000000'),  # 100GB.
                                                 Attr('MeasurementLabCentos', capabilities='CAP_NET_BIND_SERVICE,vxc_^28'), ], 
                                            users=user_list,
                                            use_initscript=True,
