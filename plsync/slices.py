@@ -93,6 +93,7 @@ slice_list = [
                                            ipv6=['mlab1.nuq0t', 'mlab2.nuq0t', 'mlab3.nuq0t', 'mlab4.nuq0t',
                                                  'mlab1.nuq1t', 'mlab2.nuq1t', 'mlab3.nuq1t', 'mlab4.nuq1t',
                                                  'mlab1.iad0t', 'mlab2.iad0t', 'mlab3.iad0t', 'mlab4.iad0t',
+                                                 'mlab1.lax01', 'mlab1.mia03', 'mlab1.ham01', 'mlab1.hnd01',
                                                  'mlab1.iad1t', 'mlab2.iad1t', 'mlab3.iad1t', 'mlab4.iad1t',]),
     Slice(name='iupui_npad',      index=2, attrs=centos_slice_attrs+web100_enable_attr+[
                                                 Attr('MeasurementLabCentos',    disk_max='10000000'),
