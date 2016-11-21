@@ -215,9 +215,10 @@ def add_config_entry(hostname, username, hosts_file, cfg_file, cfg_blob):
     """ Adds an ssh config entry for an M-Lab host to cfg_file, if not already
         in cfg_blob
     """
-    cfgentry = "Host %s\n  HostName %s\n  Port 806\n  User %s\n"
+    cfgentry = "Host %s %s\n  HostName %s\n  Port 806\n  User %s\n"
     cfgentry+= "  UserKnownHostsFile %s\n"
-    cfgentry = cfgentry % (hostname[:11], hostname, username, hosts_file)
+    cfgentry = cfgentry % (hostname[:11], hostname, hostname, username,
+        hosts_file)
     found = re.search(cfgentry, cfg_blob, re.MULTILINE)
     if not found:
         print "Adding entry for %s to %s" % (hostname, cfg_file)
