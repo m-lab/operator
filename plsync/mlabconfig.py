@@ -62,6 +62,9 @@ EXAMPLES:
         --template_output="$PATH/file-{{hostname}}.xyz" \
         --select=".*iad1t.*"
       (e.g. stage1-$HOSTNAME.ipxe)
+
+    mlabconfig.py --format=scraper_kubernetes \
+                  --template_yaml=../scraper/deploy.yml > scraper_deploy.yml
 """
 
 
@@ -480,16 +483,23 @@ def export_scraper_kubernetes_config(output, experiments, template):
     for experiment in experiments:
         slice_name = experiment['name']
         for name, node in experiment['network_list']:
+            print 'NAME', name
             node_name, site_name, _ = name.split('.', 2)
             if experiment['index'] is None:
                 continue
             rsync_host = experiment.hostname(node)
+            print 'RSYNC_HOST', rsync_host
             for rsync_module in experiment['rsync_modules']:
                 config = {'site': site_name,
                           'node': node_name,
                           'experiment': slice_name}
                 for k in config.keys():
-                    config[k] = re.sub(r'[^a-zA-Z0-9]+', '-', config[k])
+                    # Kubernetes names must match the regex [a-zA-Z0-9.-]+
+                    # Replace all sequences of characters that can't be part of
+                    # a kubernetes name with a single dash.
+                    config[k] = re.sub(r'[^a-zA-Z0-9.-]+', '-', config[k])
+                # The rsync_module and rsync_host are only used as values, and
+                # so do not need to be (and should not be) substituted as above.
                 config['rsync_module'] = rsync_module
                 config['rsync_host'] = rsync_host
                 configs.append(template.format(**config))
