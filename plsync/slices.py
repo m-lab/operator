@@ -145,7 +145,7 @@ slice_list = [
                                             users=user_list,
                                             use_initscript=True,
                                             ipv6="all",
-                                            rsync_modules=['utilization']),
+                                            rsync_modules=['utilization', 'switch']),
 
     Slice(name="pl_netflow"),
 
