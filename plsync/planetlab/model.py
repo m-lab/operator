@@ -566,7 +566,8 @@ class Slice(dict):
             else:
                 raise Exception("Unrecognized type for ipv6 parameter: %s" % 
                                     type(kwargs['ipv6']))
-
+        if 'rsync_modules' not in kwargs:
+            kwargs['rsync_modules'] = []
         if 'attrs' not in kwargs:
             kwargs['attrs'] = []
         kwargs['network_list'] = []

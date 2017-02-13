@@ -9,6 +9,7 @@ import optparse
 import os
 from planetlab import model
 import StringIO
+import textwrap
 import time
 import unittest
 
@@ -351,6 +352,65 @@ class MlabconfigTest(unittest.TestCase):
             stdout, self.sites, name_tmpl, input_tmpl, 'mlab1.abc01')
 
         self.assertEqual(file_output.getvalue(), 'ip=192.168.1.9 ; echo ${ip}')
+
+    def test_export_scraper_kubernetes_config(self):
+        stdout = StringIO.StringIO()
+        experiments = [model.Slice(name='abc_foo',
+                                   index=1,
+                                   attrs=self.attrs,
+                                   users=self.users,
+                                   use_initscript=True,
+                                   rsync_modules=['test1', 'test2'],
+                                   ipv6='all')]
+        for hostname, node in self.sites[0]['nodes'].iteritems():
+            experiments[0].add_node_address(node)
+        template = textwrap.dedent("""\
+        host: {rsync_host}
+        site: {site}
+        node: {node}
+        experiment: {experiment}
+        module: {rsync_module}
+        """)
+        mlabconfig.export_scraper_kubernetes_config(stdout, experiments,
+                                                    template)
+        expected_output = textwrap.dedent("""\
+        host: foo.abc.mlab2.abc01.measurement-lab.org
+        site: abc01
+        node: mlab2
+        experiment: abc-foo
+        module: test1
+        ---
+        host: foo.abc.mlab2.abc01.measurement-lab.org
+        site: abc01
+        node: mlab2
+        experiment: abc-foo
+        module: test2
+        ---
+        host: foo.abc.mlab1.abc01.measurement-lab.org
+        site: abc01
+        node: mlab1
+        experiment: abc-foo
+        module: test1
+        ---
+        host: foo.abc.mlab1.abc01.measurement-lab.org
+        site: abc01
+        node: mlab1
+        experiment: abc-foo
+        module: test2
+        ---
+        host: foo.abc.mlab3.abc01.measurement-lab.org
+        site: abc01
+        node: mlab3
+        experiment: abc-foo
+        module: test1
+        ---
+        host: foo.abc.mlab3.abc01.measurement-lab.org
+        site: abc01
+        node: mlab3
+        experiment: abc-foo
+        module: test2
+        """)
+        self.assertEqual(stdout.getvalue(), expected_output)
 
 
 if __name__ == '__main__':

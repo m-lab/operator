@@ -62,6 +62,9 @@ EXAMPLES:
         --template_output="$PATH/file-{{hostname}}.xyz" \
         --select=".*iad1t.*"
       (e.g. stage1-$HOSTNAME.ipxe)
+
+    mlabconfig.py --format=scraper_kubernetes \
+                  --template_yaml=../scraper/deploy.yml > scraper_deploy.yml
 """
 
 
@@ -139,6 +142,12 @@ def parse_flags():
         default=None,
         help=('A regular expression used to select a subset of hostnames. If '
               'not specified, all machine names are selected.'))
+    parser.add_option(
+        '',
+        '--template_yaml',
+        dest='template_yaml',
+        default=None,
+        help='Template yaml input file.')
 
     (options, args) = parser.parse_args()
 
@@ -468,6 +477,33 @@ def export_mlab_server_network_config(output, sites, name_tmpl, input_tmpl,
                 f.write(template.safe_substitute(i))
 
 
+def export_scraper_kubernetes_config(output, experiments, template):
+    """Generates kubernetes deployment configs based on an input template."""
+    configs = []
+    for experiment in experiments:
+        slice_name = experiment['name']
+        for name, node in experiment['network_list']:
+            node_name, site_name, _ = name.split('.', 2)
+            if experiment['index'] is None:
+                continue
+            rsync_host = experiment.hostname(node)
+            for rsync_module in experiment['rsync_modules']:
+                config = {'site': site_name,
+                          'node': node_name,
+                          'experiment': slice_name}
+                for k in config.keys():
+                    # Kubernetes names must match the regex [a-zA-Z0-9.-]+
+                    # Replace all sequences of characters that can't be part of
+                    # a kubernetes name with a single dash.
+                    config[k] = re.sub(r'[^a-zA-Z0-9.-]+', '-', config[k])
+                # The rsync_module and rsync_host are only used as values, and
+                # so do not need to be (and should not be) substituted as above.
+                config['rsync_module'] = rsync_module
+                config['rsync_host'] = rsync_host
+                configs.append(template.format(**config))
+    output.write('---\n'.join(configs))
+
+
 def main():
     (options, args) = parse_flags()
 
@@ -497,6 +533,10 @@ def main():
             export_mlab_zone_header(sys.stdout, header, options)
             sys.stdout.write("\n\n")
             export_mlab_zone_records(sys.stdout, sites, experiments)
+    elif options.format == 'scraper_kubernetes':
+        with open(options.template_yaml, 'r') as template:
+            export_scraper_kubernetes_config(sys.stdout, experiments,
+                                             template.read())
     else:
         logging.error('Sorry, unknown format: %s', options.format)
         sys.exit(1)
