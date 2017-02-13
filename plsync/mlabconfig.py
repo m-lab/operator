@@ -483,12 +483,10 @@ def export_scraper_kubernetes_config(output, experiments, template):
     for experiment in experiments:
         slice_name = experiment['name']
         for name, node in experiment['network_list']:
-            print 'NAME', name
             node_name, site_name, _ = name.split('.', 2)
             if experiment['index'] is None:
                 continue
             rsync_host = experiment.hostname(node)
-            print 'RSYNC_HOST', rsync_host
             for rsync_module in experiment['rsync_modules']:
                 config = {'site': site_name,
                           'node': node_name,
