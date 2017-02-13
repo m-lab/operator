@@ -526,7 +526,7 @@ def main():
             sys.stdout.write("\n\n")
             export_mlab_zone_records(sys.stdout, sites, experiments)
     elif options.format == 'scraper_kubernetes':
-        with open(options.template_json, 'r') as template:
+        with open(options.template_yaml, 'r') as template:
             export_scraper_kubernetes_config(sys.stdout, experiments,
                                              template.read())
     else:
