@@ -301,7 +301,7 @@ def parse_options():
     parser.set_defaults(knownhosts=False,
                         update=False,
                         config=False,
-                        user="site_admin",
+                        user="root",
                         verbose=False,
                         debug=False)
 
