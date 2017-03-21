@@ -355,10 +355,10 @@ class MlabconfigTest(unittest.TestCase):
 
     @mock.patch('__builtin__.open')
     def test_export_scraper_kubernetes_config(self, mock_open):
-        file_output = {}
+        virtual_output_files = {}
         def create_new_fake_file(*args):
-            file_output[args[0]] = StringIO.StringIO()
-            return file_output[args[0]]
+            virtual_output_files[args[0]] = StringIO.StringIO()
+            return OpenStringIO(virtual_output_files[args[0]])
         mock_open.side_effect = create_new_fake_file
         experiments = [model.Slice(name='abc_foo',
                                    index=1,
@@ -419,11 +419,12 @@ class MlabconfigTest(unittest.TestCase):
                 experiment: abc-foo
                 module: test2""")
         }
-        self.assertEqual(len(expected_output), len(file_output))
+        self.assertEqual(set(expected_output.keys()),
+                         set(virtual_output_files.keys()))
         for fname, contents in expected_output.items():
-            self.assertIn(fname, file_output)
+            self.assertIn(fname, virtual_output_files)
             self.assertEqual(contents.strip(),
-                            file_output[fname].getvalue().strip())
+                             virtual_output_files[fname].getvalue().strip())
 
 
 if __name__ == '__main__':

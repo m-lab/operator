@@ -498,8 +498,9 @@ def export_scraper_kubernetes_config(filename_template, experiments,
                 # so do not need to be (and should not be) substituted as above.
                 config['rsync_module'] = rsync_module
                 config['rsync_host'] = rsync_host
-                config_file = open(filename_tmpl.safe_substitute(config), 'w')
-                config_file.write(contents_tmpl.safe_substitute(config))
+                filename = filename_tmpl.safe_substitute(config)
+                with open(filename, 'w') as config_file:
+                    config_file.write(contents_tmpl.safe_substitute(config))
 
 
 def main():
