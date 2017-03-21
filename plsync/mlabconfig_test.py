@@ -353,8 +353,13 @@ class MlabconfigTest(unittest.TestCase):
 
         self.assertEqual(file_output.getvalue(), 'ip=192.168.1.9 ; echo ${ip}')
 
-    def test_export_scraper_kubernetes_config(self):
-        stdout = StringIO.StringIO()
+    @mock.patch('__builtin__.open')
+    def test_export_scraper_kubernetes_config(self, mock_open):
+        virtual_output_files = {}
+        def create_new_fake_file(*args):
+            virtual_output_files[args[0]] = StringIO.StringIO()
+            return OpenStringIO(virtual_output_files[args[0]])
+        mock_open.side_effect = create_new_fake_file
         experiments = [model.Slice(name='abc_foo',
                                    index=1,
                                    attrs=self.attrs,
@@ -364,53 +369,62 @@ class MlabconfigTest(unittest.TestCase):
                                    ipv6='all')]
         for hostname, node in self.sites[0]['nodes'].iteritems():
             experiments[0].add_node_address(node)
-        template = textwrap.dedent("""\
-        host: {rsync_host}
-        site: {site}
-        node: {node}
-        experiment: {experiment}
-        module: {rsync_module}
+        output_template = textwrap.dedent("""\
+        host: {{rsync_host}}
+        site: {{site}}
+        node: {{node}}
+        experiment: {{experiment}}
+        module: {{rsync_module}}
         """)
-        mlabconfig.export_scraper_kubernetes_config(stdout, experiments,
-                                                    template)
-        expected_output = textwrap.dedent("""\
-        host: foo.abc.mlab2.abc01.measurement-lab.org
-        site: abc01
-        node: mlab2
-        experiment: abc-foo
-        module: test1
-        ---
-        host: foo.abc.mlab2.abc01.measurement-lab.org
-        site: abc01
-        node: mlab2
-        experiment: abc-foo
-        module: test2
-        ---
-        host: foo.abc.mlab1.abc01.measurement-lab.org
-        site: abc01
-        node: mlab1
-        experiment: abc-foo
-        module: test1
-        ---
-        host: foo.abc.mlab1.abc01.measurement-lab.org
-        site: abc01
-        node: mlab1
-        experiment: abc-foo
-        module: test2
-        ---
-        host: foo.abc.mlab3.abc01.measurement-lab.org
-        site: abc01
-        node: mlab3
-        experiment: abc-foo
-        module: test1
-        ---
-        host: foo.abc.mlab3.abc01.measurement-lab.org
-        site: abc01
-        node: mlab3
-        experiment: abc-foo
-        module: test2
-        """)
-        self.assertEqual(stdout.getvalue(), expected_output)
+        filename_template = ('deployment/{{site}}-{{node}}-'
+                             '{{experiment}}-{{rsync_module}}.yml')
+        mlabconfig.export_scraper_kubernetes_config(filename_template,
+                                                    experiments,
+                                                    output_template)
+        expected_output = {
+            'deployment/abc01-mlab1-abc-foo-test1.yml': textwrap.dedent("""\
+                host: foo.abc.mlab1.abc01.measurement-lab.org
+                site: abc01
+                node: mlab1
+                experiment: abc-foo
+                module: test1"""),
+            'deployment/abc01-mlab1-abc-foo-test2.yml': textwrap.dedent("""\
+                host: foo.abc.mlab1.abc01.measurement-lab.org
+                site: abc01
+                node: mlab1
+                experiment: abc-foo
+                module: test2"""),
+            'deployment/abc01-mlab2-abc-foo-test1.yml': textwrap.dedent("""\
+                host: foo.abc.mlab2.abc01.measurement-lab.org
+                site: abc01
+                node: mlab2
+                experiment: abc-foo
+                module: test1"""),
+            'deployment/abc01-mlab2-abc-foo-test2.yml': textwrap.dedent("""\
+                host: foo.abc.mlab2.abc01.measurement-lab.org
+                site: abc01
+                node: mlab2
+                experiment: abc-foo
+                module: test2"""),
+            'deployment/abc01-mlab3-abc-foo-test1.yml': textwrap.dedent("""\
+                host: foo.abc.mlab3.abc01.measurement-lab.org
+                site: abc01
+                node: mlab3
+                experiment: abc-foo
+                module: test1"""),
+            'deployment/abc01-mlab3-abc-foo-test2.yml': textwrap.dedent("""\
+                host: foo.abc.mlab3.abc01.measurement-lab.org
+                site: abc01
+                node: mlab3
+                experiment: abc-foo
+                module: test2""")
+        }
+        self.assertEqual(set(expected_output.keys()),
+                         set(virtual_output_files.keys()))
+        for fname, contents in expected_output.items():
+            self.assertIn(fname, virtual_output_files)
+            self.assertEqual(contents.strip(),
+                             virtual_output_files[fname].getvalue().strip())
 
 
 if __name__ == '__main__':
