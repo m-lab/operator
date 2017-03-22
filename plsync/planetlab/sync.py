@@ -844,17 +844,19 @@ def WhitelistSliceOnNode(slicename, hostname):
     # NOTE: this approach does not delete stray slices from whitelist
     return
 
-def GetBootimage(hostname, imagetype="iso"):
+def GetBootimage(hostname, imagetype="iso", nodekeykeep=False):
     """ get_bootimage() - generate a new boot image for the named node, and
     media type.  Generating a new ISO, replaces the old node key in the myplc
     db.  So, this is a destructive operation.
 
     Args:
-        hostname - full hostname of system already registered in myPLC db.
-        type - type of boot image to fetch.  You should only use 'iso' on M-Lab.
-               'usb' is supported by the API call, but most usb sticks do not
-               include a read-only switch, so for security reasons are not
-               recommended.
+        hostname: str, full hostname of system already registered in myPLC db.
+        type: str, type of boot image to fetch.  You should only use 'iso' on
+            M-Lab. 'usb' is supported by the API call, but most usb sticks do
+            not include a read-only switch, so for security reasons are not
+            recommended.
+        nodekeykeep: bool, if True, preserve the existing node key before
+            generating a new boot image, otherwise generate a new one.
 
     Returns:
         None
@@ -865,9 +867,10 @@ def GetBootimage(hostname, imagetype="iso"):
         sys.exit(1)
 
     # NOTE: returns a gigantic blob of base64 encoded text.
-    x = s.api.GetBootMedium(hostname, 'node-%s' % imagetype, "", [])
+    options = [] if not nodekeykeep else ["node-key-keep"]
+    x = s.api.GetBootMedium(hostname, 'node-%s' % imagetype, "", options)
     bindata = base64.b64decode(x)
-    
+
     # NOTE: save file to pwd
     fname = "%s.%s" % (hostname, imagetype)
     f = open(fname, 'w')
@@ -911,7 +914,7 @@ def SyncSlice(sslice, hostname_or_site, addwhitelist, addsliceips, addusers,
 
 
 def SyncSite(site, onhost, addusers, addnodes, addinterfaces, getbootimages,
-             createusers):
+             createusers, nodekeykeep):
     """Creates and/or Updates a site object (and all children) in the PLC DB.
 
     SyncSite may include creating a new Site() in PLC DB, adding or deleting
@@ -925,6 +928,7 @@ def SyncSite(site, onhost, addusers, addnodes, addinterfaces, getbootimages,
         addinterfaces: bool, if True, add interface configuration to nodes.
         getbootimages: bool, if True, also download node bootimages to .iso.
         createusers: bool, if True, also create declared users not found in db.
+        nodekeykeep: bool, if True, keep the same node key for boot images.
     """
     MakeSite(site['login_base'], site['sitename'], site['sitename'])
     SyncLocation(site['login_base'], site['location'])
@@ -934,10 +938,11 @@ def SyncSite(site, onhost, addusers, addnodes, addinterfaces, getbootimages,
     if addnodes or getbootimages:
         for hostname,node in site['nodes'].iteritems():
             if onhost is None or hostname == onhost:
-                SyncNode(node, addnodes, addinterfaces, getbootimages)
+                SyncNode(node, addnodes, addinterfaces, getbootimages,
+                         nodekeykeep)
 
 
-def SyncNode(node, addnodes, addinterfaces, getbootimages):
+def SyncNode(node, addnodes, addinterfaces, getbootimages, nodekeykeep):
     """Creates and/or Updates a node object (and all children) in the PLC DB."""
 
     node_id = MakeNode(node['login_base'], node.hostname())
@@ -966,6 +971,6 @@ def SyncNode(node, addnodes, addinterfaces, getbootimages):
             SyncInterface(node.hostname(), node_id, interface,
                           interface['is_primary'])
     if getbootimages:
-        GetBootimage(node.hostname(), imagetype="iso")
+        GetBootimage(node.hostname(), imagetype="iso", nodekeykeep=nodekeykeep)
 
     return
