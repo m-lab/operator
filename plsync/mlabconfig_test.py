@@ -426,6 +426,58 @@ class MlabconfigTest(unittest.TestCase):
             self.assertEqual(contents.strip(),
                              virtual_output_files[fname].getvalue().strip())
 
+    def test_export_legacy_includes_all_experiments(self):
+        # Setup synthetic user, site, and experiment configuration data.
+        experiments = [model.Slice(name='abc_bar',
+                                   index=1,
+                                   attrs=self.attrs,
+                                   users=self.users,
+                                   use_initscript=True,
+                                   ipv6='all')]
+        # Assign experiments to nodes.
+        for hostname, node in self.sites[0]['nodes'].iteritems():
+            experiments[0].add_node_address(node)
+        output = StringIO.StringIO()
+        expected_config = {
+            u'labels': {u'service': u'sidestream'},
+            u'targets': [
+                u'bar.abc.mlab2.abc01.measurement-lab.org:9090',
+                u'bar.abc.mlab1.abc01.measurement-lab.org:9090',
+                u'bar.abc.mlab3.abc01.measurement-lab.org:9090'
+            ]
+        }
+
+        mlabconfig.export_legacy(output, experiments, None)
+
+        actual_config = json.loads(output.getvalue())
+        self.assertEqual(len(actual_config), 1)
+        self.assertDictContainsSubset(expected_config, actual_config[0])
+
+    def test_export_legacy_includes_selected_experiments(self):
+        # Setup synthetic user, site, and experiment configuration data.
+        experiments = [model.Slice(name='abc_bar',
+                                   index=1,
+                                   attrs=self.attrs,
+                                   users=self.users,
+                                   use_initscript=True,
+                                   ipv6='all')]
+        # Assign experiments to nodes.
+        for hostname, node in self.sites[0]['nodes'].iteritems():
+            experiments[0].add_node_address(node)
+        output = StringIO.StringIO()
+        expected_config = {
+            u'labels': {u'service': u'sidestream'},
+            u'targets': [
+                u'bar.abc.mlab2.abc01.measurement-lab.org:9090'
+            ]
+        }
+
+        mlabconfig.export_legacy(output, experiments, "bar.abc.mlab2.*")
+
+        actual_config = json.loads(output.getvalue())
+        self.assertEqual(len(actual_config), 1)
+        self.assertDictContainsSubset(expected_config, actual_config[0])
+
 
 if __name__ == '__main__':
     unittest.main()

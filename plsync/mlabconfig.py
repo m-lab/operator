@@ -66,6 +66,8 @@ EXAMPLES:
     mlabconfig.py --format=scraper_kubernetes \
         --template_input=deploy.yml \
         --template_output=deployment/{{site}}-{{node}}-{{experiment}}-{{rsync_module}}.yml
+
+    mlabconfig.py --format=legacy_prometheus --select="npad.iupui.*"
 """
 
 
@@ -396,6 +398,25 @@ def export_mlab_site_stats(output, sites):
     json.dump(sitestats, output)
 
 
+def export_legacy(output, experiments, select_regex):
+    """Exports json for legacy monitoring by Prometheus."""
+    targets = []
+    for experiment in experiments:
+        # TODO(soltesz): change 'network_list' to a sorted list of node objects.
+        for _, node in experiment['network_list']:
+            if experiment['index'] is None:
+                continue
+            # TODO(soltesz): provide a template for formatting the hostname.
+            hostname = '%s:9090' % experiment.hostname(node)
+            if select_regex and not re.search(select_regex, hostname):
+                continue
+            targets.append(hostname)
+
+    # TODO(soltesz): allow adding extra labels and an alternate service name.
+    legacy = [{ "labels": {"service": "sidestream"}, "targets": targets}]
+    json.dump(legacy, output, indent=4)
+
+
 def export_mlab_host_ips(output, sites, experiments):
     """Writes csv data of all M-Lab servers and experiments to output."""
     # Export server names and addresses.
@@ -536,6 +557,8 @@ def main():
         with open(options.template, 'r') as template:
             export_scraper_kubernetes_config(options.filename, experiments,
                                              template.read())
+    elif options.format == 'legacy_prometheus':
+        export_legacy(sys.stdout, experiments, options.select)
     else:
         logging.error('Sorry, unknown format: %s', options.format)
         sys.exit(1)
