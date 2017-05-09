@@ -380,7 +380,8 @@ class MlabconfigTest(unittest.TestCase):
                              '{{experiment}}-{{rsync_module}}.yml')
         mlabconfig.export_scraper_kubernetes_config(filename_template,
                                                     experiments,
-                                                    output_template)
+                                                    output_template,
+                                                    None)
         expected_output = {
             'deployment/abc01-mlab1-abc-foo-test1.yml': textwrap.dedent("""\
                 host: foo.abc.mlab1.abc01.measurement-lab.org
@@ -426,6 +427,55 @@ class MlabconfigTest(unittest.TestCase):
             self.assertEqual(contents.strip(),
                              virtual_output_files[fname].getvalue().strip())
 
+    @mock.patch('__builtin__.open')
+    def test_export_scraper_kubernetes_config_subset(self, mock_open):
+        virtual_output_files = {}
+        def create_new_fake_file(*args):
+            virtual_output_files[args[0]] = StringIO.StringIO()
+            return OpenStringIO(virtual_output_files[args[0]])
+        mock_open.side_effect = create_new_fake_file
+        experiments = [model.Slice(name='abc_foo',
+                                   index=1,
+                                   attrs=self.attrs,
+                                   users=self.users,
+                                   use_initscript=True,
+                                   rsync_modules=['test1', 'test2'],
+                                   ipv6='all')]
+        for hostname, node in self.sites[0]['nodes'].iteritems():
+            experiments[0].add_node_address(node)
+        output_template = textwrap.dedent("""\
+        host: {{rsync_host}}
+        site: {{site}}
+        node: {{node}}
+        experiment: {{experiment}}
+        module: {{rsync_module}}
+        """)
+        filename_template = ('deployment/{{site}}-{{node}}-'
+                             '{{experiment}}-{{rsync_module}}.yml')
+        mlabconfig.export_scraper_kubernetes_config(filename_template,
+                                                    experiments,
+                                                    output_template,
+                                                    ".*mlab3.*")
+        expected_output = {
+            'deployment/abc01-mlab3-abc-foo-test1.yml': textwrap.dedent("""\
+                host: foo.abc.mlab3.abc01.measurement-lab.org
+                site: abc01
+                node: mlab3
+                experiment: abc-foo
+                module: test1"""),
+            'deployment/abc01-mlab3-abc-foo-test2.yml': textwrap.dedent("""\
+                host: foo.abc.mlab3.abc01.measurement-lab.org
+                site: abc01
+                node: mlab3
+                experiment: abc-foo
+                module: test2""")
+        }
+        self.assertEqual(set(expected_output.keys()),
+                         set(virtual_output_files.keys()))
+        for fname, contents in expected_output.items():
+            self.assertIn(fname, virtual_output_files)
+            self.assertEqual(contents.strip(),
+                             virtual_output_files[fname].getvalue().strip())
     def test_export_legacy_includes_all_experiments(self):
         # Setup synthetic user, site, and experiment configuration data.
         experiments = [model.Slice(name='abc_bar',
