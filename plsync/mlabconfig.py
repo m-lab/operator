@@ -67,7 +67,22 @@ EXAMPLES:
         --template_input=deploy.yml \
         --template_output=deployment/{{site}}-{{node}}-{{experiment}}-{{rsync_module}}.yml
 
-    mlabconfig.py --format=legacy_prometheus --select="npad.iupui.*"
+    mlabconfig.py --format=prom-targets \
+        --template_target={{hostname}}:9090 \
+        --label service=sidestream \
+        --select="npad.iupui.*lga0t.*"
+
+    mlabconfig.py --format=prom-targets \
+        --template_target={{hostname}}:7999 \
+        --label module=rsyncd_online \
+        --label service=rsyncd \
+        --select=".*lga0t.*"
+
+    mlabconfig.py --format=prom-targets-nodes \
+        --template_target={{hostname}}:806 \
+        --label module=ssh_v4_online \
+        --label service=machine_online \
+        --select=".*lga0t.*"
 """
 
 
@@ -140,6 +155,27 @@ def parse_flags():
               'files are written.'))
     parser.add_option(
         '',
+        '--template_target',
+        dest='template_target',
+        default='{{hostname}}:7999',
+        help=('Target is interpreted as a template used to format blackbox '
+              'targets.'))
+    parser.add_option(
+        '',
+        '--label',
+        dest='labels',
+        action='append',
+        default=[],
+        help='Adds key/value labels to a resulting prometheus targets file.')
+    parser.add_option(
+        '',
+        '--rsync',
+        dest='rsync',
+        action='store_true',
+        default=True,
+        help='Only process experiments that have rsync modules defined.')
+    parser.add_option(
+        '',
         '--select',
         dest='select',
         default=None,
@@ -152,6 +188,28 @@ def parse_flags():
     if options.format == 'zone' and not os.path.exists(options.zoneheader):
         logging.error('Zone header file %s not found!', options.zoneheader)
         sys.exit(1)
+
+    # If labels are given, parse them and check for malformed values.
+    if options.labels:
+        new_labels = {}
+        for label in options.labels:
+            fields = label.split('=')
+            if len(fields) != 2:
+                logging.error(
+                    'Invalid "--label %s"; use "--label key=value" format.',
+                    label)
+                sys.exit(1)
+            # Save the key/value.
+            new_labels[fields[0]] = fields[1]
+        # Update the value of options.labels (and change the type to a dict).
+        options.labels = new_labels
+
+    # If we're generating prometheus service discovery files, require labels.
+    if options.format in ['prom-targets', 'prom-targets-nodes']:
+        if not options.labels:
+            logging.error(
+                'Provide at least one --label for "%s" format', options.format)
+            sys.exit(1)
 
     return (options, args)
 
@@ -398,25 +456,6 @@ def export_mlab_site_stats(output, sites):
     json.dump(sitestats, output)
 
 
-def export_legacy(output, experiments, select_regex):
-    """Exports json for legacy monitoring by Prometheus."""
-    targets = []
-    for experiment in experiments:
-        # TODO(soltesz): change 'network_list' to a sorted list of node objects.
-        for _, node in experiment['network_list']:
-            if experiment['index'] is None:
-                continue
-            # TODO(soltesz): provide a template for formatting the hostname.
-            hostname = '%s:9090' % experiment.hostname(node)
-            if select_regex and not re.search(select_regex, hostname):
-                continue
-            targets.append(hostname)
-
-    # TODO(soltesz): allow adding extra labels and an alternate service name.
-    legacy = [{ "labels": {"service": "sidestream"}, "targets": targets}]
-    json.dump(legacy, output, indent=4)
-
-
 def export_mlab_host_ips(output, sites, experiments):
     """Writes csv data of all M-Lab servers and experiments to output."""
     # Export server names and addresses.
@@ -526,6 +565,84 @@ def export_scraper_kubernetes_config(filename_template, experiments,
                     config_file.write(contents_tmpl.safe_substitute(config))
 
 
+def select_prometheus_experiment_targets(
+    experiments, select_regex, target_template, rsync_only):
+    """Selects and formats targets from experiments.
+
+    Args:
+      experiments: list of planetlab.Slice objects, used to enumerate hostnames.
+      select_regex: str, a regex used to choose a subset of hostnames. Ignored
+          if empty.
+      target_template: str, a template for formatting the target from the
+          hostname. e.g. {{hostname}}:7999, https://{{hostname}}/some/path
+      rsync_only: bool, skip experiments without rsync_modules.
+
+    Returns:
+      list of str, all selected and formatted targets.
+    """
+    targets = []
+    target_tmpl = BracketTemplate(target_template)
+    for experiment in experiments:
+        for _, node in experiment['network_list']:
+            # Skip experiments without an IP index.
+            if experiment['index'] is None:
+                continue
+
+            host = experiment.hostname(node)
+            # Consider all experiments or only those with rsync modules.
+            if not rsync_only or experiment['rsync_modules']:
+                if select_regex and not re.search(select_regex, host):
+                    continue
+                target = target_tmpl.safe_substitute({'hostname': host})
+                targets.append(target)
+
+    return targets
+
+
+def select_prometheus_node_targets(sites, select_regex, target_template):
+    """Selects and formats targets from site nodes.
+
+    Args:
+      sites: list of planetlab.Site objects, used to generate hostnames.
+      select_regex: str, a regex used to choose a subset of hostnames. Ignored
+          if empty.
+      target_template: str, a template for formatting the target from the
+          hostname. e.g. {{hostname}}:7999, https://{{hostname}}/some/path
+
+    Returns:
+      list of str, all selected and formatted targets.
+    """
+    targets = []
+    target_tmpl = BracketTemplate(target_template)
+    for site in sites:
+        for _, node in site['nodes'].iteritems():
+            if select_regex and not re.search(select_regex, node.hostname()):
+                continue
+            target = target_tmpl.safe_substitute({'hostname': node.hostname()})
+            targets.append(target)
+
+    return targets
+
+
+def targets_as_json(labels, targets):
+    """Generates a service discovery format for targets.
+
+    The service discovery targets are labeled with given labels.
+
+    Args:
+      labels: dict of str, a set of key/values used as target labels.
+      targets: list of str, the targets to scrape.
+
+    Returns:
+      str, the service discovery document as JSON.
+    """
+    config = {
+        "labels": labels,
+        "targets": targets,
+    }
+    return json.dumps([config], indent=4)
+
+
 def main():
     (options, args) = parse_flags()
 
@@ -542,12 +659,15 @@ def main():
 
     if options.format == 'hostips':
         export_mlab_host_ips(sys.stdout, sites, experiments)
+
     elif options.format == 'sitestats':
         export_mlab_site_stats(sys.stdout, sites)
+
     elif options.format == 'server-network-config':
         with open(options.template) as template:
             export_mlab_server_network_config(
                 sys.stdout, sites, options.filename, template, options.select)
+
     elif options.format == 'zone':
         with open(options.zoneheader, 'r') as header:
             if options.serial == 'auto':
@@ -555,12 +675,25 @@ def main():
             export_mlab_zone_header(sys.stdout, header, options)
             sys.stdout.write("\n\n")
             export_mlab_zone_records(sys.stdout, sites, experiments)
+
     elif options.format == 'scraper_kubernetes':
         with open(options.template, 'r') as template:
             export_scraper_kubernetes_config(options.filename, experiments,
                                              template.read(), options.select)
-    elif options.format == 'legacy_prometheus':
-        export_legacy(sys.stdout, experiments, options.select)
+
+    elif options.format == 'prom-targets':
+        # TODO(soltesz): support v4 only or v6 only options.
+        targets = select_prometheus_experiment_targets(
+            experiments, options.select, options.template_target,
+            options.rsync)
+        sys.stdout.write(targets_as_json(options.labels, targets))
+
+    elif options.format == 'prom-targets-nodes':
+        # TODO(soltesz): support v4 only or v6 only options.
+        targets = select_prometheus_node_targets(
+            sites, options.select, options.template_target)
+        sys.stdout.write(targets_as_json(options.labels, targets))
+
     else:
         logging.error('Sorry, unknown format: %s', options.format)
         sys.exit(1)
