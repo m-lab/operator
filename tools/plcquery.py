@@ -11,6 +11,7 @@ import ssl
 
 SESSION_DIR=os.environ['HOME'] + "/.ssh"
 SESSION_FILE=SESSION_DIR + "/query_mlab_session"
+SESSION_TIMEOUT=60*60*24*30 # 30 days
 API_URL = "https://boot.planet-lab.org/PLCAPI/"
 VERBOSE=False
 DEBUG=False
@@ -36,7 +37,7 @@ class API:
                 return method(aut, *params)
         return lambda *params : call_method(self.auth, *params)
 
-def refreshsession():
+def refreshsession(session_timeout):
     # Either read session from disk or create it and save it for later
     print "PLC Email: ",
     sys.stdout.flush()
@@ -46,7 +47,7 @@ def refreshsession():
             'AuthMethod' : 'password',
             'AuthString' : password}
     plc = API(auth, API_URL)
-    session = plc.GetSession(60*60*24*30)
+    session = plc.GetSession(session_timeout)
     try:
         os.makedirs(SESSION_DIR)
     except:
@@ -55,7 +56,7 @@ def refreshsession():
     print >>f, session
     f.close()
 
-def getapi():
+def getapi(config):
     api = xmlrpclib.ServerProxy(API_URL, allow_none=True, context=SSL_CONTEXT)
     auth = None
     authorized = False
@@ -74,7 +75,7 @@ def getapi():
             #traceback.print_exc()
             print "Setup a new PLC session file: %s" % SESSION_FILE
             sys.stdout.flush()
-            refreshsession()
+            refreshsession(config.session_timeout)
 
     assert auth is not None
     return API(auth, API_URL)
@@ -145,6 +146,7 @@ def parse_options():
 
     parser.set_defaults(
                         action="get",
+                        session_timeout=SESSION_TIMEOUT,
                         type='node',
                         filter=None,
                         fields=None,
@@ -166,6 +168,9 @@ def parse_options():
     parser.add_option("", "--action", dest="action", 
                         metavar="[get|update|delete|add]", 
                         help="Set the action type for query")
+
+    parser.add_option("", "--session_timeout", dest="session_timeout",
+                        type="int", help="Set the session timeout in seconds")
 
     parser.add_option("", "--type", dest="type", 
                         metavar="[node|pcu|person|site]", 
@@ -329,7 +334,7 @@ def handle_get(api, config, filtr, fields):
 
 def main():
     (config, args) = parse_options()
-    api = getapi()
+    api = getapi(config)
 
     if config.action == "checksession":
         sys.exit(0)
