@@ -494,7 +494,7 @@ def export_mlab_server_network_config(output, sites, name_tmpl, input_tmpl,
 
 
 def export_scraper_kubernetes_config(filename_template, experiments,
-                                     contents_template):
+                                     contents_template, select):
     """Generates kubernetes deployment configs based on an input template."""
     filename_tmpl = BracketTemplate(filename_template)
     contents_tmpl = BracketTemplate(contents_template)
@@ -506,6 +506,8 @@ def export_scraper_kubernetes_config(filename_template, experiments,
             if experiment['index'] is None:
                 continue
             rsync_host = experiment.hostname(node)
+            if select and not re.search(select, rsync_host):
+                continue
             for rsync_module in experiment['rsync_modules']:
                 config = {'site': site_name,
                           'node': node_name,
@@ -556,7 +558,7 @@ def main():
     elif options.format == 'scraper_kubernetes':
         with open(options.template, 'r') as template:
             export_scraper_kubernetes_config(options.filename, experiments,
-                                             template.read())
+                                             template.read(), options.select)
     elif options.format == 'legacy_prometheus':
         export_legacy(sys.stdout, experiments, options.select)
     else:
