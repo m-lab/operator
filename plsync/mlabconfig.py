@@ -521,7 +521,7 @@ def export_scraper_kubernetes_config(filename_template, experiments,
                     # a kubernetes name with a single dash to make the strings
                     # safe.
                     config[k + '_safe'] = re.sub(r'[^a-zA-Z0-9.-]+', '-',
-                                                     config[k])
+                                                 config[k])
                 filename = filename_tmpl.safe_substitute(config)
                 with open(filename, 'w') as config_file:
                     config_file.write(contents_tmpl.safe_substitute(config))
