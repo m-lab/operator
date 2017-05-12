@@ -491,18 +491,42 @@ class MlabconfigTest(unittest.TestCase):
             experiments[0].add_node_address(node)
         output = StringIO.StringIO()
         expected_targets = [
-            u'bar.abc.mlab2.abc01.measurement-lab.org:9090',
-            u'bar.abc.mlab1.abc01.measurement-lab.org:9090',
-            u'bar.abc.mlab3.abc01.measurement-lab.org:9090'
+            {
+                'labels': {
+                    'experiment': 'bar.abc',
+                    'machine': 'mlab2.abc01.measurement-lab.org'
+                },
+                'targets': [
+                    'bar.abc.mlab2.abc01.measurement-lab.org:9090'
+                ]
+            },
+            {
+                'labels': {
+                    'experiment': 'bar.abc',
+                    'machine': 'mlab1.abc01.measurement-lab.org'
+                },
+                'targets': [
+                    'bar.abc.mlab1.abc01.measurement-lab.org:9090'
+                ]
+            },
+            {
+                'labels': {
+                    'experiment': 'bar.abc',
+                    'machine': 'mlab3.abc01.measurement-lab.org'
+                },
+                'targets': [
+                    'bar.abc.mlab3.abc01.measurement-lab.org:9090'
+                ]
+            }
         ]
 
         actual_targets = mlabconfig.select_prometheus_experiment_targets(
-            experiments, None, '{{hostname}}:9090', False)
+            experiments, None, '{{hostname}}:9090', {}, False)
 
         self.assertEqual(len(actual_targets), 3)
         self.assertItemsEqual(expected_targets, actual_targets)
 
-    def test_export_legacy_includes_selected_experiments(self):
+    def test_select_prometheus_experiment_targets_includes_selected(self):
         # Setup synthetic user, site, and experiment configuration data.
         experiments = [model.Slice(name='abc_bar',
                                    index=1,
@@ -515,36 +539,40 @@ class MlabconfigTest(unittest.TestCase):
             experiments[0].add_node_address(node)
         output = StringIO.StringIO()
         expected_targets = [
-            u'bar.abc.mlab2.abc01.measurement-lab.org:9090'
+            {
+                'labels': {
+                    'machine': 'mlab2.abc01.measurement-lab.org',
+                    'experiment': 'bar.abc'
+                },
+                'targets': [
+                    'bar.abc.mlab2.abc01.measurement-lab.org:9090'
+                ]
+            }
         ]
 
         actual_targets = mlabconfig.select_prometheus_experiment_targets(
-            experiments, "bar.abc.mlab2.*", '{{hostname}}:9090', False)
+            experiments, "bar.abc.mlab2.*", '{{hostname}}:9090', {}, False)
 
         self.assertEqual(len(actual_targets), 1)
         self.assertItemsEqual(expected_targets, actual_targets)
 
-    def test_targets_as_json(self):
-        expected_json = textwrap.dedent("""\
-        [
+    def test_select_prometheus_node_targets(self):
+        expected_targets = [
             {
-                "labels": {
-                    "module": "tcp_v4_online",
-                    "service": "sidestream"
+                'labels': {
+                    'machine': 'mlab2.abc01.measurement-lab.org'
                 },
-                "targets": [
-                    "bar.abc.mlab2.abc01.measurement-lab.org:9090"
+                'targets': [
+                    'mlab2.abc01.measurement-lab.org:9090'
                 ]
             }
-        ]""")
+        ]
 
-        actual_json = mlabconfig.targets_as_json(
-            {'service': 'sidestream', 'module': 'tcp_v4_online'},
-            ('bar.abc.mlab2.abc01.measurement-lab.org:9090',))
+        actual_targets = mlabconfig.select_prometheus_node_targets(
+            self.sites, "mlab2.*", '{{hostname}}:9090', {})
 
-        self.assertItemsEqual(
-            json.loads(expected_json), json.loads(actual_json))
-
+        self.assertEqual(len(actual_targets), 1)
+        self.assertItemsEqual(actual_targets, expected_targets)
 
 
 if __name__ == '__main__':

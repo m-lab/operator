@@ -566,7 +566,7 @@ def export_scraper_kubernetes_config(filename_template, experiments,
 
 
 def select_prometheus_experiment_targets(
-    experiments, select_regex, target_template, rsync_only):
+    experiments, select_regex, target_template, common_labels, rsync_only):
     """Selects and formats targets from experiments.
 
     Args:
@@ -575,12 +575,14 @@ def select_prometheus_experiment_targets(
           if empty.
       target_template: str, a template for formatting the target from the
           hostname. e.g. {{hostname}}:7999, https://{{hostname}}/some/path
+      common_labels: dict of str, a set of labels to apply to all targets.
       rsync_only: bool, skip experiments without rsync_modules.
 
     Returns:
-      list of str, all selected and formatted targets.
+      list of dict, each element is a dict with 'labels' (a dict of key/values)
+          and 'targets' (a list of targets).
     """
-    targets = []
+    records = []
     target_tmpl = BracketTemplate(target_template)
     for experiment in experiments:
         for _, node in experiment['network_list']:
@@ -588,18 +590,25 @@ def select_prometheus_experiment_targets(
             if experiment['index'] is None:
                 continue
 
+            labels = common_labels.copy()
+            labels['experiment'] = experiment.dnsname()
+            labels['machine'] = node.hostname()
+
             host = experiment.hostname(node)
             # Consider all experiments or only those with rsync modules.
             if not rsync_only or experiment['rsync_modules']:
                 if select_regex and not re.search(select_regex, host):
                     continue
                 target = target_tmpl.safe_substitute({'hostname': host})
-                targets.append(target)
+                records.append({
+                    'labels': labels,
+                    'targets': [target],
+                })
+    return records
 
-    return targets
 
-
-def select_prometheus_node_targets(sites, select_regex, target_template):
+def select_prometheus_node_targets(sites, select_regex, target_template,
+                                   common_labels):
     """Selects and formats targets from site nodes.
 
     Args:
@@ -608,39 +617,26 @@ def select_prometheus_node_targets(sites, select_regex, target_template):
           if empty.
       target_template: str, a template for formatting the target from the
           hostname. e.g. {{hostname}}:7999, https://{{hostname}}/some/path
+      common_labels: dict of str, a set of labels to apply to all targets.
 
     Returns:
-      list of str, all selected and formatted targets.
+      list of dict, each element is a dict with 'labels' (a dict of key/values)
+          and 'targets' (a list of targets).
     """
-    targets = []
+    records = []
     target_tmpl = BracketTemplate(target_template)
     for site in sites:
         for _, node in site['nodes'].iteritems():
             if select_regex and not re.search(select_regex, node.hostname()):
                 continue
+            labels = common_labels.copy()
+            labels['machine'] = node.hostname()
             target = target_tmpl.safe_substitute({'hostname': node.hostname()})
-            targets.append(target)
-
-    return targets
-
-
-def targets_as_json(labels, targets):
-    """Generates a service discovery format for targets.
-
-    The service discovery targets are labeled with given labels.
-
-    Args:
-      labels: dict of str, a set of key/values used as target labels.
-      targets: list of str, the targets to scrape.
-
-    Returns:
-      str, the service discovery document as JSON.
-    """
-    config = {
-        "labels": labels,
-        "targets": targets,
-    }
-    return json.dumps([config], indent=4)
+            records.append({
+                'labels': labels,
+                'targets': [target],
+            })
+    return records
 
 
 def main():
@@ -683,16 +679,16 @@ def main():
 
     elif options.format == 'prom-targets':
         # TODO(soltesz): support v4 only or v6 only options.
-        targets = select_prometheus_experiment_targets(
+        records = select_prometheus_experiment_targets(
             experiments, options.select, options.template_target,
-            options.rsync)
-        sys.stdout.write(targets_as_json(options.labels, targets))
+            options.labels, options.rsync)
+        json.dump(records, sys.stdout, indent=4)
 
     elif options.format == 'prom-targets-nodes':
         # TODO(soltesz): support v4 only or v6 only options.
-        targets = select_prometheus_node_targets(
-            sites, options.select, options.template_target)
-        sys.stdout.write(targets_as_json(options.labels, targets))
+        records = select_prometheus_node_targets(
+            sites, options.select, options.template_target, options.labels)
+        json.dump(records, sys.stdout, indent=4)
 
     else:
         logging.error('Sorry, unknown format: %s', options.format)
