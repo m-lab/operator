@@ -509,19 +509,18 @@ def export_scraper_kubernetes_config(filename_template, experiments,
             if select and not re.search(select, rsync_host):
                 continue
             for rsync_module in experiment['rsync_modules']:
-                config = {'full_nodename': name,
+                config = {'machine': node.hostname(),
                           'site': site_name,
                           'node': node_name,
-                          'experiment': slice_name,
+                          'experiment': experiment.dnsname(),
                           'rsync_module': rsync_module,
                           'rsync_host': rsync_host}
-                for k in list(config.keys()):
+                for key, value in list(config.items()):
                     # Kubernetes names must match the regex [a-zA-Z0-9.-]+
-                    # Replace all sequences of characters that can't be part of
-                    # a kubernetes name with a single dash to make the strings
-                    # safe.
-                    config[k + '_safe'] = re.sub(r'[^a-zA-Z0-9.-]+', '-',
-                                                 config[k])
+                    # Replace all sequences of characters that aren't a letter
+                    # or number with a single dash to make the strings safe.
+                    config[key + '_safe'] = re.sub(r'[^a-zA-Z0-9]+', '-',
+                                                   value)
                 filename = filename_tmpl.safe_substitute(config)
                 with open(filename, 'w') as config_file:
                     config_file.write(contents_tmpl.safe_substitute(config))

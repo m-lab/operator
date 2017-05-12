@@ -373,7 +373,7 @@ class MlabconfigTest(unittest.TestCase):
         host: {{rsync_host}}
         site: {{site_safe}}
         node: {{node_safe}}
-        experiment: {{experiment_safe}}
+        experiment: {{experiment}}
         module: {{rsync_module}}
         """)
         filename_template = ('deployment/{{site_safe}}-{{node_safe}}-'
@@ -383,41 +383,41 @@ class MlabconfigTest(unittest.TestCase):
                                                     output_template,
                                                     None)
         expected_output = {
-            'deployment/abc01-mlab1-abc-foo-test1.yml': textwrap.dedent("""\
+            'deployment/abc01-mlab1-foo-abc-test1.yml': textwrap.dedent("""\
                 host: foo.abc.mlab1.abc01.measurement-lab.org
                 site: abc01
                 node: mlab1
-                experiment: abc-foo
+                experiment: foo.abc
                 module: test1"""),
-            'deployment/abc01-mlab1-abc-foo-test2.yml': textwrap.dedent("""\
+            'deployment/abc01-mlab1-foo-abc-test2.yml': textwrap.dedent("""\
                 host: foo.abc.mlab1.abc01.measurement-lab.org
                 site: abc01
                 node: mlab1
-                experiment: abc-foo
+                experiment: foo.abc
                 module: test2"""),
-            'deployment/abc01-mlab2-abc-foo-test1.yml': textwrap.dedent("""\
+            'deployment/abc01-mlab2-foo-abc-test1.yml': textwrap.dedent("""\
                 host: foo.abc.mlab2.abc01.measurement-lab.org
                 site: abc01
                 node: mlab2
-                experiment: abc-foo
+                experiment: foo.abc
                 module: test1"""),
-            'deployment/abc01-mlab2-abc-foo-test2.yml': textwrap.dedent("""\
+            'deployment/abc01-mlab2-foo-abc-test2.yml': textwrap.dedent("""\
                 host: foo.abc.mlab2.abc01.measurement-lab.org
                 site: abc01
                 node: mlab2
-                experiment: abc-foo
+                experiment: foo.abc
                 module: test2"""),
-            'deployment/abc01-mlab3-abc-foo-test1.yml': textwrap.dedent("""\
+            'deployment/abc01-mlab3-foo-abc-test1.yml': textwrap.dedent("""\
                 host: foo.abc.mlab3.abc01.measurement-lab.org
                 site: abc01
                 node: mlab3
-                experiment: abc-foo
+                experiment: foo.abc
                 module: test1"""),
-            'deployment/abc01-mlab3-abc-foo-test2.yml': textwrap.dedent("""\
+            'deployment/abc01-mlab3-foo-abc-test2.yml': textwrap.dedent("""\
                 host: foo.abc.mlab3.abc01.measurement-lab.org
                 site: abc01
                 node: mlab3
-                experiment: abc-foo
+                experiment: foo.abc
                 module: test2""")
         }
         self.assertEqual(set(expected_output.keys()),
@@ -444,11 +444,11 @@ class MlabconfigTest(unittest.TestCase):
         for hostname, node in self.sites[0]['nodes'].iteritems():
             experiments[0].add_node_address(node)
         output_template = textwrap.dedent("""\
-        fullnode: {{full_nodename}}
+        machine: {{machine}}
         host: {{rsync_host}}
         site: {{site}}
         node: {{node}}
-        experiment: {{experiment_safe}}
+        experiment: {{experiment}}
         module: {{rsync_module}}
         """)
         filename_template = ('deployment/{{site}}-{{node}}-'
@@ -458,19 +458,19 @@ class MlabconfigTest(unittest.TestCase):
                                                     output_template,
                                                     ".*mlab3.*")
         expected_output = {
-            'deployment/abc01-mlab3-abc-foo-test1.yml': textwrap.dedent("""\
-                fullnode: mlab3.abc01.measurement-lab.org
+            'deployment/abc01-mlab3-foo-abc-test1.yml': textwrap.dedent("""\
+                machine: mlab3.abc01.measurement-lab.org
                 host: foo.abc.mlab3.abc01.measurement-lab.org
                 site: abc01
                 node: mlab3
-                experiment: abc-foo
+                experiment: foo.abc
                 module: test1"""),
-            'deployment/abc01-mlab3-abc-foo-test2.yml': textwrap.dedent("""\
-                fullnode: mlab3.abc01.measurement-lab.org
+            'deployment/abc01-mlab3-foo-abc-test2.yml': textwrap.dedent("""\
+                machine: mlab3.abc01.measurement-lab.org
                 host: foo.abc.mlab3.abc01.measurement-lab.org
                 site: abc01
                 node: mlab3
-                experiment: abc-foo
+                experiment: foo.abc
                 module: test2""")
         }
         self.assertEqual(set(expected_output.keys()),
