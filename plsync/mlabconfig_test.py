@@ -371,53 +371,53 @@ class MlabconfigTest(unittest.TestCase):
             experiments[0].add_node_address(node)
         output_template = textwrap.dedent("""\
         host: {{rsync_host}}
-        site: {{site}}
-        node: {{node}}
+        site: {{site_safe}}
+        node: {{node_safe}}
         experiment: {{experiment}}
         module: {{rsync_module}}
         """)
-        filename_template = ('deployment/{{site}}-{{node}}-'
-                             '{{experiment}}-{{rsync_module}}.yml')
+        filename_template = ('deployment/{{site_safe}}-{{node_safe}}-'
+                             '{{experiment_safe}}-{{rsync_module}}.yml')
         mlabconfig.export_scraper_kubernetes_config(filename_template,
                                                     experiments,
                                                     output_template,
                                                     None)
         expected_output = {
-            'deployment/abc01-mlab1-abc-foo-test1.yml': textwrap.dedent("""\
+            'deployment/abc01-mlab1-foo-abc-test1.yml': textwrap.dedent("""\
                 host: foo.abc.mlab1.abc01.measurement-lab.org
                 site: abc01
                 node: mlab1
-                experiment: abc-foo
+                experiment: foo.abc
                 module: test1"""),
-            'deployment/abc01-mlab1-abc-foo-test2.yml': textwrap.dedent("""\
+            'deployment/abc01-mlab1-foo-abc-test2.yml': textwrap.dedent("""\
                 host: foo.abc.mlab1.abc01.measurement-lab.org
                 site: abc01
                 node: mlab1
-                experiment: abc-foo
+                experiment: foo.abc
                 module: test2"""),
-            'deployment/abc01-mlab2-abc-foo-test1.yml': textwrap.dedent("""\
+            'deployment/abc01-mlab2-foo-abc-test1.yml': textwrap.dedent("""\
                 host: foo.abc.mlab2.abc01.measurement-lab.org
                 site: abc01
                 node: mlab2
-                experiment: abc-foo
+                experiment: foo.abc
                 module: test1"""),
-            'deployment/abc01-mlab2-abc-foo-test2.yml': textwrap.dedent("""\
+            'deployment/abc01-mlab2-foo-abc-test2.yml': textwrap.dedent("""\
                 host: foo.abc.mlab2.abc01.measurement-lab.org
                 site: abc01
                 node: mlab2
-                experiment: abc-foo
+                experiment: foo.abc
                 module: test2"""),
-            'deployment/abc01-mlab3-abc-foo-test1.yml': textwrap.dedent("""\
+            'deployment/abc01-mlab3-foo-abc-test1.yml': textwrap.dedent("""\
                 host: foo.abc.mlab3.abc01.measurement-lab.org
                 site: abc01
                 node: mlab3
-                experiment: abc-foo
+                experiment: foo.abc
                 module: test1"""),
-            'deployment/abc01-mlab3-abc-foo-test2.yml': textwrap.dedent("""\
+            'deployment/abc01-mlab3-foo-abc-test2.yml': textwrap.dedent("""\
                 host: foo.abc.mlab3.abc01.measurement-lab.org
                 site: abc01
                 node: mlab3
-                experiment: abc-foo
+                experiment: foo.abc
                 module: test2""")
         }
         self.assertEqual(set(expected_output.keys()),
@@ -444,6 +444,7 @@ class MlabconfigTest(unittest.TestCase):
         for hostname, node in self.sites[0]['nodes'].iteritems():
             experiments[0].add_node_address(node)
         output_template = textwrap.dedent("""\
+        machine: {{machine}}
         host: {{rsync_host}}
         site: {{site}}
         node: {{node}}
@@ -451,23 +452,25 @@ class MlabconfigTest(unittest.TestCase):
         module: {{rsync_module}}
         """)
         filename_template = ('deployment/{{site}}-{{node}}-'
-                             '{{experiment}}-{{rsync_module}}.yml')
+                             '{{experiment_safe}}-{{rsync_module}}.yml')
         mlabconfig.export_scraper_kubernetes_config(filename_template,
                                                     experiments,
                                                     output_template,
                                                     ".*mlab3.*")
         expected_output = {
-            'deployment/abc01-mlab3-abc-foo-test1.yml': textwrap.dedent("""\
+            'deployment/abc01-mlab3-foo-abc-test1.yml': textwrap.dedent("""\
+                machine: mlab3.abc01.measurement-lab.org
                 host: foo.abc.mlab3.abc01.measurement-lab.org
                 site: abc01
                 node: mlab3
-                experiment: abc-foo
+                experiment: foo.abc
                 module: test1"""),
-            'deployment/abc01-mlab3-abc-foo-test2.yml': textwrap.dedent("""\
+            'deployment/abc01-mlab3-foo-abc-test2.yml': textwrap.dedent("""\
+                machine: mlab3.abc01.measurement-lab.org
                 host: foo.abc.mlab3.abc01.measurement-lab.org
                 site: abc01
                 node: mlab3
-                experiment: abc-foo
+                experiment: foo.abc
                 module: test2""")
         }
         self.assertEqual(set(expected_output.keys()),
