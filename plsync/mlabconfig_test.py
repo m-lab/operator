@@ -371,13 +371,13 @@ class MlabconfigTest(unittest.TestCase):
             experiments[0].add_node_address(node)
         output_template = textwrap.dedent("""\
         host: {{rsync_host}}
-        site: {{site}}
-        node: {{node}}
-        experiment: {{experiment}}
+        site: {{site_safe}}
+        node: {{node_safe}}
+        experiment: {{experiment_safe}}
         module: {{rsync_module}}
         """)
-        filename_template = ('deployment/{{site}}-{{node}}-'
-                             '{{experiment}}-{{rsync_module}}.yml')
+        filename_template = ('deployment/{{site_safe}}-{{node_safe}}-'
+                             '{{experiment_safe}}-{{rsync_module}}.yml')
         mlabconfig.export_scraper_kubernetes_config(filename_template,
                                                     experiments,
                                                     output_template,
@@ -444,26 +444,29 @@ class MlabconfigTest(unittest.TestCase):
         for hostname, node in self.sites[0]['nodes'].iteritems():
             experiments[0].add_node_address(node)
         output_template = textwrap.dedent("""\
+        fullnode: {{full_nodename}}
         host: {{rsync_host}}
         site: {{site}}
         node: {{node}}
-        experiment: {{experiment}}
+        experiment: {{experiment_safe}}
         module: {{rsync_module}}
         """)
         filename_template = ('deployment/{{site}}-{{node}}-'
-                             '{{experiment}}-{{rsync_module}}.yml')
+                             '{{experiment_safe}}-{{rsync_module}}.yml')
         mlabconfig.export_scraper_kubernetes_config(filename_template,
                                                     experiments,
                                                     output_template,
                                                     ".*mlab3.*")
         expected_output = {
             'deployment/abc01-mlab3-abc-foo-test1.yml': textwrap.dedent("""\
+                fullnode: mlab3.abc01.measurement-lab.org
                 host: foo.abc.mlab3.abc01.measurement-lab.org
                 site: abc01
                 node: mlab3
                 experiment: abc-foo
                 module: test1"""),
             'deployment/abc01-mlab3-abc-foo-test2.yml': textwrap.dedent("""\
+                fullnode: mlab3.abc01.measurement-lab.org
                 host: foo.abc.mlab3.abc01.measurement-lab.org
                 site: abc01
                 node: mlab3
