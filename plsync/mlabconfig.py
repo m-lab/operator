@@ -76,6 +76,7 @@ EXAMPLES:
         --template_target={{hostname}}:7999 \
         --label module=rsyncd_online \
         --label service=rsyncd \
+        --rsync \
         --select=".*lga0t.*"
 
     mlabconfig.py --format=prom-targets-nodes \

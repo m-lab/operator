@@ -1,15 +1,68 @@
 language: python
 python:
-  - "2.7"
-# Install dependencies
+- '2.7'
 install:
-    - pip install -r test-requirements.txt
-    - pip install coveralls
-    - pip install pyflakes==1.2.3
-    - pip install pylint==1.5.6
-    - pip install yapf==0.10.0
-# Run unit tests
+- pip install -r test-requirements.txt
+- pip install coveralls
+- pip install pyflakes==1.2.3
+- pip install pylint==1.5.6
+- pip install yapf==0.10.0
 script:
-    - ./build
+- ./build
+- ./generate_prometheus_targets.sh
 after_success:
-    - coveralls
+- coveralls
+before_install:
+- travis/decrypt.sh $encrypted_ea5d7bea5193_iv $encrypted_ea5d7bea5193_key
+  keys/service-accounts.tar.enc /tmp/service-accounts.tar /tmp
+# These directories will be cached on successful "script" builds, and restored,
+# if available, to save time on future builds.
+cache:
+  directories:
+    - "$HOME/google-cloud-sdk/"
+
+deploy:
+# Sandbox.
+- provider: script
+  script: $TRAVIS_BUILD_DIR/travis/deploy_gcs_copy.sh /tmp/mlab-sandbox.json
+    $TRAVIS_BUILD_DIR/gen/mlab-sandbox/prometheus
+    gs://operator-mlab-sandbox/prometheus -r
+  skip_cleanup: true
+  on:
+    # TODO: update repo
+    repo: m-lab/operator
+    # Consider all branches and match using the condition. By default
+    # "all_branches" is false, and the condition is ignored.
+    all_branches: true
+    # Only deploy after merging to master.
+    condition: $TRAVIS_BRANCH == master || $TRAVIS_BRANCH == sandbox-*
+
+# Staging.
+- provider: script
+  script: $TRAVIS_BUILD_DIR/travis/deploy_gcs_copy.sh /tmp/mlab-staging.json
+    $TRAVIS_BUILD_DIR/gen/mlab-staging/prometheus
+    gs://operator-mlab-staging/prometheus -r
+  skip_cleanup: true
+  on:
+    # TODO: update repo
+    repo: m-lab/operator
+    # Consider all branches and match using the condition. By default
+    # "all_branches" is false, and the condition is ignored.
+    all_branches: true
+    # Only deploy after merging to master.
+    condition: $TRAVIS_BRANCH == master || $TRAVIS_BRANCH == sandbox-*
+
+# Production.
+- provider: script
+  script: $TRAVIS_BUILD_DIR/travis/deploy_gcs_copy.sh /tmp/mlab-oti.json
+    $TRAVIS_BUILD_DIR/gen/mlab-oti/prometheus
+    gs://operator-mlab-oti/prometheus -r
+  skip_cleanup: true
+  on:
+    # TODO: update repo
+    repo: m-lab/operator
+    # Consider all branches and match using the condition. By default
+    # "all_branches" is false, and the condition is ignored.
+    all_branches: true
+    # Only deploy after merging to master.
+    condition: $TRAVIS_BRANCH == master || $TRAVIS_BRANCH == sandbox-*
