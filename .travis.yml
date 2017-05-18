@@ -10,6 +10,7 @@ install:
 script:
 - ./build
 - ./generate_prometheus_targets.sh
+- $TRAVIS_BUILD_DIR/travis/install_gcloud.sh
 after_success:
 - coveralls
 before_install:
@@ -26,7 +27,7 @@ deploy:
 - provider: script
   script: $TRAVIS_BUILD_DIR/travis/deploy_gcs_copy.sh /tmp/mlab-sandbox.json
     $TRAVIS_BUILD_DIR/gen/mlab-sandbox/prometheus
-    gs://operator-mlab-sandbox/prometheus -r
+    gs://operator-mlab-sandbox -r
   skip_cleanup: true
   on:
     # TODO: update repo
@@ -41,7 +42,7 @@ deploy:
 - provider: script
   script: $TRAVIS_BUILD_DIR/travis/deploy_gcs_copy.sh /tmp/mlab-staging.json
     $TRAVIS_BUILD_DIR/gen/mlab-staging/prometheus
-    gs://operator-mlab-staging/prometheus -r
+    gs://operator-mlab-staging -r
   skip_cleanup: true
   on:
     # TODO: update repo
@@ -56,7 +57,7 @@ deploy:
 - provider: script
   script: $TRAVIS_BUILD_DIR/travis/deploy_gcs_copy.sh /tmp/mlab-oti.json
     $TRAVIS_BUILD_DIR/gen/mlab-oti/prometheus
-    gs://operator-mlab-oti/prometheus -r
+    gs://operator-mlab-oti -r
   skip_cleanup: true
   on:
     # TODO: update repo
@@ -65,4 +66,4 @@ deploy:
     # "all_branches" is false, and the condition is ignored.
     all_branches: true
     # Only deploy after merging to master.
-    condition: $TRAVIS_BRANCH == master || $TRAVIS_BRANCH == sandbox-*
+    condition: $TRAVIS_BRANCH == master
