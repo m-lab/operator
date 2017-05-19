@@ -99,7 +99,7 @@ site_list = [
     makesite('hnd01','203.178.130.192','2001:200:0:b801::',    'Tokyo', 'JP', 35.552200, 139.780000, user_list, nodegroup='MeasurementLabCentos'),
     makesite('iad01','216.156.197.128','2610:18:111:8001::',   'Washington_DC', 'US', 38.944400, -77.455800, user_list, nodegroup='MeasurementLabCentos'),
     makesite('iad02','38.90.140.128',  '2001:550:200:7::',     'Washington_DC', 'US', 38.944400, -77.455800, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
-    makesite('iad03','66.198.10.128',  '2001:5a0:3c03::',      'Washington_DC', 'US', 38.944400, -77.455800, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
+    makesite('iad03','66.198.10.128',  '2001:5a0:3c03::',      'Washington_DC', 'US', 38.944400, -77.455800, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('iad04','173.205.4.0',    '2001:668:1f:21::',     'Washington_DC', 'US', 38.944400, -77.455800, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
     makesite('iad05','4.35.238.192',   '2001:1900:2200:46::',  'Washington_DC', 'US', 38.944400, -77.455800, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
     makesite('jnb01','196.24.45.128',  '2001:4200:fff0:4512::','Johannesburg', 'ZA', -26.203500, 28.133500, user_list, nodegroup='MeasurementLabCentos'),
