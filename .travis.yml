@@ -14,7 +14,7 @@ script:
 after_success:
 - coveralls
 before_install:
-- travis/decrypt.sh $encrypted_ea5d7bea5193_iv $encrypted_ea5d7bea5193_key
+- travis/decrypt.sh "$encrypted_ea5d7bea5193_iv" "$encrypted_ea5d7bea5193_key"
   keys/service-accounts.tar.enc /tmp/service-accounts.tar /tmp
 # These directories will be cached on successful "script" builds, and restored,
 # if available, to save time on future builds.
