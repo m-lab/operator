@@ -76,7 +76,7 @@ site_list = [
     makesite('arn01','213.248.112.64', '2001:2030:0:1b::',     'Stockholm', 'SE', 59.651900, 17.918600, user_list, nodegroup='MeasurementLabCentos'),
     makesite('atl01','4.71.254.128',   '2001:1900:3001:c::',   'Atlanta_GA', 'US', 33.636700, -84.428100, user_list, nodegroup='MeasurementLabCentos'),
     makesite('atl02','38.112.151.64',  '2001:550:5b00:1::',    'Atlanta_GA', 'US', 33.636700, -84.428100, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
-    makesite('atl03','64.86.200.192',  '2001:5a0:3b02::',      'Atlanta_GA', 'US', 33.636700, -84.428100, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
+    makesite('atl03','64.86.200.192',  '2001:5a0:3b02::',      'Atlanta_GA', 'US', 33.636700, -84.428100, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('atl04','173.205.0.192',  '2001:668:1f:1c::',     'Atlanta_GA', 'US', 33.636700, -84.428100, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
     makesite('atl05','67.106.215.192', '2610:18:111:c002::',   'Atlanta_GA', 'US', 33.636700, -84.428100, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
     makesite('atl06','70.42.177.64',   '2600:c0b:2002:5::',    'Atlanta_GA', 'US', 33.636700, -84.428100, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
