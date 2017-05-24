@@ -40,6 +40,52 @@ class BracketTemplate(string.Template):
         (?P<invalid>)
         )'''
 
+    # TODO(#116): Delete this class and local definition of safe_substitute once
+    # the resolution for http://bugs.python.org/issue17078 is in all
+    # contemporary python packages.
+    class _multimap:
+        """Helper class for combining multiple mappings.
+
+        Used by .{safe_,}substitute() to combine the mapping and keyword
+        arguments.
+        """
+        def __init__(self, primary, secondary):
+            self._primary = primary
+            self._secondary = secondary
+
+        def __getitem__(self, key):
+            try:
+                return self._primary[key]
+            except KeyError:
+                return self._secondary[key]
+
+    def safe_substitute(self, *args, **kws):
+        if len(args) > 1:
+            raise TypeError('Too many positional arguments')
+        if not args:
+            mapping = kws
+        elif kws:
+            mapping = _multimap(kws, args[0])
+        else:
+            mapping = args[0]
+        # Helper function for .sub()
+        def convert(mo):
+            named = mo.group('named') or mo.group('braced')
+            if named is not None:
+                try:
+                    # We use this idiom instead of str() because the latter
+                    # will fail if val is a Unicode containing non-ASCII
+                    return '%s' % (mapping[named],)
+                except KeyError:
+                    return mo.group()
+            if mo.group('escaped') is not None:
+                return self.delimiter
+            if mo.group('invalid') is not None:
+                return mo.group()
+            raise ValueError('Unrecognized named group in pattern',
+                             self.pattern)
+        return self.pattern.sub(convert, self.template)
+
 
 def usage():
     return """

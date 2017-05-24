@@ -69,6 +69,13 @@ class BracketTemplateTest(unittest.TestCase):
         self.assertEqual(actual1, '$var1 == Spot')
         self.assertEqual(actual2, '${var2} == Dog')
 
+    def test_substitute_without_value_returns_unchanged_template(self):
+        tmpl = mlabconfig.BracketTemplate('{{evaluated}} {{unevaluated}}')
+
+        actual = tmpl.safe_substitute({'evaluated': 'okay'})
+
+        self.assertEqual(actual, 'okay {{unevaluated}}')
+
 
 class MlabconfigTest(unittest.TestCase):
 
