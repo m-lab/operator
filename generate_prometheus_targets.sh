@@ -6,15 +6,13 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
 done
 
 # All testing sites and machines.
-SELECT_mlab_sandbox=".*[a-z]{3}[0-9]t.*"
+SELECT_mlab_sandbox=$( cat plsync/testing_patterns.txt | xargs | sed -e 's/ /|/g' )
 
 # All mlab4's and the set of canary machines.
-CANARY_PATTERN=$( cat plsync/canary_machines.txt | xargs | sed -e 's/ /|.*/g' )
-SELECT_mlab_staging=".*(mlab4.[a-z]{3}[0-9]{2}.*"
-SELECT_mlab_staging+="|$CANARY_PATTERN).*"
+SELECT_mlab_staging=$( cat plsync/staging_patterns.txt plsync/canary_machines.txt | xargs | sed -e 's/ /|/g' )
 
 # All sites *excluding* test sites.
-SELECT_mlab_oti=".*[a-z]{3}[0-9]{2}.*"
+SELECT_mlab_oti=$( cat plsync/production_patterns.txt | xargs | sed -e 's/ /|/g' )
 
 
 BASEDIR=${PWD}
@@ -44,7 +42,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
     ./mlabconfig.py --format=prom-targets \
         --template_target={{hostname}}:9090 \
         --label service=sidestream \
-        --select "npad.iupui.${!pattern}" > \
+        --select "npad.iupui.(${!pattern})" > \
             ${output}/legacy-targets/sidestream.json
   popd
 done
