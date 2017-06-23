@@ -1,23 +1,27 @@
 #!/bin/bash
 
+
+# Root directory of this script.
+SCRIPTDIR=$( dirname "${BASH_SOURCE[0]}" )
+BASEDIR=${PWD}
+
 # Create all output directories.
 for project in mlab-sandbox mlab-staging mlab-oti ; do
-  mkdir -p gen/${project}/prometheus/{legacy-targets,blackbox-targets}
+  mkdir -p ${BASEDIR}/gen/${project}/prometheus/{legacy-targets,blackbox-targets}
 done
 
 # All testing sites and machines.
-SELECT_mlab_sandbox=$( cat plsync/testing_patterns.txt | xargs | sed -e 's/ /|/g' )
+SELECT_mlab_sandbox=$( cat ${SCRIPTDIR}/plsync/testing_patterns.txt | xargs | sed -e 's/ /|/g' )
 
 # All mlab4's and the set of canary machines.
-SELECT_mlab_staging=$( cat plsync/staging_patterns.txt plsync/canary_machines.txt | xargs | sed -e 's/ /|/g' )
+SELECT_mlab_staging=$( cat ${SCRIPTDIR}/plsync/staging_patterns.txt ${SCRIPTDIR}/plsync/canary_machines.txt | xargs | sed -e 's/ /|/g' )
 
 # All sites *excluding* test sites.
-SELECT_mlab_oti=$( cat plsync/production_patterns.txt | xargs | sed -e 's/ /|/g' )
+SELECT_mlab_oti=$( cat ${SCRIPTDIR}/plsync/production_patterns.txt | xargs | sed -e 's/ /|/g' )
 
 
-BASEDIR=${PWD}
 for project in mlab-sandbox mlab-staging mlab-oti ; do
-  pushd plsync
+  pushd ${SCRIPTDIR}/plsync
     output=${BASEDIR}/gen/${project}/prometheus
 
     # Construct the per-project SELECT variable name to use below.

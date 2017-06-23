@@ -9,7 +9,6 @@ install:
 - pip install yapf==0.10.0
 script:
 - ./build
-- ./generate_prometheus_targets.sh
 - $TRAVIS_BUILD_DIR/travis/install_gcloud.sh
 after_success:
 - coveralls
@@ -26,9 +25,7 @@ cache:
 deploy:
 # Sandbox.
 - provider: script
-  script: $TRAVIS_BUILD_DIR/travis/deploy_gcs_copy.sh /tmp/mlab-sandbox.json
-    $TRAVIS_BUILD_DIR/gen/mlab-sandbox/prometheus
-    gs://operator-mlab-sandbox -r
+  script: $TRAVIS_BUILD_DIR/deploy_prometheus_targets.sh mlab-sandbox
   skip_cleanup: true
   on:
     # TODO: update repo
@@ -38,33 +35,3 @@ deploy:
     all_branches: true
     # Only deploy after merging to master.
     condition: $TRAVIS_BRANCH == master || $TRAVIS_BRANCH == sandbox-*
-
-# Staging.
-- provider: script
-  script: $TRAVIS_BUILD_DIR/travis/deploy_gcs_copy.sh /tmp/mlab-staging.json
-    $TRAVIS_BUILD_DIR/gen/mlab-staging/prometheus
-    gs://operator-mlab-staging -r
-  skip_cleanup: true
-  on:
-    # TODO: update repo
-    repo: m-lab/operator
-    # Consider all branches and match using the condition. By default
-    # "all_branches" is false, and the condition is ignored.
-    all_branches: true
-    # Only deploy after merging to master.
-    condition: $TRAVIS_BRANCH == master || $TRAVIS_BRANCH == sandbox-*
-
-# Production.
-- provider: script
-  script: $TRAVIS_BUILD_DIR/travis/deploy_gcs_copy.sh /tmp/mlab-oti.json
-    $TRAVIS_BUILD_DIR/gen/mlab-oti/prometheus
-    gs://operator-mlab-oti -r
-  skip_cleanup: true
-  on:
-    # TODO: update repo
-    repo: m-lab/operator
-    # Consider all branches and match using the condition. By default
-    # "all_branches" is false, and the condition is ignored.
-    all_branches: true
-    # Only deploy after merging to master.
-    condition: $TRAVIS_BRANCH == master
