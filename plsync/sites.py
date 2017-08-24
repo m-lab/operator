@@ -182,8 +182,11 @@ site_list = [
     makesite('vie01','213.208.152.0',  '2a01:190:1700:38::',   'Vienna', 'AT', 48.269000, 16.410700, user_list, nodegroup='MeasurementLabCentos'),
     makesite('wlg02','163.7.129.64',   '2404:138:4009:1::',    'Wellington', 'NZ', -41.327200, 174.805000, user_list, nodegroup='MeasurementLabCentos'),
     makesite('yul01','162.219.49.0',   '2620:10a:80fe::',      'Montreal', 'CA', 45.4576, -73.7497, user_list, arch='x86_64-r420', nodegroup='MeasurementLabCentos'),
+    makesite('yul02','216.66.14.64',   '2001:470:1:48f::',     'Montreal', 'CA', 45.4576, -73.7497, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('yyc01','162.219.50.0',   '2620:10a:80ff::',      'Calgary', 'CA', 51.1315, -114.0106, user_list, arch='x86_64-r420', nodegroup='MeasurementLabCentos'),
+    makesite('yyc02','65.49.72.192',   '2001:470:1:42c::',     'Calgary', 'CA', 51.1315, -114.0106, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('yyz01','162.219.48.0',   '2620:10a:80fd::',      'Toronto', 'CA', 43.6767, -79.6306, user_list, arch='x86_64-r420', nodegroup='MeasurementLabCentos'),
+    makesite('yyz02','216.66.68.128',  '2001:470:1:70a::',     'Toronto', 'CA', 43.6767, -79.6306, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
 
     # Site for M-Lab testing machines
     makesite('lga0t','4.14.159.64', '2001:1900:2100:2d::','New York_NY', 'US', 40.766700, -73.866700, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
