@@ -4,6 +4,8 @@ set -e
 set -x
 set -u
 
+CACHE_CONTROL="Cache-Control:private, max-age=0, no-transform"
+
 USAGE="Usage: $0 <project>"
 PROJECT=${1:?Please provide project name: $USAGE}
 
@@ -14,8 +16,16 @@ BASEDIR=${PWD}
 # Generate the configs.
 ${SCRIPTDIR}/generate_prometheus_targets.sh
 
+
+# Authenticate all operations using the given service account.
+if [[ -f /tmp/${PROJECT}.json ]] ; then
+  gcloud auth activate-service-account --key-file /tmp/${PROJECT}.json
+else
+  echo "Service account key not found at /tmp/${PROJECT}.json!!"
+  echo "Using default credentials."
+fi
+
 # Copy the configs to GCS.
-${SCRIPTDIR}/travis/deploy_gcs_copy.sh \
-  /tmp/${PROJECT}.json \
+gsutil -h "$CACHE_CONTROL" cp -r \
   ${BASEDIR}/gen/${PROJECT}/prometheus \
-  gs://operator-${PROJECT} -r
+  gs://operator-${PROJECT}
