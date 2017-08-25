@@ -11,7 +11,8 @@ set prompt "\\$|system>|/.*>|</>hpiLO->"
 
 log_user 1
 if { "$method" == "ssh" } {
-    #send_user "spawn ssh -o StrictHostKeyChecking=no \
+    #send_user "spawn ssh -o UserKnownHostsFile=/dev/null \
+    #                     -o StrictHostKeyChecking=no \
     #                     -o PasswordAuthentication=yes \
     #                     -o PubkeyAuthentication=no $user@$host\n"
     set cont 0
@@ -21,11 +22,13 @@ if { "$method" == "ssh" } {
         #       stderr redirected to stdout, others only work without it.
         if { $retry == 0 } {
             spawn ssh -o Port=806 \
+                      -o UserKnownHostsFile=/dev/null \
                       -o StrictHostKeyChecking=no \
                       -o PasswordAuthentication=yes \
                       -o PubkeyAuthentication=no $user@$host 
         } else {
             spawn ssh -o Port=806 \
+                      -o UserKnownHostsFile=/dev/null \
                       -o StrictHostKeyChecking=no \
                       -o PasswordAuthentication=yes \
                       -o PubkeyAuthentication=no $user@$host 2>&1
