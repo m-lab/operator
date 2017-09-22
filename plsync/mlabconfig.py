@@ -500,6 +500,19 @@ def export_mlab_site_stats(output, sites):
             'latitude': location['latitude'],
             'longitude': location['longitude']
         })
+
+    # Temporary workaround for HND01 load issues. Remove this after the issue
+    # has been resolved.
+    for tyo in ['tyo01', 'tyo02', 'tyo03']:
+        sitestats.append({
+            'site': tyo,
+            'metro': [tyo, tyo[:-2]],
+            'city': 'Tokyo',
+            'country': 'JP',
+            'latitude': 35.552200,
+            'longitude': 139.780000
+        })
+
     json.dump(sitestats, output)
 
 
@@ -523,6 +536,18 @@ def export_mlab_host_ips(output, sites, experiments):
                 '{name},{ipv4},{ipv6}\n'.format(name=experiment.hostname(node),
                                                 ipv4=experiment.ipv4(node),
                                                 ipv6=experiment.ipv6(node)))
+
+    # Temporary workaround for HND01 load issues. Remove this after the
+    # issue has been resolved.
+    output.write(
+       'mlab1.tyo01.measurement-lab.org,35.200.102.226,\n'
+       'ndt.iupui.mlab1.tyo01.measurement-lab.org,35.200.102.226,\n'
+       'mlab1.tyo02.measurement-lab.org,35.200.32.43,\n'
+       'ndt.iupui.mlab1.tyo02.measurement-lab.org,35.200.32.43,\n'
+       'mlab1.tyo03.measurement-lab.org,35.200.112.17,\n'
+       'ndt.iupui.mlab1.tyo03.measurement-lab.org,35.200.112.17,\n'
+    )
+
 
 
 # TODO(soltesz): this function is too specific to node network configuration.
