@@ -584,6 +584,24 @@ class MlabconfigTest(unittest.TestCase):
         self.assertEqual(len(actual_targets), 1)
         self.assertItemsEqual(actual_targets, expected_targets)
 
+    def test_select_prometheus_site_targets(self):
+        expected_targets = [
+            {
+                'labels': {
+                    'site': 'abc01'
+                },
+                'targets': [
+                    's1.abc01.measurement-lab.org:9116'
+                ]
+            }
+        ]
+
+        actual_targets = mlabconfig.select_prometheus_site_targets(
+            self.sites, None, 's1.{{sitename}}.measurement-lab.org:9116', {})
+
+        self.assertEqual(len(actual_targets), 1)
+        self.assertItemsEqual(actual_targets, expected_targets)
+
 
 if __name__ == '__main__':
     unittest.main()

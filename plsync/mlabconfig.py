@@ -130,6 +130,10 @@ EXAMPLES:
         --label module=ssh_v4_online \
         --label service=machine_online \
         --select=".*lga0t.*"
+
+    mlabconfig.py --format=prom-targets-sites \
+        --template_target=s1.{{sitename}}.measurement-lab.org:9116 \
+        --label service=snmp_exporter
 """
 
 
@@ -711,6 +715,37 @@ def select_prometheus_node_targets(sites, select_regex, target_template,
     return records
 
 
+def select_prometheus_site_targets(sites, select_regex, target_template,
+                                  common_labels):
+    """Selects and formats site targets.
+
+    Args:
+      sites: list of planetlab.Site objects, used to generate site names.
+      select_regex: str, a regex used to choose a subset of hostnames. Ignored
+          if empty.
+      target_template: str, a template for formatting the target from the
+          hostname. e.g. s1.{{sitename}}.measurement-lab.org:9116
+      common_labels: dict of str, a set of labels to apply to all targets.
+
+    Returns:
+      list of dict, each element is a dict with 'labels' (a dict of key/values)
+          and 'targets' (a list of targets).
+    """
+    records = []
+    target_tmpl = BracketTemplate(target_template)
+    for site in sites:
+        if select_regex and not re.search(select_regex, site['name']):
+            continue
+        labels = common_labels.copy()
+        labels['site'] = site['name']
+        target = target_tmpl.safe_substitute({'sitename': site['name']})
+        records.append({
+            'labels': labels,
+            'targets': [target],
+        })
+    return records
+
+
 def main():
     (options, args) = parse_flags()
 
@@ -759,6 +794,12 @@ def main():
     elif options.format == 'prom-targets-nodes':
         # TODO(soltesz): support v4 only or v6 only options.
         records = select_prometheus_node_targets(
+            sites, options.select, options.template_target, options.labels)
+        json.dump(records, sys.stdout, indent=4)
+
+    elif options.format == 'prom-targets-sites':
+        # TODO(soltesz): support v4 only or v6 only options.
+        records = select_prometheus_site_targets(
             sites, options.select, options.template_target, options.labels)
         json.dump(records, sys.stdout, indent=4)
 

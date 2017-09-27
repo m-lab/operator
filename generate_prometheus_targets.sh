@@ -7,7 +7,7 @@ BASEDIR=${PWD}
 
 # Create all output directories.
 for project in mlab-sandbox mlab-staging mlab-oti ; do
-  mkdir -p ${BASEDIR}/gen/${project}/prometheus/{legacy-targets,blackbox-targets}
+  mkdir -p ${BASEDIR}/gen/${project}/prometheus/{legacy-targets,blackbox-targets,snmp-targets}
 done
 
 # All testing sites and machines.
@@ -41,6 +41,12 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
         --label service=ssh806 \
         --label module=ssh_v4_online \
         --select="${!pattern}" > ${output}/blackbox-targets/ssh806.json
+
+    # snmp_exporter on port 9116
+    ./mlabconfig.py --format=prom-targets-sites \
+        --template_target=s1.{{sitename}}.measurement-lab.org:9116 \
+        --label service=snmp_exporter > \
+        ${output}/snmp-targets/snmpexporter.json
 
     # Sidestream exporter in the npad experiment.
     ./mlabconfig.py --format=prom-targets \
