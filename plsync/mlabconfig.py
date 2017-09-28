@@ -132,8 +132,9 @@ EXAMPLES:
         --select=".*lga0t.*"
 
     mlabconfig.py --format=prom-targets-sites \
-        --template_target=s1.{{sitename}}.measurement-lab.org:9116 \
-        --label service=snmp_exporter
+        --template_target=s1.{{sitename}}.measurement-lab.org \
+        --label service=snmp \
+        --label __exporter_project=sandbox
 """
 
 
