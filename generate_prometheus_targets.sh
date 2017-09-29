@@ -42,12 +42,12 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
         --label module=ssh_v4_online \
         --select="${!pattern}" > ${output}/blackbox-targets/ssh806.json
 
-    # snmp_exporter on port 9116
+    # snmp_exporter on port 9116.
     ./mlabconfig.py --format=prom-targets-sites \
         --template_target=s1.{{sitename}}.measurement-lab.org \
         --label service=snmp \
         --label __exporter_project=${project#mlab-} > \
-        ${output}/snmp-targets/snmpexporter.json
+            ${output}/snmp-targets/snmpexporter.json
 
     # Sidestream exporter in the npad experiment.
     ./mlabconfig.py --format=prom-targets \
@@ -55,5 +55,12 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
         --label service=sidestream \
         --select "npad.iupui.(${!pattern})" > \
             ${output}/legacy-targets/sidestream.json
+
+    # node_exporter on port 9100.
+    ./mlabconfig.py --format=prom-targets-nodes \
+        --template_target={{hostname}}:9100 \
+        --label service=nodeexporter \
+        --label module=lame_duck > \
+            ${output}/legacy-targets/lameduck.json
   popd
 done
