@@ -547,8 +547,8 @@ def export_mlab_host_ips(output, sites, experiments):
     output.write(
        'mlab1.tyo01.measurement-lab.org,35.200.102.226,\n'
        'ndt.iupui.mlab1.tyo01.measurement-lab.org,35.200.102.226,\n'
-       'mlab1.tyo02.measurement-lab.org,35.200.32.43,\n'
-       'ndt.iupui.mlab1.tyo02.measurement-lab.org,35.200.32.43,\n'
+       'mlab1.tyo02.measurement-lab.org,35.200.34.149,\n'
+       'ndt.iupui.mlab1.tyo02.measurement-lab.org,35.200.34.149,\n'
        'mlab1.tyo03.measurement-lab.org,35.200.112.17,\n'
        'ndt.iupui.mlab1.tyo03.measurement-lab.org,35.200.112.17,\n'
     )
