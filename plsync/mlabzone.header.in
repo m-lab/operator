@@ -43,33 +43,33 @@ donar   IN      NS      utility.mlab.mlab1.hnd01.measurement-lab.org.
 ;
 ; hosts v4
 mlab1.tyo01                       IN  A         35.200.102.226
-mlab1.tyo02                       IN  A         35.200.32.43
+mlab1.tyo02                       IN  A         35.200.34.149
 mlab1.tyo03                       IN  A         35.200.112.17
 
 ; hosts v4 decorated
 mlab1v4.tyo01                     IN  A         35.200.102.226
-mlab1v4.tyo02                     IN  A         35.200.32.43
+mlab1v4.tyo02                     IN  A         35.200.34.149
 mlab1v4.tyo03                     IN  A         35.200.112.17
 
 ; ndt.iupui v4
 ndt.iupui.tyo01                   IN  A         35.200.102.226
 ndt.iupui.mlab1.tyo01             IN  A         35.200.102.226
-ndt.iupui.tyo02                   IN  A         35.200.32.43
-ndt.iupui.mlab1.tyo02             IN  A         35.200.32.43
+ndt.iupui.tyo02                   IN  A         35.200.34.149
+ndt.iupui.mlab1.tyo02             IN  A         35.200.34.149
 ndt.iupui.tyo03                   IN  A         35.200.112.17
 ndt.iupui.mlab1.tyo03             IN  A         35.200.112.17
 
 ; ndt.iupui v4 decorated
 ndt.iupuiv4.tyo01                 IN  A         35.200.102.226
 ndt.iupui.mlab1v4.tyo01           IN  A         35.200.102.226
-ndt.iupuiv4.tyo02                 IN  A         35.200.32.43
-ndt.iupui.mlab1v4.tyo02           IN  A         35.200.32.43
+ndt.iupuiv4.tyo02                 IN  A         35.200.34.149
+ndt.iupui.mlab1v4.tyo02           IN  A         35.200.34.149
 ndt.iupuiv4.tyo03                 IN  A         35.200.112.17
 ndt.iupui.mlab1v4.tyo03           IN  A         35.200.112.17
 
 ; ndt.iupui v4 flattened
 ndt-iupui-mlab1-tyo01             IN  A         35.200.102.226
-ndt-iupui-mlab1-tyo02             IN  A         35.200.32.43
+ndt-iupui-mlab1-tyo02             IN  A         35.200.34.149
 ndt-iupui-mlab1-tyo03             IN  A         35.200.112.17
 
 ; ndt.iupui v4 decorated flattened
