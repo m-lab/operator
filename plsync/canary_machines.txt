@@ -1,6 +1,10 @@
-mlab1.atl06.measurement-lab.org
-mlab1.dfw01.measurement-lab.org
-mlab1.ham01.measurement-lab.org
-mlab1.lhr01.measurement-lab.org
-mlab1.nuq02.measurement-lab.org
+mlab1.bru01.measurement-lab.org
+mlab1.fra01.measurement-lab.org
+mlab1.lax01.measurement-lab.org
+mlab1.lga03.measurement-lab.org
+mlab1.lhr05.measurement-lab.org
+mlab1.mia02.measurement-lab.org
+mlab1.nuq05.measurement-lab.org
+mlab1.ord04.measurement-lab.org
+mlab1.sea06.measurement-lab.org
 mlab1.wlg02.measurement-lab.org
