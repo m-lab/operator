@@ -209,7 +209,8 @@ def parse_flags():
         '',
         '--template_target',
         dest='template_target',
-        default='{{hostname}}:7999',
+        action='append',
+        default=[],
         help=('Target is interpreted as a template used to format blackbox '
               'targets.'))
     parser.add_option(
@@ -224,7 +225,7 @@ def parse_flags():
         '--rsync',
         dest='rsync',
         action='store_true',
-        default=True,
+        default=False,
         help='Only process experiments that have rsync modules defined.')
     parser.add_option(
         '',
@@ -643,14 +644,14 @@ def export_scraper_kubernetes_config(filename_template, experiments,
 
 
 def select_prometheus_experiment_targets(
-    experiments, select_regex, target_template, common_labels, rsync_only):
+    experiments, select_regex, target_templates, common_labels, rsync_only):
     """Selects and formats targets from experiments.
 
     Args:
       experiments: list of planetlab.Slice objects, used to enumerate hostnames.
       select_regex: str, a regex used to choose a subset of hostnames. Ignored
           if empty.
-      target_template: str, a template for formatting the target from the
+      target_templates: list of templates for formatting the target(s) from the
           hostname. e.g. {{hostname}}:7999, https://{{hostname}}/some/path
       common_labels: dict of str, a set of labels to apply to all targets.
       rsync_only: bool, skip experiments without rsync_modules.
@@ -660,7 +661,6 @@ def select_prometheus_experiment_targets(
           and 'targets' (a list of targets).
     """
     records = []
-    target_tmpl = BracketTemplate(target_template)
     for experiment in experiments:
         for _, node in experiment['network_list']:
             # Skip experiments without an IP index.
@@ -676,15 +676,19 @@ def select_prometheus_experiment_targets(
             if not rsync_only or experiment['rsync_modules']:
                 if select_regex and not re.search(select_regex, host):
                     continue
-                target = target_tmpl.safe_substitute({'hostname': host})
+                targets = []
+                for tmpl in target_templates:
+                    target_tmpl = BracketTemplate(tmpl)
+                    target = target_tmpl.safe_substitute({'hostname': host})
+                    targets.append(target)
                 records.append({
                     'labels': labels,
-                    'targets': [target],
+                    'targets': targets,
                 })
     return records
 
 
-def select_prometheus_node_targets(sites, select_regex, target_template,
+def select_prometheus_node_targets(sites, select_regex, target_templates,
                                    common_labels):
     """Selects and formats targets from site nodes.
 
@@ -692,7 +696,7 @@ def select_prometheus_node_targets(sites, select_regex, target_template,
       sites: list of planetlab.Site objects, used to generate hostnames.
       select_regex: str, a regex used to choose a subset of hostnames. Ignored
           if empty.
-      target_template: str, a template for formatting the target from the
+      target_templates: list of templates for formatting the target(s) from the
           hostname. e.g. {{hostname}}:7999, https://{{hostname}}/some/path
       common_labels: dict of str, a set of labels to apply to all targets.
 
@@ -701,22 +705,25 @@ def select_prometheus_node_targets(sites, select_regex, target_template,
           and 'targets' (a list of targets).
     """
     records = []
-    target_tmpl = BracketTemplate(target_template)
     for site in sites:
         for _, node in site['nodes'].iteritems():
             if select_regex and not re.search(select_regex, node.hostname()):
                 continue
             labels = common_labels.copy()
             labels['machine'] = node.hostname()
-            target = target_tmpl.safe_substitute({'hostname': node.hostname()})
+            targets = []
+            for tmpl in target_templates:
+                target_tmpl = BracketTemplate(tmpl)
+                target = target_tmpl.safe_substitute({'hostname': node.hostname()})
+                targets.append(target)
             records.append({
                 'labels': labels,
-                'targets': [target],
+                'targets': targets,
             })
     return records
 
 
-def select_prometheus_site_targets(sites, select_regex, target_template,
+def select_prometheus_site_targets(sites, select_regex, target_templates,
                                   common_labels):
     """Selects and formats site targets.
 
@@ -724,7 +731,7 @@ def select_prometheus_site_targets(sites, select_regex, target_template,
       sites: list of planetlab.Site objects, used to generate site names.
       select_regex: str, a regex used to choose a subset of hostnames. Ignored
           if empty.
-      target_template: str, a template for formatting the target from the
+      target_templates: list of templates for formatting the target(s) from the
           hostname. e.g. s1.{{sitename}}.measurement-lab.org:9116
       common_labels: dict of str, a set of labels to apply to all targets.
 
@@ -733,16 +740,19 @@ def select_prometheus_site_targets(sites, select_regex, target_template,
           and 'targets' (a list of targets).
     """
     records = []
-    target_tmpl = BracketTemplate(target_template)
     for site in sites:
         if select_regex and not re.search(select_regex, site['name']):
             continue
         labels = common_labels.copy()
         labels['site'] = site['name']
-        target = target_tmpl.safe_substitute({'sitename': site['name']})
+        targets = []
+        for tmpl in target_templates:
+            target_tmpl = BracketTemplate(tmpl)
+            target = target_tmpl.safe_substitute({'sitename': site['name']})
+            targets.append(target)
         records.append({
             'labels': labels,
-            'targets': [target],
+            'targets': targets,
         })
     return records
 

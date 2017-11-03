@@ -531,7 +531,7 @@ class MlabconfigTest(unittest.TestCase):
         ]
 
         actual_targets = mlabconfig.select_prometheus_experiment_targets(
-            experiments, None, '{{hostname}}:9090', {}, False)
+            experiments, None, ['{{hostname}}:9090'], {}, False)
 
         self.assertEqual(len(actual_targets), 3)
         self.assertItemsEqual(expected_targets, actual_targets)
@@ -561,7 +561,7 @@ class MlabconfigTest(unittest.TestCase):
         ]
 
         actual_targets = mlabconfig.select_prometheus_experiment_targets(
-            experiments, "bar.abc.mlab2.*", '{{hostname}}:9090', {}, False)
+            experiments, "bar.abc.mlab2.*", ['{{hostname}}:9090'], {}, False)
 
         self.assertEqual(len(actual_targets), 1)
         self.assertItemsEqual(expected_targets, actual_targets)
@@ -579,10 +579,31 @@ class MlabconfigTest(unittest.TestCase):
         ]
 
         actual_targets = mlabconfig.select_prometheus_node_targets(
-            self.sites, "mlab2.*", '{{hostname}}:9090', {})
+            self.sites, "mlab2.*", ['{{hostname}}:9090'], {})
 
         self.assertEqual(len(actual_targets), 1)
         self.assertItemsEqual(actual_targets, expected_targets)
+
+    def test_select_prometheus_node_mulitple_targets(self):
+        expected_targets = [
+            {
+                'labels': {
+                    'machine': 'mlab2.abc01.measurement-lab.org'
+                },
+                'targets': [
+                    'mlab2.abc01.measurement-lab.org:9090',
+                    'mlab2.abc01.measurement-lab.org:8080'
+                ]
+            }
+        ]
+
+        actual_targets = mlabconfig.select_prometheus_node_targets(
+            self.sites, "mlab2.*", ['{{hostname}}:9090', '{{hostname}}:8080'],
+            {})
+
+        self.assertEqual(len(actual_targets), 1)
+        self.assertItemsEqual(actual_targets, expected_targets)
+
 
     def test_select_prometheus_site_targets(self):
         expected_targets = [
@@ -597,7 +618,7 @@ class MlabconfigTest(unittest.TestCase):
         ]
 
         actual_targets = mlabconfig.select_prometheus_site_targets(
-            self.sites, None, 's1.{{sitename}}.measurement-lab.org:9116', {})
+            self.sites, None, ['s1.{{sitename}}.measurement-lab.org:9116'], {})
 
         self.assertEqual(len(actual_targets), 1)
         self.assertItemsEqual(actual_targets, expected_targets)
