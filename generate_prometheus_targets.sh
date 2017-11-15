@@ -58,6 +58,13 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
         --select="ndt.iupui.(${!pattern})" > \
             ${output}/blackbox-targets/ndt_ssl.json
 
+    # inotify_exporter for NDT on port 9393.
+    ./mlabconfig.py --format=prom-targets \
+        --template_target={{hostname}}:9393 \
+        --label service=inotify \
+        --select="ndt.iupui.(${!pattern})" > \
+            ${output}/legacy-targets/ndt_inotify.json
+
     # Mobiperf on ports 6001, 6002, 6003.
     ./mlabconfig.py --format=prom-targets \
         --template_target={{hostname}}:6001 \
