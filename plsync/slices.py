@@ -79,7 +79,10 @@ mlab4s_only = ['mlab4.nuq01', 'mlab4.nuq02', 'mlab4.prg01',
 #                  arbitrary initscripts and support resetting.
 # ipv6  : specifies how to assign ipv6 addresses to slices. Accepted values are:
 #            None - do not assign.
-#            list - An explicit list of machine names to permit ipv6 addresses
+#            list - An explicit list of machine and/or site names to permit ipv6
+#                   addresses e.g., ['den01', 'mlab3.bru02', 'mlab1.hnd01']. If
+#                   a bare site name is provided, then every node at the site
+#                   will get an IPv6 address.
 #            "all" - assign ipv6 addresses to all machines
 #         If a site lacks IPv6 addresses, none will be assigned even if "all" is
 #         given. For example, see lca01+npad.

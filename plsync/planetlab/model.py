@@ -532,8 +532,8 @@ class Slice(dict):
                     nodes on which plsync is called explicitly.
         ipv6 - how to enable IPv6 for this slice. Options are:
                 "all" - add IPv6 addres to all nodes
-                [] - a list of abbreviated hostnames, i..e ['mlab1.nuq01', 
-                    'mlab2.nuq02', ...]
+                [] - a list of abbreviated hostnames and/or sites, i.e.,
+                     ['mlab1.nuq01', 'sea03', 'mia01', 'mlab3.den04', ...]
                 None - do not enble IPv6 addressing anywhere.
     """
 
@@ -561,8 +561,21 @@ class Slice(dict):
             if type(kwargs['ipv6']) == str:
                 kwargs['ipv6'] = "all"
             elif type(kwargs['ipv6']) == type([]):
-                kwargs['ipv6'] = ['%s.%s' % (host, MLAB_ORG_DOMAIN)
-                                  for host in kwargs['ipv6']]
+                ipv6_hosts = []
+                for host in kwargs['ipv6']:
+                    # This is a node (e.g., mlab1.sea02)
+                    if len(host.split('.')) == 2:
+                        ipv6_hosts.append('%s.%s' % (host, MLAB_ORG_DOMAIN))
+                    # This is a site (e.g., sea02)
+                    elif len(host.split('.')) == 1:
+                        for node in ['mlab1', 'mlab2', 'mlab3', 'mlab4']:
+                            ipv6_hosts.append('%s.%s.%s' % (node, host,
+                                              MLAB_ORG_DOMAIN))
+                    # We don't know what this is. Raise an error.
+                    else:
+                        raise Exception("Unrecognized node/site for ipv6"+
+                                        "parameter: %s" % host)
+                kwargs['ipv6'] = ipv6_hosts
             else:
                 raise Exception("Unrecognized type for ipv6 parameter: %s" % 
                                     type(kwargs['ipv6']))
