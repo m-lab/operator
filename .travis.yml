@@ -28,6 +28,11 @@ cache:
   directories:
     - "$HOME/google-cloud-sdk/"
 
+# NOTE: This Travis-CI config *only* deploys to mlab-sandbox. Currently,
+# deployment of Prometheus targets to mlab-staging and mlab-oti are handled by
+# m-lab/scraper deployments to those projects. See here:
+# https://github.com/m-lab/scraper/blob/master/.travis.yml#L33
+# https://github.com/m-lab/scraper/blob/master/.travis.yml#L48
 deploy:
 # Sandbox.
 - provider: script
