@@ -531,7 +531,7 @@ class MlabconfigTest(unittest.TestCase):
         ]
 
         actual_targets = mlabconfig.select_prometheus_experiment_targets(
-            experiments, None, ['{{hostname}}:9090'], {}, False)
+            experiments, None, ['{{hostname}}:9090'], {}, False, False)
 
         self.assertEqual(len(actual_targets), 3)
         self.assertItemsEqual(expected_targets, actual_targets)
@@ -561,7 +561,39 @@ class MlabconfigTest(unittest.TestCase):
         ]
 
         actual_targets = mlabconfig.select_prometheus_experiment_targets(
-            experiments, "bar.abc.mlab2.*", ['{{hostname}}:9090'], {}, False)
+            experiments, "bar.abc.mlab2.*", ['{{hostname}}:9090'], {}, False,
+            False)
+
+        self.assertEqual(len(actual_targets), 1)
+        self.assertItemsEqual(expected_targets, actual_targets)
+
+    def test_select_prometheus_experiment_targets_flattens_names(self):
+        # Setup synthetic user, site, and experiment configuration data.
+        experiments = [model.Slice(name='abc_bar',
+                                   index=1,
+                                   attrs=self.attrs,
+                                   users=self.users,
+                                   use_initscript=True,
+                                   ipv6='all')]
+        # Assign experiments to nodes.
+        for hostname, node in self.sites[0]['nodes'].iteritems():
+            experiments[0].add_node_address(node)
+        output = StringIO.StringIO()
+        expected_targets = [
+            {
+                'labels': {
+                    'machine': 'mlab2.abc01.measurement-lab.org',
+                    'experiment': 'bar.abc'
+                },
+                'targets': [
+                    'bar-abc-mlab2-abc01.measurement-lab.org:9090'
+                ]
+            }
+        ]
+
+        actual_targets = mlabconfig.select_prometheus_experiment_targets(
+            experiments, "bar.abc.mlab2.*", ['{{hostname}}:9090'], {}, False,
+            True)
 
         self.assertEqual(len(actual_targets), 1)
         self.assertItemsEqual(expected_targets, actual_targets)

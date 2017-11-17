@@ -55,6 +55,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
         --template_target={{hostname}}:3010 \
         --label service=ndt_ssl \
         --label module=tcp_v4_tls_online \
+        --use_flatnames \
         --select="ndt.iupui.(${!pattern})" > \
             ${output}/blackbox-targets/ndt_ssl.json
 
