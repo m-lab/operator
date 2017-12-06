@@ -28,21 +28,40 @@ cache:
   directories:
     - "$HOME/google-cloud-sdk/"
 
-# NOTE: This Travis-CI config *only* deploys to mlab-sandbox. Currently,
-# deployment of Prometheus targets to mlab-staging and mlab-oti are handled by
-# m-lab/scraper deployments to those projects. See here:
-# https://github.com/m-lab/scraper/blob/master/.travis.yml#L33
-# https://github.com/m-lab/scraper/blob/master/.travis.yml#L48
+# NOTE: Currently, Prometheus targets are managed in two monitoring groups:
+#  1. "scraper" - targets for scraper alerts are generated & deployed by the
+#     scraper release process.
+#     See more here:
+#       https://github.com/m-lab/scraper/blob/master/.travis.yml#L33
+#       https://github.com/m-lab/scraper/blob/master/.travis.yml#L48
+#
+#  2. "global" - targets for all other prometheus usage are generated &
+#     deployed by the operator release process.
+#
+# The monitoring group is the second argument to deploy_prometheus_targets.sh.
 deploy:
+
 # Sandbox.
 - provider: script
-  script: $TRAVIS_BUILD_DIR/deploy_prometheus_targets.sh mlab-sandbox
+  script: $TRAVIS_BUILD_DIR/deploy_prometheus_targets.sh mlab-sandbox global
   skip_cleanup: true
   on:
-    # TODO: update repo
     repo: m-lab/operator
-    # Consider all branches and match using the condition. By default
-    # "all_branches" is false, and the condition is ignored.
     all_branches: true
-    # Only deploy after merging to master.
     condition: $TRAVIS_BRANCH == master || $TRAVIS_BRANCH == sandbox-*
+
+# Staging, on master.
+- provider: script
+  script: $TRAVIS_BUILD_DIR/deploy_prometheus_targets.sh mlab-staging global
+  skip_cleanup: true
+  on:
+    repo: m-lab/operator
+    branch: master
+
+# Production, on tags.
+- provider: script
+  script: $TRAVIS_BUILD_DIR/deploy_prometheus_targets.sh mlab-oti global
+  skip_cleanup: true
+  on:
+    repo: m-lab/operator
+    tags: true
