@@ -72,13 +72,6 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --select="ndt.iupui.(${!pattern})" > \
               ${output}/blackbox-targets/ndt_ssl.json
 
-      # inotify_exporter for NDT on port 9393.
-      ./mlabconfig.py --format=prom-targets \
-          --template_target={{hostname}}:9393 \
-          --label service=inotify \
-          --select="ndt.iupui.(${!pattern})" > \
-              ${output}/legacy-targets/ndt_inotify.json
-
       # Mobiperf on ports 6001, 6002, 6003.
       ./mlabconfig.py --format=prom-targets \
           --template_target={{hostname}}:6001 \
@@ -97,12 +90,25 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --select="neubot.mlab.(${!pattern})" > \
               ${output}/blackbox-targets/neubot.json
 
+      ########################################################################
+      # Note: The following configs select all servers. This allows us to
+      # experiment with monitoring many sites in sandbox or staging before
+      # production.
+      ########################################################################
+
       # snmp_exporter on port 9116.
       ./mlabconfig.py --format=prom-targets-sites \
           --template_target=s1.{{sitename}}.measurement-lab.org \
           --label service=snmp \
           --label __exporter_project=${project#mlab-} > \
               ${output}/snmp-targets/snmpexporter.json
+
+      # inotify_exporter for NDT on port 9393.
+      ./mlabconfig.py --format=prom-targets \
+          --template_target={{hostname}}:9393 \
+          --label service=inotify \
+          --select="ndt.iupui.*" > \
+              ${output}/legacy-targets/ndt_inotify.json
 
       # node_exporter on port 9100.
       ./mlabconfig.py --format=prom-targets-nodes \
