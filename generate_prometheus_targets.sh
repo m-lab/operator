@@ -55,12 +55,18 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
 
     elif [[ ${GROUP} == global ]] ; then
 
+      ########################################################################
+      # Note: The following configs select all servers. This allows us to
+      # experiment with monitoring many sites in sandbox or staging before
+      # production.
+      ########################################################################
+
       # NDT "raw" on port 3001.
       ./mlabconfig.py --format=prom-targets \
           --template_target={{hostname}}:3001 \
           --label service=ndt_raw \
           --label module=tcp_v4_online \
-          --select="ndt.iupui.(${!pattern})" > \
+          --select="ndt.iupui.*" > \
               ${output}/blackbox-targets/ndt_raw.json
 
       # NDT SSL on port 3010.
@@ -69,7 +75,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --label service=ndt_ssl \
           --label module=tcp_v4_tls_online \
           --use_flatnames \
-          --select="ndt.iupui.(${!pattern})" > \
+          --select="ndt.iupui.*" > \
               ${output}/blackbox-targets/ndt_ssl.json
 
       # Mobiperf on ports 6001, 6002, 6003.
@@ -79,7 +85,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --template_target={{hostname}}:6003 \
           --label service=mobiperf \
           --label module=tcp_v4_online \
-          --select="1.michigan.(${!pattern})" > \
+          --select="1.michigan.*" > \
               ${output}/blackbox-targets/mobiperf.json
 
       # neubot on port 9773.
@@ -87,14 +93,8 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --template_target={{hostname}}:9773/sapi/state \
           --label service=neubot \
           --label module=neubot_online \
-          --select="neubot.mlab.(${!pattern})" > \
+          --select="neubot.mlab.*" > \
               ${output}/blackbox-targets/neubot.json
-
-      ########################################################################
-      # Note: The following configs select all servers. This allows us to
-      # experiment with monitoring many sites in sandbox or staging before
-      # production.
-      ########################################################################
 
       # snmp_exporter on port 9116.
       ./mlabconfig.py --format=prom-targets-sites \
