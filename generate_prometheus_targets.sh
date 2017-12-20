@@ -100,7 +100,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
       ./mlabconfig.py --format=prom-targets-sites \
           --template_target=s1.{{sitename}}.measurement-lab.org \
           --label service=snmp \
-          --label __exporter_project=${project#mlab-} > \
+          --label __exporter_project=${project} > \
               ${output}/snmp-targets/snmpexporter.json
 
       # inotify_exporter for NDT on port 9393.
