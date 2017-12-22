@@ -114,8 +114,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
       ./mlabconfig.py --format=prom-targets-nodes \
           --template_target={{hostname}}:9100 \
           --label service=nodeexporter \
-          --label module=lame_duck > \
-              ${output}/legacy-targets/lameduck.json
+              ${output}/legacy-targets/nodeexporter.json
 
     else
       echo "Unknown group name: ${GROUP} for ${project}"
