@@ -53,6 +53,13 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --select "npad.iupui.(${!pattern})" > \
               ${output}/legacy-targets/sidestream.json
 
+      # script_exporter for NDT end-to-end monitoring
+      ./mlabconfig.py --format=prom-targets \
+          --template_target={{hostname}} \
+          --label service=ndt_e2e \
+          --select="ndt.iupui.(${!pattern})" > \
+              ${output}/script-targets/ndt_e2e.json
+
     elif [[ ${GROUP} == global ]] ; then
 
       ########################################################################
