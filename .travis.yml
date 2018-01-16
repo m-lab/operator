@@ -41,6 +41,7 @@ cache:
 # The monitoring group is the second argument to deploy_prometheus_targets.sh.
 deploy:
 
+############################################################################
 # Sandbox.
 - provider: script
   script: $TRAVIS_BUILD_DIR/deploy_prometheus_targets.sh mlab-sandbox global
@@ -50,6 +51,17 @@ deploy:
     all_branches: true
     condition: $TRAVIS_BRANCH == master || $TRAVIS_BRANCH == sandbox-*
 
+  # Deploy metadata configs.
+- provider: script
+  script: $TRAVIS_BUILD_DIR/travis/deploy_gcs.sh SERVICE_ACCOUNT_mlab_sandbox
+      $TRAVIS_BUILD_DIR/metadata/v0 gs://operator-mlab-sandbox/metadata/
+  skip_cleanup: true
+  on:
+    repo: m-lab/operator
+    all_branches: true
+    condition: $TRAVIS_BRANCH == master || $TRAVIS_BRANCH == sandbox-*
+
+############################################################################
 # Staging, on master.
 - provider: script
   script: $TRAVIS_BUILD_DIR/deploy_prometheus_targets.sh mlab-staging global
@@ -58,6 +70,7 @@ deploy:
     repo: m-lab/operator
     branch: master
 
+############################################################################
 # Production, on tags.
 - provider: script
   script: $TRAVIS_BUILD_DIR/deploy_prometheus_targets.sh mlab-oti global
