@@ -15,7 +15,7 @@ SCRIPTDIR=$( dirname "${BASH_SOURCE[0]}" )
 BASEDIR=${PWD}
 
 # Generate the configs.
-${SCRIPTDIR}/generate_prometheus_targets.sh ${GROUP}
+${SCRIPTDIR}/generate_prometheus_targets.sh ${GROUP} > /dev/null
 
 
 # Authenticate all operations using the given service account.

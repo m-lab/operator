@@ -10,7 +10,7 @@ GROUP=${1:?Please provide monitoring group name: $USAGE}
 
 # Create all output directories.
 for project in mlab-sandbox mlab-staging mlab-oti ; do
-  mkdir -p ${BASEDIR}/gen/${project}/prometheus/{legacy-targets,blackbox-targets,snmp-targets}
+  mkdir -p ${BASEDIR}/gen/${project}/prometheus/{legacy-targets,blackbox-targets,snmp-targets,script-targets}
 done
 
 # All testing sites and machines.
@@ -52,13 +52,6 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --label service=sidestream \
           --select "npad.iupui.(${!pattern})" > \
               ${output}/legacy-targets/sidestream.json
-
-      # script_exporter for NDT end-to-end monitoring
-      ./mlabconfig.py --format=prom-targets \
-          --template_target={{hostname}} \
-          --label service=ndt_e2e \
-          --select="ndt.iupui.(${!pattern})" > \
-              ${output}/script-targets/ndt_e2e.json
 
     elif [[ ${GROUP} == global ]] ; then
 
@@ -122,6 +115,13 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --template_target={{hostname}}:9100 \
           --label service=nodeexporter \
               ${output}/legacy-targets/nodeexporter.json
+
+      # script_exporter for NDT end-to-end monitoring
+      ./mlabconfig.py --format=prom-targets \
+          --template_target={{hostname}} \
+          --label service=ndt_e2e \
+          --select="ndt.iupui.(${!pattern})" > \
+              ${output}/script-targets/ndt_e2e.json
 
     else
       echo "Unknown group name: ${GROUP} for ${project}"
