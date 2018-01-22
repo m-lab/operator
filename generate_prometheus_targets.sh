@@ -123,6 +123,13 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --select="ndt.iupui.(${!pattern})" > \
               ${output}/script-targets/ndt_e2e.json
 
+      # script_exporter for NDT queueing check
+      ./mlabconfig.py --format=prom-targets \
+          --template_target={{hostname}} \
+          --label service=ndt_queue \
+          --select="ndt.iupui.(${!pattern})" > \
+              ${output}/script-targets/ndt_queue.json
+
     else
       echo "Unknown group name: ${GROUP} for ${project}"
     fi
