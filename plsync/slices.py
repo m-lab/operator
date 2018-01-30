@@ -105,6 +105,11 @@ slice_list = [
                                            use_initscript=True,
                                            ipv6="all",
                                            rsync_modules=['sidestream', 'npad', 'paris-traceroute']),
+    Slice(name="mlab_diff",       index=4, attrs=centos_slice_attrs+[
+                                                Attr('MeasurementLabCentos',    disk_max='100000000'),  # 100GB.
+                                                Attr('MeasurementLabCentos', capabilities='CAP_NET_BIND_SERVICE,vxc_^28'), ],
+                                           users=user_list,
+                                           ipv6="all"),
     #Slice(name="mlab_mitate",    index=4, attrs=centos_slice_attrs+web100_enable_attr, users=user_list, ipv6="all"),
     Slice(name="uw_geoloc4",      index=5, attrs=centos_slice_attrs+web100_enable_attr, 
                                            users=user_list,
