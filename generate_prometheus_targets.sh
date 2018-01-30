@@ -66,7 +66,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --template_target={{hostname}}:3001 \
           --label service=ndt_raw \
           --label module=tcp_v4_online \
-          --select="ndt.iupui.*" > \
+          --select="ndt.iupui.(${!pattern})" > \
               ${output}/blackbox-targets/ndt_raw.json
 
       # NDT SSL on port 3010.
@@ -75,8 +75,22 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --label service=ndt_ssl \
           --label module=tcp_v4_tls_online \
           --use_flatnames \
-          --select="ndt.iupui.*" > \
+          --select="ndt.iupui.(${!pattern})" > \
               ${output}/blackbox-targets/ndt_ssl.json
+
+      # script_exporter for NDT end-to-end monitoring
+      ./mlabconfig.py --format=prom-targets \
+          --template_target={{hostname}} \
+          --label service=ndt_e2e \
+          --select="ndt.iupui.(${!pattern})" > \
+              ${output}/script-targets/ndt_e2e.json
+
+      # script_exporter for NDT queueing check
+      ./mlabconfig.py --format=prom-targets \
+          --template_target={{hostname}} \
+          --label service=ndt_queue \
+          --select="ndt.iupui.(${!pattern})" > \
+              ${output}/script-targets/ndt_queue.json
 
       # Mobiperf on ports 6001, 6002, 6003.
       ./mlabconfig.py --format=prom-targets \
@@ -115,20 +129,6 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --template_target={{hostname}}:9100 \
           --label service=nodeexporter \
               ${output}/legacy-targets/nodeexporter.json
-
-      # script_exporter for NDT end-to-end monitoring
-      ./mlabconfig.py --format=prom-targets \
-          --template_target={{hostname}} \
-          --label service=ndt_e2e \
-          --select="ndt.iupui.(${!pattern})" > \
-              ${output}/script-targets/ndt_e2e.json
-
-      # script_exporter for NDT queueing check
-      ./mlabconfig.py --format=prom-targets \
-          --template_target={{hostname}} \
-          --label service=ndt_queue \
-          --select="ndt.iupui.(${!pattern})" > \
-              ${output}/script-targets/ndt_queue.json
 
     else
       echo "Unknown group name: ${GROUP} for ${project}"
