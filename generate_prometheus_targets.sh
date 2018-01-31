@@ -44,7 +44,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --template_target={{hostname}}:806 \
           --label service=ssh806 \
           --label module=ssh_v4_online \
-          --select="${!pattern}" > ${output}/blackbox-targets/ssh806.json
+          --select "${!pattern}" > ${output}/blackbox-targets/ssh806.json
 
       # Sidestream exporter in the npad experiment.
       ./mlabconfig.py --format=prom-targets \
@@ -66,7 +66,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --template_target={{hostname}}:3001 \
           --label service=ndt_raw \
           --label module=tcp_v4_online \
-          --select="ndt.iupui.(${!pattern})" > \
+          --select "ndt.iupui.(${!pattern})" > \
               ${output}/blackbox-targets/ndt_raw.json
 
       # NDT SSL on port 3010.
@@ -75,21 +75,21 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --label service=ndt_ssl \
           --label module=tcp_v4_tls_online \
           --use_flatnames \
-          --select="ndt.iupui.(${!pattern})" > \
+          --select "ndt.iupui.(${!pattern})" > \
               ${output}/blackbox-targets/ndt_ssl.json
 
       # script_exporter for NDT end-to-end monitoring
       ./mlabconfig.py --format=prom-targets \
           --template_target={{hostname}} \
           --label service=ndt_e2e \
-          --select="ndt.iupui.(${!pattern})" > \
+          --select "ndt.iupui.(${!pattern})" > \
               ${output}/script-targets/ndt_e2e.json
 
       # script_exporter for NDT queueing check
       ./mlabconfig.py --format=prom-targets \
           --template_target={{hostname}} \
           --label service=ndt_queue \
-          --select="ndt.iupui.(${!pattern})" > \
+          --select "ndt.iupui.(${!pattern})" > \
               ${output}/script-targets/ndt_queue.json
 
       # Mobiperf on ports 6001, 6002, 6003.
@@ -99,7 +99,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --template_target={{hostname}}:6003 \
           --label service=mobiperf \
           --label module=tcp_v4_online \
-          --select="1.michigan.*" > \
+          --select "1.michigan.(${!pattern})" > \
               ${output}/blackbox-targets/mobiperf.json
 
       # neubot on port 9773.
@@ -107,7 +107,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --template_target={{hostname}}:9773/sapi/state \
           --label service=neubot \
           --label module=neubot_online \
-          --select="neubot.mlab.*" > \
+          --select "neubot.mlab.(${!pattern})" > \
               ${output}/blackbox-targets/neubot.json
 
       # snmp_exporter on port 9116.
@@ -121,13 +121,14 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
       ./mlabconfig.py --format=prom-targets \
           --template_target={{hostname}}:9393 \
           --label service=inotify \
-          --select="ndt.iupui.*" > \
+          --select "ndt.iupui.(${!pattern})" > \
               ${output}/legacy-targets/ndt_inotify.json
 
       # node_exporter on port 9100.
       ./mlabconfig.py --format=prom-targets-nodes \
           --template_target={{hostname}}:9100 \
           --label service=nodeexporter \
+          --select "${!pattern}" > \
               ${output}/legacy-targets/nodeexporter.json
 
     else
