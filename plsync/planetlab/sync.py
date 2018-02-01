@@ -738,7 +738,7 @@ def SyncSliceAttribute(slicename, attr):
     #api.AddSliceTag(slicename, 'ip_addresses', nnet['ip'], node['node_id'])
 
 EXPIRE_DELTA_90DAYS = (90*60*60*24)
-EXPIRE_DELTA_20YEARS = (20*365*60*60*24)
+EXPIRE_DELTA_10YEARS = (10*365*60*60*24)
 
 def SyncSliceExpiration(slicename):
     slices = s.api.GetSlices(slicename)
@@ -749,8 +749,8 @@ def SyncSliceExpiration(slicename):
     sslice = slices[0]
     current_time = int(time.time())
     if sslice['expires'] < current_time + EXPIRE_DELTA_90DAYS:
-        print "Updating slice %s expiration to 20 years from now" % slicename
-        attr = {'expires' : current_time + EXPIRE_DELTA_20YEARS}
+        print "Updating slice %s expiration to 10 years from now" % slicename
+        attr = {'expires' : current_time + EXPIRE_DELTA_10YEARS}
         s.api.UpdateSlice(slicename, attr)
 
 def RemoveSliceFromNode(slicename, hostname):
