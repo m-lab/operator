@@ -56,7 +56,7 @@ centos_slice_attrs += [ Attr('MeasurementLabCentos', isolate_loopback='1') ]
 #   http://man7.org/linux/man-pages/man7/capabilities.7.html
 # VServer configuration hints: 
 #   http://www.nongnu.org/util-vserver/doc/conf/configuration.html
-web100_enable_attr = [ Attr('MeasurementLabCentos', capabilities='CAP_NET_RAW') ]
+web100_enable_attr = [ Attr('MeasurementLabCentos', capabilities='vxc_^28') ]
 
 
 mlab4s_only = ['mlab4.nuq01', 'mlab4.nuq02', 'mlab4.prg01', 
@@ -105,9 +105,9 @@ slice_list = [
                                            use_initscript=True,
                                            ipv6="all",
                                            rsync_modules=['sidestream', 'npad', 'paris-traceroute']),
-    Slice(name="mlab_diff",       index=4, attrs=centos_slice_attrs+[
+    Slice(name="mlab_diff",       index=4, attrs=centos_slice_attrs+web100_enable_attr+[
                                                 Attr('MeasurementLabCentos',    disk_max='100000000'),  # 100GB.
-                                                Attr('MeasurementLabCentos', capabilities='CAP_NET_BIND_SERVICE,vxc_^28'), ],
+                                                Attr('MeasurementLabCentos', capabilities='CAP_NET_BIND_SERVICE, CAP_NET_RAW'), ],
                                            users=user_list,
                                            ipv6="all"),
     Slice(name="uw_geoloc4",      index=5, attrs=centos_slice_attrs+web100_enable_attr, 
