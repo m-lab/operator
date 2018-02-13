@@ -105,7 +105,7 @@ slice_list = [
                                            use_initscript=True,
                                            ipv6="all",
                                            rsync_modules=['sidestream', 'npad', 'paris-traceroute']),
-    Slice(name="mlab_diff",       index=4, attrs=centos_slice_attrs+web100_enable_attr+[
+    Slice(name="mlab_diff",       index=4, attrs=centos_slice_attrs+[
                                                 Attr('MeasurementLabCentos',    disk_max='100000000'),  # 100GB.
                                                 Attr('MeasurementLabCentos', capabilities='CAP_NET_BIND_SERVICE, CAP_NET_RAW'), ],
                                            users=user_list,
