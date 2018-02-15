@@ -196,7 +196,7 @@ site_list = [
     # Site for M-Lab testing machines
     makesite('lga0t','4.14.159.64', '2001:1900:2100:2d::','New York_NY', 'US', 40.766700, -73.866700, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('lga1t','4.14.3.0',    '2001:1900:2100:1::', 'New York_NY', 'US', 40.766700, -73.866700, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
-    makesite('iad0t','165.117.251.128', '2610:18:8b40:200::','Washington_DC', 'US', 38.944400, -77.455800, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
+    makesite('iad0t','165.117.251.128', '2610:18:8b40:200::','Washington_DC', 'US', 38.944400, -77.455800, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('iad1t','165.117.240.0', '2610:18:8b40:202::','Washington_DC', 'US', 38.944400, -77.455800, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
    # NOTE: mlc servers need special handling
    #Site(name='mlc',   net=Network(v4='64.9.225.64',     v6='2604:CA00:F000:5::'), domain="measurementlab.net", count=3),
