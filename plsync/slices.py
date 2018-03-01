@@ -95,9 +95,9 @@ slice_list = [
                                            users=user_list,
                                            use_initscript=True,
                                            ipv6=['mlab1.lax01', 'mlab1.mia03', 'mlab1.ham01', 'mlab1.hnd01',
-                                                 'ams02', 'arn03', 'atl02', 'bru03', 'den01', 'dfw01', 'fra03',
-                                                 'iad05', 'iad0t', 'iad1t', 'lax02', 'lga07', 'lhr03', 'mia01',
-                                                 'mil02', 'nuq04', 'par04', 'prg05', 'ord05', 'sea05',],
+                                                 'ams02', 'arn03', 'atl02', 'bru03', 'den01', 'dfw01', 'fln01',
+                                                 'fra03', 'iad05', 'iad0t', 'iad1t', 'lax02', 'lga07', 'lhr03',
+                                                 'mia01', 'mil02', 'nuq04', 'par04', 'prg05', 'ord05', 'sea05',],
                                            rsync_modules=['ndt']),
     Slice(name='iupui_npad',      index=2, attrs=centos_slice_attrs+[
                                                 Attr('MeasurementLabCentos', disk_max='10000000'),
