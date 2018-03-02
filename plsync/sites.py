@@ -107,7 +107,8 @@ site_list = [
     makesite('fra03','195.89.146.64',  '2001:5001:200:30::',   'Frankfurt', 'DE', 50.037932, 8.562151, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('fra04','62.67.198.192',  '2001:4c08:2003:40::',  'Frankfurt', 'DE', 50.037932, 8.562151, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('ham01','80.239.142.192', '2001:2030:0:19::',     'Hamburg', 'DE', 53.633300, 9.983330, user_list, nodegroup='MeasurementLabCentos'),
-    makesite('hnd01','203.178.130.192','2001:200:0:b801::',    'Tokyo', 'JP', 35.552200, 139.780000, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
+    # NOTE: hnd01's arch is 'x86_64-r630', but they are actually R620s. The boot flags and CD for the R630s works for the R620s, whereas the arch 'x86_64' does not.
+    makesite('hnd01','203.178.130.192','2001:200:0:b801::',    'Tokyo', 'JP', 35.552200, 139.780000, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('hnd02','210.151.179.128','2001:260:8a::',        'Tokyo', 'JP', 35.552200, 139.780000, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('iad01','216.156.197.128','2610:18:111:8001::',   'Washington_DC', 'US', 38.944400, -77.455800, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('iad02','38.90.140.128',  '2001:550:200:7::',     'Washington_DC', 'US', 38.944400, -77.455800, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
@@ -197,6 +198,7 @@ site_list = [
     # Site for M-Lab testing machines
     makesite('lga0t','4.14.159.64', '2001:1900:2100:2d::','New York_NY', 'US', 40.766700, -73.866700, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('lga1t','4.14.3.0',    '2001:1900:2100:1::', 'New York_NY', 'US', 40.766700, -73.866700, user_list, count=4, arch='x86_64', nodegroup='MeasurementLabCentos'),
+    # NOTE: iad0t's arch is 'x86_64-r630', but they are actually R620s. The boot flags and CD for the R630s works for the R620s, whereas the arch 'x86_64' does not.
     makesite('iad0t','165.117.251.128', '2610:18:8b40:200::','Washington_DC', 'US', 38.944400, -77.455800, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('iad1t','165.117.240.0', '2610:18:8b40:202::','Washington_DC', 'US', 38.944400, -77.455800, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
    # NOTE: mlc servers need special handling
