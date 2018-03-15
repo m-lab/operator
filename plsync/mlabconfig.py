@@ -236,6 +236,13 @@ def parse_flags():
         help='Whether to return TLS-formatted host names (dashes, not dots.)')
     parser.add_option(
         '',
+        '--decoration',
+        dest='decoration',
+        default='',
+        choices=['', 'v4', 'v6'],
+        help='Protocol decoration for Prom targets (e.g, mlab1v4.abc01).')
+    parser.add_option(
+        '',
         '--select',
         dest='select',
         default=None,
@@ -652,7 +659,8 @@ def export_scraper_kubernetes_config(filename_template, experiments,
 
 def select_prometheus_experiment_targets(experiments, select_regex,
                                          target_templates, common_labels,
-                                         rsync_only, use_flatnames):
+                                         rsync_only, use_flatnames,
+                                         decoration):
     """Selects and formats targets from experiments.
 
     Args:
@@ -665,6 +673,8 @@ def select_prometheus_experiment_targets(experiments, select_regex,
       rsync_only: bool, skip experiments without rsync_modules.
       use_flatnames: bool, return "flattened" hostnames suitable for TLS/SSL
           wildcard certificates.
+      decoration: str, return protocol 'decorated' host names
+          (e.g., mlab1v6.abc01).
 
     Returns:
       list of dict, each element is a dict with 'labels' (a dict of key/values)
@@ -681,7 +691,8 @@ def select_prometheus_experiment_targets(experiments, select_regex,
             labels['experiment'] = experiment.dnsname()
             labels['machine'] = node.hostname()
 
-            host = experiment.hostname(node)
+            host = experiment.hostname(node, decoration)
+
             # Don't use the flatten_hostname() function in this module because
             # it adds too much overhead. Just replace the first three dots with
             # dashes.
@@ -704,7 +715,7 @@ def select_prometheus_experiment_targets(experiments, select_regex,
 
 
 def select_prometheus_node_targets(sites, select_regex, target_templates,
-                                   common_labels):
+                                   common_labels, decoration):
     """Selects and formats targets from site nodes.
 
     Args:
@@ -714,6 +725,8 @@ def select_prometheus_node_targets(sites, select_regex, target_templates,
       target_templates: list of templates for formatting the target(s) from the
           hostname. e.g. {{hostname}}:7999, https://{{hostname}}/some/path
       common_labels: dict of str, a set of labels to apply to all targets.
+      decoration: str, used to "decorate" the hostname with a protocol
+          (e.g., mlab1v6.abc01).
 
     Returns:
       list of dict, each element is a dict with 'labels' (a dict of key/values)
@@ -727,9 +740,12 @@ def select_prometheus_node_targets(sites, select_regex, target_templates,
             labels = common_labels.copy()
             labels['machine'] = node.hostname()
             targets = []
+
+            host = node.hostname(decoration)
+
             for tmpl in target_templates:
                 target_tmpl = BracketTemplate(tmpl)
-                target = target_tmpl.safe_substitute({'hostname': node.hostname()})
+                target = target_tmpl.safe_substitute({'hostname': host})
                 targets.append(target)
             records.append({
                 'labels': labels,
@@ -739,7 +755,7 @@ def select_prometheus_node_targets(sites, select_regex, target_templates,
 
 
 def select_prometheus_site_targets(sites, select_regex, target_templates,
-                                  common_labels):
+                                   common_labels):
     """Selects and formats site targets.
 
     Args:
@@ -811,20 +827,19 @@ def main():
                                              template.read(), options.select)
 
     elif options.format == 'prom-targets':
-        # TODO(soltesz): support v4 only or v6 only options.
         records = select_prometheus_experiment_targets(
             experiments, options.select, options.template_target,
-            options.labels, options.rsync, options.use_flatnames)
+            options.labels, options.rsync, options.use_flatnames,
+            options.decoration)
         json.dump(records, sys.stdout, indent=4)
 
     elif options.format == 'prom-targets-nodes':
-        # TODO(soltesz): support v4 only or v6 only options.
         records = select_prometheus_node_targets(
-            sites, options.select, options.template_target, options.labels)
+            sites, options.select, options.template_target, options.labels,
+            options.decoration)
         json.dump(records, sys.stdout, indent=4)
 
     elif options.format == 'prom-targets-sites':
-        # TODO(soltesz): support v4 only or v6 only options.
         records = select_prometheus_site_targets(
             sites, options.select, options.template_target, options.labels)
         json.dump(records, sys.stdout, indent=4)

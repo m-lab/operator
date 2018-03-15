@@ -390,9 +390,9 @@ class Node(dict):
     def v6gw(self):
         return self['net']['v6'].ipv6_defaultgw()
 
-    def hostname(self):
+    def hostname(self, decoration=''):
         """Returns the Node FQDN."""
-        return '%s.%s' % (self.recordname(), MLAB_ORG_DOMAIN)
+        return '%s.%s' % (self.recordname(decoration), MLAB_ORG_DOMAIN)
 
     def recordname(self, decoration=''):
         """Returns the Node resource record, e.g. hostname without domain."""
@@ -593,9 +593,9 @@ class Slice(dict):
         # When a name has multiple '_', rejoin all parts after the group name.
         return '.'.join(fields[1:] + fields[:1])
 
-    def hostname(self, node):
+    def hostname(self, node, decoration=''):
         """Returns the FQDN for a slice on the given node."""
-        return '.'.join((self.dnsname(), node.hostname()))
+        return '%s.%s' % (self.recordname(node, decoration), MLAB_ORG_DOMAIN)
 
     def recordname(self, server, decoration=''):
         """Returns the Slice resource record, e.g. hostname without domain."""
