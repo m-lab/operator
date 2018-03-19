@@ -506,25 +506,15 @@ def export_mlab_site_stats(output, sites):
             }
         metro = [name, name[:-2]]
 
-        if 'roundrobin' in site.keys():
-            sitestats.append({
-                'site': name,
-                'metro': metro,
-                'city': location['city'],
-                'country': location['country'],
-                'latitude': location['latitude'],
-                'longitude': location['longitude'],
-                'roundrobin': True
-            })
-        else:
-            sitestats.append({
-                'site': name,
-                'metro': metro,
-                'city': location['city'],
-                'country': location['country'],
-                'latitude': location['latitude'],
-                'longitude': location['longitude']
-            })
+        sitestats.append({
+            'site': name,
+            'metro': metro,
+            'city': location['city'],
+            'country': location['country'],
+            'latitude': location['latitude'],
+            'longitude': location['longitude'],
+            'roundrobin': site.keys().get('roundrobin', False)
+        })
 
     # Temporary workaround for HND01 load issues. Remove this after the issue
     # has been resolved.
