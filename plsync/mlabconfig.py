@@ -513,7 +513,7 @@ def export_mlab_site_stats(output, sites):
             'country': location['country'],
             'latitude': location['latitude'],
             'longitude': location['longitude'],
-            'roundrobin': site.keys().get('roundrobin', False)
+            'roundrobin': site.get('roundrobin', False)
         })
 
     # Temporary workaround for HND01 load issues. Remove this after the issue
