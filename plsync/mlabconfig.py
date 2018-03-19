@@ -505,7 +505,8 @@ def export_mlab_site_stats(output, sites):
                 'longitude': None
             }
         metro = [name, name[:-2]]
-        if site['roundrobin'] == 'true':
+
+        if 'roundrobin' in site.keys():
             sitestats.append({
                 'site': name,
                 'metro': metro,
@@ -513,9 +514,9 @@ def export_mlab_site_stats(output, sites):
                 'country': location['country'],
                 'latitude': location['latitude'],
                 'longitude': location['longitude'],
-                'roundrobin': true
+                'roundrobin': True
             })
-        else:    
+        else:
             sitestats.append({
                 'site': name,
                 'metro': metro,
