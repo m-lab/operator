@@ -499,7 +499,7 @@ def export_mlab_zone_header(output, header, options):
     output.write(headerdata)
 
 
-def export_mlab_site_stats(output, sites):
+def export_mlab_site_stats(sites):
     sitestats = []
     for site in sites:
         name = site['name']
@@ -523,23 +523,12 @@ def export_mlab_site_stats(output, sites):
             'roundrobin': site.get('roundrobin', False)
         })
 
-    # Temporary workaround for HND01 load issues. Remove this after the issue
-    # has been resolved.
-    for tyo in ['tyo01', 'tyo02', 'tyo03']:
-        sitestats.append({
-            'site': tyo,
-            'metro': [tyo, tyo[:-2]],
-            'city': 'Tokyo',
-            'country': 'JP',
-            'latitude': 35.552200,
-            'longitude': 139.780000
-        })
-
-    json.dump(sitestats, output)
+    return sitestats
 
 
-def export_mlab_host_ips(output, sites, experiments):
+def export_mlab_host_ips(sites, experiments):
     """Writes csv data of all M-Lab servers and experiments to output."""
+    output = StringIO.StringIO()
     # Export server names and addresses.
     for site in sites:
         # TODO(soltesz): change 'nodes' to be a sorted list of node objects.
@@ -559,17 +548,7 @@ def export_mlab_host_ips(output, sites, experiments):
                                                 ipv4=experiment.ipv4(node),
                                                 ipv6=experiment.ipv6(node)))
 
-    # Temporary workaround for HND01 load issues. Remove this after the
-    # issue has been resolved.
-    output.write(
-       'mlab1.tyo01.measurement-lab.org,35.200.102.226,\n'
-       'ndt.iupui.mlab1.tyo01.measurement-lab.org,35.200.102.226,\n'
-       'mlab1.tyo02.measurement-lab.org,35.200.34.149,\n'
-       'ndt.iupui.mlab1.tyo02.measurement-lab.org,35.200.34.149,\n'
-       'mlab1.tyo03.measurement-lab.org,35.200.112.17,\n'
-       'ndt.iupui.mlab1.tyo03.measurement-lab.org,35.200.112.17,\n'
-    )
-
+    return output
 
 
 # TODO(soltesz): this function is too specific to node network configuration.
@@ -805,10 +784,36 @@ def main():
                 experiment.add_node_address(node)
 
     if options.format == 'hostips':
-        export_mlab_host_ips(sys.stdout, sites, experiments)
+        output = export_mlab_host_ips(sites, experiments)
+        sys.stdout.write(output.getvalue())
+        # Temporary workaround for HND01 load issues. Remove or generalize:
+        # https://github.com/m-lab/operator/issues/154
+        sys.stdout.write(
+            'mlab1.tyo01.measurement-lab.org,35.200.102.226,\n'
+            'ndt.iupui.mlab1.tyo01.measurement-lab.org,35.200.102.226,\n'
+            'mlab1.tyo02.measurement-lab.org,35.200.34.149,\n'
+            'ndt.iupui.mlab1.tyo02.measurement-lab.org,35.200.34.149,\n'
+            'mlab1.tyo03.measurement-lab.org,35.200.112.17,\n'
+            'ndt.iupui.mlab1.tyo03.measurement-lab.org,35.200.112.17,\n'
+        )
 
     elif options.format == 'sitestats':
-        export_mlab_site_stats(sys.stdout, sites)
+        sitestats = export_mlab_site_stats(sites)
+
+        # Temporary workaround for HND01 load issues. Remove or generalize:
+        # https://github.com/m-lab/operator/issues/154
+        for tyo in ['tyo01', 'tyo02', 'tyo03']:
+            sitestats.append({
+                'site': tyo,
+                'metro': [tyo, tyo[:-2]],
+                'city': 'Tokyo',
+                'country': 'JP',
+                'latitude': 35.552200,
+                'longitude': 139.780000,
+                'roundrobin': False
+            })
+
+        json.dump(sitestats, sys.stdout)
 
     elif options.format == 'server-network-config':
         with open(options.template) as template:

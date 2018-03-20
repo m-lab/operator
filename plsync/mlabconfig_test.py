@@ -128,24 +128,23 @@ class MlabconfigTest(unittest.TestCase):
              '2400:1002:4008::37'),
         ]
 
-        mlabconfig.export_mlab_host_ips(output, self.sites, experiments)
+        output = mlabconfig.export_mlab_host_ips(self.sites, experiments)
 
         results = output.getvalue().split()
-        #self.assertItemsEqual(results, expected_results)
+        self.assertItemsEqual(results, expected_results)
 
     def test_export_mlab_site_stats(self):
-        output = StringIO.StringIO()
         expected_results = [{"city": "Some City",
                              "metro": ["abc01", "abc"],
                              "country": "US",
                              "site": "abc01",
                              "longitude": 74.783,
-                             "latitude": 36.85}]
+                             "latitude": 36.85,
+                             "roundrobin": False}]
 
-        mlabconfig.export_mlab_site_stats(output, self.sites)
+        sitestats = mlabconfig.export_mlab_site_stats(self.sites)
 
-        results = json.loads(output.getvalue())
-        #self.assertItemsEqual(results, expected_results)
+        self.assertItemsEqual(sitestats, expected_results)
 
     def test_export_router_and_switch_records(self):
         output = StringIO.StringIO()
