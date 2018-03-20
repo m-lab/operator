@@ -62,7 +62,7 @@ Network.legacy_network_remap = legacy_network_remap
 
 site_list = [
     makesite('acc02','196.49.14.192',  None,                   'Accra', 'GH', 5.6060, -0.1681, user_list, exclude=[1,2,3], arch='x86_64', nodegroup='MeasurementLabCentos'),
-    makesite('akl01','163.7.129.0',    '2404:138:4009::',      'Auckland', 'NZ', -36.850000, 174.783000, user_list, nodegroup='MeasurementLabCentos'),
+    makesite('akl01','163.7.129.0',    '2404:138:4009::',      'Auckland', 'NZ', -36.850000, 174.783000, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('ams01','213.244.128.128','2001:4c08:2003:2::',   'Amsterdam', 'NL', 52.308600, 4.763890, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('ams02','72.26.217.64',   '2001:48c8:7::',        'Amsterdam', 'NL', 52.308600, 4.763890, user_list, nodegroup='MeasurementLabCentos'),
     makesite('ams03','80.239.169.0',   '2001:2030:32::',       'Amsterdam', 'NL', 52.308600, 4.763890, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
@@ -99,7 +99,7 @@ site_list = [
     makesite('dfw04','208.177.76.64',  '2610:18:10e:2::',      'Dallas_TX', 'US', 32.896900, -97.038100, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('dfw05','128.177.163.64', '2001:438:fffd:30::',   'Dallas_TX', 'US', 32.896900, -97.038100, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('dfw06','63.251.44.192',  '2600:c12:1002:4::',    'Dallas_TX', 'US', 32.896900, -97.038100, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
-    makesite('dub01','193.1.12.192',   '2001:770:b5::',        'Dublin', 'IE', 53.433300, -6.250000, user_list, nodegroup='MeasurementLabCentos'),
+    makesite('dub01','193.1.12.192',   '2001:770:b5::',        'Dublin', 'IE', 53.433300, -6.250000, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('fln01','200.237.203.0',  '2801:80:a88:4006::',   'Florianopolis', 'BR', -27.668455, -48.545998, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('fra01','80.239.199.0',   '2001:2030:2f::',       'Frankfurt', 'DE', 50.037932, 8.562151, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('fra02','77.67.114.0',    '2001:668:1f:5e::',     'Frankfurt', 'DE', 50.037932, 8.562151, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
@@ -178,7 +178,7 @@ site_list = [
     makesite('sin01','180.87.97.64',   '2405:2000:301::',      'Singapore', 'SG', 1.3550, 103.9880, user_list, nodegroup='MeasurementLabCentos'),
     makesite('sjc01','70.42.244.64',   '2600:c02:2:82::',      'San Francisco Bay Area_CA', 'US', 37.383300, -122.066700, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),  # should be nuq07
     makesite('svg01','81.167.39.0',    '2a01:798:0:13::',      'Stavanger', 'NO', 58.876700, 5.63780, user_list, nodegroup='MeasurementLabCentos'),
-    makesite('syd01','203.5.76.128',   '2001:388:d0::',        'Sydney', 'AU', -33.946100, 151.177000, user_list, nodegroup='MeasurementLabCentos', roundrobin=True),
+    makesite('syd01','203.5.76.128',   '2001:388:d0::',        'Sydney', 'AU', -33.946100, 151.177000, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
     makesite('syd02','175.45.79.0',    '2402:7800:0:12::',     'Sydney', 'AU', -33.946100, 151.177000, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
     makesite('tnr01','41.188.12.64',   None,                   'Antananarivo', 'MG', -18.7969, 47.4788, user_list, exclude=[1,2,3], arch='x86_64', nodegroup='MeasurementLabCentos'),
     makesite('tpe01','163.22.28.0',    '2001:e10:6840:28::',   'Taipei', 'TW', 25.077800, 121.224000, user_list, nodegroup='MeasurementLabCentos'),
