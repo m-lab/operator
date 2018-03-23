@@ -10,7 +10,7 @@ GROUP=${1:?Please provide monitoring group name: $USAGE}
 
 # Create all output directories.
 for project in mlab-sandbox mlab-staging mlab-oti ; do
-  mkdir -p ${BASEDIR}/gen/${project}/prometheus/{legacy-targets,blackbox-targets,snmp-targets,script-targets}
+  mkdir -p ${BASEDIR}/gen/${project}/prometheus/{legacy-targets,blackbox-targets,blackbox-targets-ipv6,snmp-targets,script-targets}
 done
 
 # All testing sites and machines.
@@ -65,7 +65,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --label module=ssh_v6_online \
           --label __blackbox_port=${!bbe_port} \
           --select "${!pattern}" \
-          --decoration "v6" > ${output}/blackbox-targets/ssh806_ipv6.json
+          --decoration "v6" > ${output}/blackbox-targets-ipv6/ssh806_ipv6.json
 
       # Sidestream exporter in the npad experiment.
       ./mlabconfig.py --format=prom-targets \
@@ -132,7 +132,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --label module=tcp_v6_online \
           --label __blackbox_port=${!bbe_port} \
           --select "1.michigan.(${!pattern})" \
-          --decoration "v6" > ${output}/blackbox-targets/mobiperf_ipv6.json
+          --decoration "v6" > ${output}/blackbox-targets-ipv6/mobiperf_ipv6.json
 
       # neubot on port 9773 over IPv4.
       ./mlabconfig.py --format=prom-targets \
@@ -149,7 +149,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --label module=neubot_online_v6 \
           --label __blackbox_port=${!bbe_port} \
           --select "neubot.mlab.(${!pattern})" \
-          --decoration "v6" > ${output}/blackbox-targets/neubot_ipv6.json
+          --decoration "v6" > ${output}/blackbox-targets-ipv6/neubot_ipv6.json
 
       # snmp_exporter on port 9116.
       ./mlabconfig.py --format=prom-targets-sites \
