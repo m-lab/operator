@@ -134,7 +134,7 @@ site_list = [
     makesite('lhr05','212.113.31.0',  '2001:4c08:2003:3c::',   'London', 'GB', 51.469700, -0.451389, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('lis01','213.242.96.192',  '2001:4c08:2003:3d::', 'Lisbon', 'PT', 38.775600, -9.135400, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('lis02','195.89.147.128',  '2001:500d:200:3::',   'Lisbon', 'PT', 38.775600, -9.135400, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
-    makesite('lju01','91.239.96.64',   '2001:67c:27e4:100::',  'Ljubljana', 'SI', 46.223600, 14.457500, user_list, nodegroup='MeasurementLabCentos'),
+    makesite('lju01','91.239.96.64',   '2001:67c:27e4:100::',  'Ljubljana', 'SI', 46.223600, 14.457500, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('los01','196.216.149.64', None,                   'Lagos', 'NG', 6.5821, 3.3211, user_list, exclude=[1,2,3], arch='x86_64', nodegroup='MeasurementLabCentos'),
     makesite('mad02','213.242.96.128','2001:4c08:2003:3e::',   'Madrid', 'ES', 40.466700, -3.566670, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('mad03','80.239.229.128','2001:2030:34::',        'Madrid', 'ES', 40.466700, -3.566670, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
@@ -177,7 +177,7 @@ site_list = [
     makesite('sea06','64.74.15.192',   '2600:c00:0:202::',     'Seattle_WA', 'US', 47.448900, -122.309400, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('sin01','180.87.97.64',   '2405:2000:301::',      'Singapore', 'SG', 1.3550, 103.9880, user_list, nodegroup='MeasurementLabCentos'),
     makesite('sjc01','70.42.244.64',   '2600:c02:2:82::',      'San Francisco Bay Area_CA', 'US', 37.383300, -122.066700, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),  # should be nuq07
-    makesite('svg01','81.167.39.0',    '2a01:798:0:13::',      'Stavanger', 'NO', 58.876700, 5.63780, user_list, nodegroup='MeasurementLabCentos'),
+    makesite('svg01','81.167.39.0',    '2a01:798:0:13::',      'Stavanger', 'NO', 58.876700, 5.63780, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('syd01','203.5.76.128',   '2001:388:d0::',        'Sydney', 'AU', -33.946100, 151.177000, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
     makesite('syd02','175.45.79.0',    '2402:7800:0:12::',     'Sydney', 'AU', -33.946100, 151.177000, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
     makesite('tnr01','41.188.12.64',   None,                   'Antananarivo', 'MG', -18.7969, 47.4788, user_list, exclude=[1,2,3], arch='x86_64', nodegroup='MeasurementLabCentos'),
@@ -186,7 +186,7 @@ site_list = [
     # old ipv6 2c0f:fab0:ffff:1000:: @ tun01
     makesite('tun01','41.231.21.0',    '2001:4350:3000:1::',   'Tunis', 'TN', 36.851600, 10.229100, user_list, nodegroup='MeasurementLabCentos'),
     makesite('vie01','213.208.152.0',  '2a01:190:1700:38::',   'Vienna', 'AT', 48.269000, 16.410700, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
-    makesite('wlg02','163.7.129.64',   '2404:138:4009:1::',    'Wellington', 'NZ', -41.327200, 174.805000, user_list, nodegroup='MeasurementLabCentos'),
+    makesite('wlg02','163.7.129.64',   '2404:138:4009:1::',    'Wellington', 'NZ', -41.327200, 174.805000, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('yqm01','209.51.169.128', '2001:470:1:820::',     'Moncton', 'CA', 46.107332, -64.673830, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('yul02','216.66.14.64',   '2001:470:1:48f::',     'Montreal', 'CA', 45.4576, -73.7497, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
     makesite('yvr01','184.105.70.192', '2001:470:1:822::',     'Vancouver','CA', 49.190165, -123.183665, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos'),
