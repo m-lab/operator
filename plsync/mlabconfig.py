@@ -672,18 +672,20 @@ def select_prometheus_experiment_targets(experiments, select_regex,
             labels['experiment'] = experiment.dnsname()
             labels['machine'] = node.hostname()
 
-            host = experiment.hostname(node, decoration)
-
-            # Don't use the flatten_hostname() function in this module because
-            # it adds too much overhead. Just replace the first three dots with
-            # dashes.
-            if use_flatnames:
-                host = host.replace('.', '-', 3)
             # Consider all experiments or only those with rsync modules.
             if not rsync_only or experiment['rsync_modules']:
-                if select_regex and not re.search(select_regex, host):
+                if select_regex and not re.search(select_regex, experiment.hostname(node)):
                     continue
                 targets = []
+
+                host = experiment.hostname(node, decoration)
+
+                # Don't use the flatten_hostname() function in this module because
+                # it adds too much overhead. Just replace the first three dots with
+                # dashes.
+                if use_flatnames:
+                    host = host.replace('.', '-', 3)
+
                 for tmpl in target_templates:
                     target_tmpl = BracketTemplate(tmpl)
                     target = target_tmpl.safe_substitute({'hostname': host})
