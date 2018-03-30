@@ -82,7 +82,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
       # production.
       ########################################################################
 
-      # NDT "raw" on port 3001.
+      # NDT "raw" on port 3001 over IPv4
       ./mlabconfig.py --format=prom-targets \
           --template_target={{hostname}}:3001 \
           --label service=ndt_raw \
@@ -90,7 +90,16 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --select "ndt.iupui.(${!pattern})" > \
               ${output}/blackbox-targets/ndt_raw.json
 
-      # NDT SSL on port 3010.
+      # NDT "raw" on port 3001 over IPv6
+      ./mlabconfig.py --format=prom-targets \
+          --template_target={{hostname}}:3001 \
+          --label service=ndt_raw_ipv6 \
+          --label module=tcp_v6_online \
+          --select "ndt.iupui.(${!pattern})" \
+          --decoration "v6" > \
+              ${output}/blackbox-targets-ipv6/ndt_raw_ipv6.json
+
+      # NDT SSL on port 3010 over IPv4
       ./mlabconfig.py --format=prom-targets \
           --template_target={{hostname}}:3010 \
           --label service=ndt_ssl \
@@ -98,6 +107,16 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --use_flatnames \
           --select "ndt.iupui.(${!pattern})" > \
               ${output}/blackbox-targets/ndt_ssl.json
+
+      # NDT SSL on port 3010 over IPv6
+      ./mlabconfig.py --format=prom-targets \
+          --template_target={{hostname}}:3010 \
+          --label service=ndt_ssl_ipv6 \
+          --label module=tcp_v6_tls_online \
+          --use_flatnames \
+          --select "ndt.iupui.(${!pattern})" \
+          --decoration "v6" > \
+              ${output}/blackbox-targets-ipv6/ndt_ssl_ipv6.json
 
       # script_exporter for NDT end-to-end monitoring
       ./mlabconfig.py --format=prom-targets \
