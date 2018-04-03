@@ -55,7 +55,7 @@ deploy:
 - provider: script
   script: $TRAVIS_BUILD_DIR/deploy_metadata_configs.sh
       SERVICE_ACCOUNT_mlab_sandbox
-      $TRAVIS_BUILD_DIR/gen/mlab-sandbox
+      $TRAVIS_BUILD_DIR/gen/mlab-sandbox/metadata
       gs://operator-mlab-sandbox/metadata/v0
   skip_cleanup: true
   on:
@@ -76,7 +76,7 @@ deploy:
 - provider: script
   script: $TRAVIS_BUILD_DIR/deploy_metadata_configs.sh
       SERVICE_ACCOUNT_mlab_staging
-      $TRAVIS_BUILD_DIR/gen/mlab-staging
+      $TRAVIS_BUILD_DIR/gen/mlab-staging/metadata
       gs://operator-mlab-staging/metadata/v0
   skip_cleanup: true
   on:
@@ -97,7 +97,7 @@ deploy:
 - provider: script
   script: $TRAVIS_BUILD_DIR/deploy_metadata_configs.sh
       SERVICE_ACCOUNT_mlab_oti
-      $TRAVIS_BUILD_DIR/gen/mlab-oti
+      $TRAVIS_BUILD_DIR/gen/mlab-oti/metadata
       gs://operator-mlab-oti/metadata/v0
   skip_cleanup: true
   on:
