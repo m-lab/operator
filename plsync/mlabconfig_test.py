@@ -1,7 +1,6 @@
 """Tests for mlabconfig."""
 
 import contextlib
-import json
 import logging
 import mlabconfig
 import mock
@@ -113,7 +112,7 @@ class MlabconfigTest(unittest.TestCase):
                                    use_initscript=True,
                                    ipv6='all')]
         # Assign experiments to nodes.
-        for hostname, node in self.sites[0]['nodes'].iteritems():
+        for node in self.sites[0]['nodes'].values():
             experiments[0].add_node_address(node)
         expected_results = [
             {'hostname': 'mlab1.abc01.measurement-lab.org', 'ipv4': '192.168.1.9', 'ipv6': '2400:1002:4008::9'},
@@ -368,7 +367,7 @@ class MlabconfigTest(unittest.TestCase):
                                    use_initscript=True,
                                    rsync_modules=['test1', 'test2'],
                                    ipv6='all')]
-        for hostname, node in self.sites[0]['nodes'].iteritems():
+        for node in self.sites[0]['nodes'].values():
             experiments[0].add_node_address(node)
         output_template = textwrap.dedent("""\
         host: {{rsync_host}}
@@ -442,7 +441,7 @@ class MlabconfigTest(unittest.TestCase):
                                    use_initscript=True,
                                    rsync_modules=['test1', 'test2'],
                                    ipv6='all')]
-        for hostname, node in self.sites[0]['nodes'].iteritems():
+        for node in self.sites[0]['nodes'].values():
             experiments[0].add_node_address(node)
         output_template = textwrap.dedent("""\
         machine: {{machine}}
@@ -491,9 +490,8 @@ class MlabconfigTest(unittest.TestCase):
                                    use_initscript=True,
                                    ipv6='all')]
         # Assign experiments to nodes.
-        for hostname, node in self.sites[0]['nodes'].iteritems():
+        for node in self.sites[0]['nodes'].values():
             experiments[0].add_node_address(node)
-        output = StringIO.StringIO()
         expected_targets = [
             {
                 'labels': {
@@ -539,9 +537,8 @@ class MlabconfigTest(unittest.TestCase):
                                    use_initscript=True,
                                    ipv6='all')]
         # Assign experiments to nodes.
-        for hostname, node in self.sites[0]['nodes'].iteritems():
+        for node in self.sites[0]['nodes'].values():
             experiments[0].add_node_address(node)
-        output = StringIO.StringIO()
         expected_targets = [
             {
                 'labels': {
@@ -570,9 +567,8 @@ class MlabconfigTest(unittest.TestCase):
                                    use_initscript=True,
                                    ipv6='all')]
         # Assign experiments to nodes.
-        for hostname, node in self.sites[0]['nodes'].iteritems():
+        for node in self.sites[0]['nodes'].values():
             experiments[0].add_node_address(node)
-        output = StringIO.StringIO()
         expected_targets = [
             {
                 'labels': {
@@ -601,9 +597,8 @@ class MlabconfigTest(unittest.TestCase):
                                    use_initscript=True,
                                    ipv6='all')]
         # Assign experiments to nodes.
-        for hostname, node in self.sites[0]['nodes'].iteritems():
+        for node in self.sites[0]['nodes'].values():
             experiments[0].add_node_address(node)
-        output = StringIO.StringIO()
         expected_targets = [
             {
                 'labels': {

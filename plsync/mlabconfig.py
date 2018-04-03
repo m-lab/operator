@@ -64,7 +64,7 @@ class BracketTemplate(string.Template):
         if not args:
             mapping = kws
         elif kws:
-            mapping = _multimap(kws, args[0])
+            mapping = BracketTemplate._multimap(kws, args[0])
         else:
             mapping = args[0]
         # Helper function for .sub()
@@ -318,7 +318,7 @@ def flatten_hostname(hostname):
 
 def export_router_and_switch_records(output, sites):
     comment(output, 'router and switch v4 records.')
-    for i, site in enumerate(sites):
+    for site in sites:
         write_a_record(output, 'r1.' + site['name'], site.ipv4(index=1))
         write_a_record(output, 's1.' + site['name'], site.ipv4(index=2))
 
@@ -614,9 +614,7 @@ def export_scraper_kubernetes_config(filename_template, experiments,
     """Generates kubernetes deployment configs based on an input template."""
     filename_tmpl = BracketTemplate(filename_template)
     contents_tmpl = BracketTemplate(contents_template)
-    configs = []
     for experiment in experiments:
-        slice_name = experiment['name']
         for name, node in experiment['network_list']:
             node_name, site_name, _ = name.split('.', 2)
             if experiment['index'] is None:
@@ -776,7 +774,7 @@ def select_prometheus_site_targets(sites, select_regex, target_templates,
 
 
 def main():
-    (options, args) = parse_flags()
+    (options, _) = parse_flags()
 
     # TODO: consider alternate formats for configuration information, e.g. yaml.
     sites = getattr(__import__(options.sites_config), options.sites)
@@ -786,7 +784,7 @@ def main():
     # Assign every slice to every node.
     for experiment in experiments:
         for site in sites:
-            for hostname, node in site['nodes'].iteritems():
+            for node in site['nodes'].values():
                 experiment.add_node_address(node)
 
     if options.format in ['hostips', 'hostips-json']:

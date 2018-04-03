@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import pprint
 from planetlab import session
 from planetlab import sync
 import sys
@@ -203,7 +202,7 @@ def main():
                 default="slice_list",
                 help="the slice list variable name.")
 
-    (options, args) = parser.parse_args()
+    (options, _) = parser.parse_args()
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)

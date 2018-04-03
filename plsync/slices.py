@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-import pprint
 from planetlab.model import *
 from users import user_list
 # NOTE: slice attributes:
