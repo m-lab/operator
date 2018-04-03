@@ -21,4 +21,4 @@ done
 
 # Run the docstring lint checker.
 PYTHONPATH=$PYTHONPATH:$PWD/third_party/docstringchecker pylint \
-    --reports=n pysync/*.py
+    --reports=n plsync/*.py

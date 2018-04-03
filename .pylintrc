@@ -9,3 +9,6 @@ load-plugins=lint
 # from the whitelist of DocStringChecker checks that we want.
 disable=all
 enable=docstring-trailing-whitespace,docstring-leading-whitespace,docstring-cuddled-quotes,docstring-section-newline,docstring-section-name,docstring-section-order,docstring-first-line,docstring-missing-args,docstring-misnamed-args,docstring-arg-spacing,docstring-too-many-newlines,docstring-second-line-blank,docstring-section-indent
+
+# TODO: enable additional checks.
+# unused-variable,bad-indentation,unused-import

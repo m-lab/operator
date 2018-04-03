@@ -6,7 +6,6 @@ import optparse
 import os
 import re
 import string
-import StringIO
 import sys
 import time
 
@@ -527,15 +526,20 @@ def export_mlab_site_stats(sites):
 
 
 def export_mlab_host_ips(sites, experiments):
-    """Writes csv data of all M-Lab servers and experiments to output."""
-    output = StringIO.StringIO()
+    """Extracts the hostname and IP addresses for all machines & experiments.
+
+    Returns:
+      list of dict, where each dict has keys: 'hostname', 'ipv4', 'ipv6'.
+    """
+    output = []
     # Export server names and addresses.
     for site in sites:
         # TODO(soltesz): change 'nodes' to be a sorted list of node objects.
         for _, node in site['nodes'].iteritems():
-            output.write('{name},{ipv4},{ipv6}\n'.format(name=node.hostname(),
-                                                         ipv4=node.ipv4(),
-                                                         ipv6=node.ipv6()))
+            output.append(
+                {'hostname': node.hostname(),
+                 'ipv4': node.ipv4(),
+                 'ipv6': node.ipv6()})
 
     # Export experiment names and addresses.
     for experiment in experiments:
@@ -543,10 +547,10 @@ def export_mlab_host_ips(sites, experiments):
         for _, node in experiment['network_list']:
             if experiment['index'] is None:
                 continue
-            output.write(
-                '{name},{ipv4},{ipv6}\n'.format(name=experiment.hostname(node),
-                                                ipv4=experiment.ipv4(node),
-                                                ipv6=experiment.ipv6(node)))
+            output.append(
+                {'hostname': experiment.hostname(node),
+                 'ipv4': experiment.ipv4(node),
+                 'ipv6': experiment.ipv6(node)})
 
     return output
 
@@ -785,23 +789,37 @@ def main():
             for hostname, node in site['nodes'].iteritems():
                 experiment.add_node_address(node)
 
-    if options.format == 'hostips':
-        output = export_mlab_host_ips(sites, experiments)
-        sys.stdout.write(output.getvalue())
+    if options.format in ['hostips', 'hostips-json']:
+        hostips = export_mlab_host_ips(sites, experiments)
         # Temporary workaround for HND01 load issues. Remove or generalize:
         # https://github.com/m-lab/operator/issues/154
-        sys.stdout.write(
-            'mlab1.tyo01.measurement-lab.org,35.200.102.226,\n'
-            'ndt.iupui.mlab1.tyo01.measurement-lab.org,35.200.102.226,\n'
-            'mlab1.tyo02.measurement-lab.org,35.200.34.149,\n'
-            'ndt.iupui.mlab1.tyo02.measurement-lab.org,35.200.34.149,\n'
-            'mlab1.tyo03.measurement-lab.org,35.200.112.17,\n'
-            'ndt.iupui.mlab1.tyo03.measurement-lab.org,35.200.112.17,\n'
+        hostips.extend(
+            [
+                {'hostname': 'mlab1.tyo01.measurement-lab.org',
+                     'ipv4': '35.200.102.226', 'ipv6': ''},
+                {'hostname': 'mlab1.tyo02.measurement-lab.org',
+                     'ipv4': '35.200.34.149', 'ipv6': ''},
+                {'hostname': 'mlab1.tyo03.measurement-lab.org',
+                     'ipv4': '35.200.112.17', 'ipv6': ''},
+                {'hostname': 'ndt.iupui.mlab1.tyo01.measurement-lab.org',
+                     'ipv4': '35.200.102.226', 'ipv6': ''},
+                {'hostname': 'ndt.iupui.mlab1.tyo02.measurement-lab.org',
+                     'ipv4': '35.200.34.149', 'ipv6': ''},
+                {'hostname': 'ndt.iupui.mlab1.tyo03.measurement-lab.org',
+                     'ipv4': '35.200.112.17', 'ipv6': ''}
+            ]
         )
+
+        if options.format == 'hostips':
+            for record in hostips:
+                sys.stdout.write('%(hostname)s,%(ipv4)s,%(ipv6)s\n' % record)
+        elif options.format == 'hostips-json':
+            json.dump(hostips, sys.stdout, indent=2)
+        else:
+            raise Exception('Unsupported format: ' + options.format)
 
     elif options.format == 'sitestats':
         sitestats = export_mlab_site_stats(sites)
-
         # Temporary workaround for HND01 load issues. Remove or generalize:
         # https://github.com/m-lab/operator/issues/154
         for tyo in ['tyo01', 'tyo02', 'tyo03']:
@@ -815,7 +833,7 @@ def main():
                 'roundrobin': False
             })
 
-        json.dump(sitestats, sys.stdout)
+        json.dump(sitestats, sys.stdout, indent=2)
 
     elif options.format == 'server-network-config':
         with open(options.template) as template:

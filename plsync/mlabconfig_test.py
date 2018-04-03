@@ -115,22 +115,17 @@ class MlabconfigTest(unittest.TestCase):
         # Assign experiments to nodes.
         for hostname, node in self.sites[0]['nodes'].iteritems():
             experiments[0].add_node_address(node)
-        output = StringIO.StringIO()
         expected_results = [
-            'mlab1.abc01.measurement-lab.org,192.168.1.9,2400:1002:4008::9',
-            'mlab2.abc01.measurement-lab.org,192.168.1.22,2400:1002:4008::22',
-            'mlab3.abc01.measurement-lab.org,192.168.1.35,2400:1002:4008::35',
-            ('bar.abc.mlab1.abc01.measurement-lab.org,192.168.1.11,'
-             '2400:1002:4008::11'),
-            ('bar.abc.mlab2.abc01.measurement-lab.org,192.168.1.24,'
-             '2400:1002:4008::24'),
-            ('bar.abc.mlab3.abc01.measurement-lab.org,192.168.1.37,'
-             '2400:1002:4008::37'),
+            {'hostname': 'mlab1.abc01.measurement-lab.org', 'ipv4': '192.168.1.9', 'ipv6': '2400:1002:4008::9'},
+            {'hostname': 'mlab2.abc01.measurement-lab.org', 'ipv4': '192.168.1.22', 'ipv6': '2400:1002:4008::22'},
+            {'hostname': 'mlab3.abc01.measurement-lab.org', 'ipv4': '192.168.1.35', 'ipv6': '2400:1002:4008::35'},
+            {'hostname': 'bar.abc.mlab1.abc01.measurement-lab.org', 'ipv4': '192.168.1.11', 'ipv6': '2400:1002:4008::11'},
+            {'hostname': 'bar.abc.mlab2.abc01.measurement-lab.org', 'ipv4': '192.168.1.24', 'ipv6': '2400:1002:4008::24'},
+            {'hostname': 'bar.abc.mlab3.abc01.measurement-lab.org', 'ipv4': '192.168.1.37', 'ipv6': '2400:1002:4008::37'},
         ]
 
-        output = mlabconfig.export_mlab_host_ips(self.sites, experiments)
+        results = mlabconfig.export_mlab_host_ips(self.sites, experiments)
 
-        results = output.getvalue().split()
         self.assertItemsEqual(results, expected_results)
 
     def test_export_mlab_site_stats(self):
