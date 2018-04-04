@@ -9,7 +9,7 @@
 # Example:
 #  ./deploy_metadata_configs.sh
 #      SERVICE_ACCOUNT_mlab_sandbox
-#      $TRAVIS_BUILD_DIR/gen/mlab-sandbox
+#      $TRAVIS_BUILD_DIR/gen/mlab-sandbox/output
 #      gs://operator-mlab-sandbox/metadata/v0
 
 set -eux
