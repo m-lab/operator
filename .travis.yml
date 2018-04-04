@@ -53,8 +53,10 @@ deploy:
 
   # Deploy metadata configs.
 - provider: script
-  script: $TRAVIS_BUILD_DIR/travis/deploy_gcs.sh SERVICE_ACCOUNT_mlab_sandbox
-      $TRAVIS_BUILD_DIR/metadata/v0 gs://operator-mlab-sandbox/metadata/
+  script: $TRAVIS_BUILD_DIR/deploy_metadata_configs.sh
+      SERVICE_ACCOUNT_mlab_sandbox
+      $TRAVIS_BUILD_DIR/gen/mlab-sandbox/metadata
+      gs://operator-mlab-sandbox/metadata/v0
   skip_cleanup: true
   on:
     repo: m-lab/operator
@@ -70,10 +72,33 @@ deploy:
     repo: m-lab/operator
     branch: master
 
+  # Deploy metadata configs.
+- provider: script
+  script: $TRAVIS_BUILD_DIR/deploy_metadata_configs.sh
+      SERVICE_ACCOUNT_mlab_staging
+      $TRAVIS_BUILD_DIR/gen/mlab-staging/metadata
+      gs://operator-mlab-staging/metadata/v0
+  skip_cleanup: true
+  on:
+    repo: m-lab/operator
+    all_branches: true
+    condition: $TRAVIS_BRANCH == master
+
 ############################################################################
 # Production, on tags.
 - provider: script
   script: $TRAVIS_BUILD_DIR/deploy_prometheus_targets.sh mlab-oti global
+  skip_cleanup: true
+  on:
+    repo: m-lab/operator
+    tags: true
+
+  # Deploy metadata configs.
+- provider: script
+  script: $TRAVIS_BUILD_DIR/deploy_metadata_configs.sh
+      SERVICE_ACCOUNT_mlab_oti
+      $TRAVIS_BUILD_DIR/gen/mlab-oti/metadata
+      gs://operator-mlab-oti/metadata/v0
   skip_cleanup: true
   on:
     repo: m-lab/operator
