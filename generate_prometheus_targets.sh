@@ -95,6 +95,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --template_target={{hostname}}:3001 \
           --label service=ndt_raw_ipv6 \
           --label module=tcp_v6_online \
+          --label __blackbox_port=${!bbe_port} \
           --select "ndt.iupui.(${!pattern})" \
           --decoration "v6" > \
               ${output}/blackbox-targets-ipv6/ndt_raw_ipv6.json
@@ -113,6 +114,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --template_target={{hostname}}:3010 \
           --label service=ndt_ssl_ipv6 \
           --label module=tcp_v6_tls_online \
+          --label __blackbox_port=${!bbe_port} \
           --use_flatnames \
           --select "ndt.iupui.(${!pattern})" \
           --decoration "v6" > \
