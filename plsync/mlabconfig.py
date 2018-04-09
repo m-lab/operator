@@ -194,7 +194,7 @@ def parse_flags():
     parser.add_option(
         '',
         '--template_input',
-        dest='template',
+        dest='template_input',
         default=None,
         help='Template to apply values. Creates a new file for every hostname.')
     parser.add_option(
@@ -559,11 +559,11 @@ def export_mlab_host_ips(sites, experiments):
 # Replace this function with a more general interface for accessing
 # configuration information for a site, node, slice, or otherwise.
 def export_mlab_server_network_config(output, sites, name_tmpl, input_tmpl,
-                                      select_regex):
+                                      select_regex, labels):
     """Evaluates input_tmpl with values from the server network configuration.
 
-    NOTE: Only fields returned by the model.Node.interface function are
-    supported.
+    NOTE: Only fields returned by the model.Node.interface function and any
+    key/values in labels are supported.
 
     If select_regex is not None, then only node hostnames that match the
     regular expression are processed.
@@ -589,6 +589,7 @@ def export_mlab_server_network_config(output, sites, name_tmpl, input_tmpl,
         name_tmpl: str, the name of an output file as a template.
         input_tmpl: open file for reading, contains the template content.
         select_regex: str, a regular expression used to select node hostnames.
+        labels: dict, extra key values available in the templates.
 
     Raises:
         IOError, could not create or write to a file.
@@ -603,6 +604,7 @@ def export_mlab_server_network_config(output, sites, name_tmpl, input_tmpl,
             i = node.interface()
             # Add 'hostname' so that it is available to templates.
             i['hostname'] = hostname
+            i.update(labels)
             filename = output_name.safe_substitute(i)
             with open(filename, 'w') as f:
                 output.write("%s\n" % filename)
@@ -834,9 +836,10 @@ def main():
         json.dump(sitestats, sys.stdout, indent=2)
 
     elif options.format == 'server-network-config':
-        with open(options.template) as template:
+        with open(options.template_input) as template:
             export_mlab_server_network_config(
-                sys.stdout, sites, options.filename, template, options.select)
+                sys.stdout, sites, options.filename, template, options.select,
+                options.labels)
 
     elif options.format == 'zone':
         with open(options.zoneheader, 'r') as header:
@@ -847,7 +850,7 @@ def main():
             export_mlab_zone_records(sys.stdout, sites, experiments)
 
     elif options.format == 'scraper_kubernetes':
-        with open(options.template, 'r') as template:
+        with open(options.template_input, 'r') as template:
             export_scraper_kubernetes_config(options.filename, experiments,
                                              template.read(), options.select)
 

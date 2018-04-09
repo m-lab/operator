@@ -344,14 +344,16 @@ class MlabconfigTest(unittest.TestCase):
     def test_export_mlab_server_network_config(self, mock_open):
         stdout = StringIO.StringIO()
         name_tmpl = '{{hostname}}-foo.ipxe'
-        input_tmpl = StringIO.StringIO('ip={{ip}} ; echo ${ip}')
+        input_tmpl = StringIO.StringIO('ip={{ip}} ; echo ${ip} {{extra}}')
         file_output = StringIO.StringIO()
         mock_open.return_value = OpenStringIO(file_output)
 
         mlabconfig.export_mlab_server_network_config(
-            stdout, self.sites, name_tmpl, input_tmpl, 'mlab1.abc01')
+            stdout, self.sites, name_tmpl, input_tmpl, 'mlab1.abc01',
+            {'extra': 'value'})
 
-        self.assertEqual(file_output.getvalue(), 'ip=192.168.1.9 ; echo ${ip}')
+        self.assertEqual(
+            file_output.getvalue(), 'ip=192.168.1.9 ; echo ${ip} value')
 
     @mock.patch('__builtin__.open')
     def test_export_scraper_kubernetes_config(self, mock_open):
