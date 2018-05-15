@@ -98,7 +98,10 @@ class Network(dict):
         if 'v6gw' not in kwargs:
             kwargs['v6gw'] = None
 
-        kwargs['v4'] = NetworkIPv4(prefix=kwargs['v4'])
+        if 'gcenet' in kwargs and kwargs['gcenet']:
+            kwargs['v4'] = GCENetworkIPv4(ipv4=kwargs['v4'])
+        else:
+            kwargs['v4'] = NetworkIPv4(prefix=kwargs['v4'])
         # Allow disabling IPv6
         if kwargs['v6'] is not None:
             kwargs['v6'] = NetworkIPv6(prefix=kwargs['v6'],
@@ -176,6 +179,10 @@ class NetworkIPv4(dict):
             raise Exception(msg)
         super(NetworkIPv4, self).__init__(**kwargs)
 
+    def index(self, position=0):
+        """Returns the IPv4 address at the given position for a site."""
+        return ml_site_ipv4(self['prefix'], position)
+
     def interface(self, index):
         """ Returns the myPLC interface definition for the given host index"""
         return pl_interface(index, self['prefix'])
@@ -191,7 +198,7 @@ class NetworkIPv4(dict):
 
             re_order = [ ip_list[int(i)] for i in index_list ]
             return re_order
-        return ip_list 
+        return ip_list
 
     def drac(self, index):
         """ Returns the IPv4 address reserved for the DRAC interface"""
@@ -201,6 +208,43 @@ class NetworkIPv4(dict):
         """ Returns the last octet of 'prefix' """
         l = self['prefix'].split('.')[3]
         return int(l)
+
+
+class GCENetworkIPv4(dict):
+    """The GCENetworkIPv4() object encapsulates a single IPv4 address assigned
+    to a GCE VM. The GCENetworkIPv4 object implements the NetworkIPv4 interface.
+
+    GCENetworkIPv4() constructor expects these parameters:
+        ipv4 - string, a IPv4 address i.e. 192.168.10.23
+    """
+    def __str__(self):
+        return pprint.pformat(self)
+
+    def __init__(self, **kwargs):
+        if 'ipv4' not in kwargs:
+            msg="'ipv4' is a mandatory argument. i.e.  192.168.10.23"
+            raise Exception(msg)
+        super(GCENetworkIPv4, self).__init__(**kwargs)
+
+    def index(self, position=0):
+        return self['ipv4']
+
+    def interface(self, index):
+        """ Returns the myPLC interface definition for the given host index"""
+        return {'ip': self['ipv4']}
+
+    def iplist(self, index):
+        """Unconditionally returns a list with the GCE IPv4 address 12 times."""
+        return [self['ipv4']] * 12
+
+    def drac(self, index):
+        """ Returns the IPv4 address reserved for the DRAC interface"""
+        return self['ipv4']
+
+    def last(self):
+        """Provides interface compatibility with NetworkIPv4. Unused."""
+        raise Exception('Not implemented')
+
 
 class Site(dict):
     """Site() - represents an M-Lab site.  Also wraps the creation of site 
@@ -275,7 +319,7 @@ class Site(dict):
         super(Site, self).__init__(**kwargs)
 
     def ipv4(self, index=0):
-      return ml_site_ipv4(self['net']['v4']['prefix'], index)
+      return self['net']['v4'].index(index)
 
 
 def makesite(name, v4prefix, v6prefix, city, country, 
@@ -284,6 +328,9 @@ def makesite(name, v4prefix, v6prefix, city, country,
     if 'v6gw' in kwargs:    # but, if provided
         v6gw=kwargs['v6gw'] # save for Network() object below
         del kwargs['v6gw']  # and don't pass to Site()
+    gcenet = False
+    if 'gcenet' in kwargs:
+        gcenet = kwargs['gcenet']
     location=None
     if city is not None and latitude is not None and longitude is not None:
         # NOTE: only create Location() if city, lat, and long are specified.
@@ -291,8 +338,8 @@ def makesite(name, v4prefix, v6prefix, city, country,
     #Don't allow site to be created without this info--unless it's a test site
     elif name.find("0t") < 0:
         raise Exception("city, latititude and/or longitude were not specified")
-    return Site(name=name, 
-                net=Network(v4=v4prefix, v6=v6prefix, v6gw=v6gw),
+    return Site(name=name,
+                net=Network(v4=v4prefix, v6=v6prefix, v6gw=v6gw, gcenet=gcenet),
                 location=location,
                 users=user_list,
                 **kwargs)
