@@ -9,6 +9,9 @@ import string
 import sys
 import time
 
+from planetlab import model
+
+
 ZONE_TTL = 60 * 5
 ZONE_MIN_TTL = 60 * 5
 ZONE_REFRESH = 60 * 60
@@ -783,32 +786,38 @@ def main():
     experiments = getattr(
         __import__(options.experiments_config), options.experiments)
 
+    # TODO: define these in a separate file, so plsync continues to work for PLC.
+    sites.extend([
+        # The following sites represent GCE VMs that only run NDT tests. The
+        # IPv4 "prefix" is the VM public IPv4 address. The attribute
+        # `gcenet=True` changes how the site treats the IP address for node
+        # and experiment configuration.
+        #
+        # Temporary workaround for HND01 load issues. Remove or generalize:
+        # https://github.com/m-lab/operator/issues/154
+        model.makesite('tyo01', '35.200.102.226', None, 'Tokyo', 'JP',
+                       35.552200, 139.780000, [], exclude=[1], count=1,
+                       arch='x86_64', nodegroup='GCEVM', gcenet=True),
+        model.makesite('tyo02', '35.200.34.149', None, 'Tokyo', 'JP',
+                       35.552200, 139.780000, [], exclude=[1], count=1,
+                       arch='x86_64', nodegroup='GCEVM', gcenet=True),
+        model.makesite('tyo03', '35.200.112.17', None, 'Tokyo', 'JP',
+                       35.552200, 139.780000, [], exclude=[1], count=1,
+                       arch='x86_64', nodegroup='GCEVM', gcenet=True),
+    ])
+
     # Assign every slice to every node.
     for experiment in experiments:
         for site in sites:
             for node in site['nodes'].values():
+                if ('GCEVM' in node['nodegroup'] and
+                    experiment.dnsname() != 'ndt.iupui'):
+                    # Ignore experiments that are not NDT on GCE VMs.
+                    continue
                 experiment.add_node_address(node)
 
     if options.format in ['hostips', 'hostips-json']:
         hostips = export_mlab_host_ips(sites, experiments)
-        # Temporary workaround for HND01 load issues. Remove or generalize:
-        # https://github.com/m-lab/operator/issues/154
-        hostips.extend(
-            [
-                {'hostname': 'mlab1.tyo01.measurement-lab.org',
-                     'ipv4': '35.200.102.226', 'ipv6': ''},
-                {'hostname': 'mlab1.tyo02.measurement-lab.org',
-                     'ipv4': '35.200.34.149', 'ipv6': ''},
-                {'hostname': 'mlab1.tyo03.measurement-lab.org',
-                     'ipv4': '35.200.112.17', 'ipv6': ''},
-                {'hostname': 'ndt.iupui.mlab1.tyo01.measurement-lab.org',
-                     'ipv4': '35.200.102.226', 'ipv6': ''},
-                {'hostname': 'ndt.iupui.mlab1.tyo02.measurement-lab.org',
-                     'ipv4': '35.200.34.149', 'ipv6': ''},
-                {'hostname': 'ndt.iupui.mlab1.tyo03.measurement-lab.org',
-                     'ipv4': '35.200.112.17', 'ipv6': ''}
-            ]
-        )
 
         if options.format == 'hostips':
             for record in hostips:
@@ -820,19 +829,6 @@ def main():
 
     elif options.format == 'sitestats':
         sitestats = export_mlab_site_stats(sites)
-        # Temporary workaround for HND01 load issues. Remove or generalize:
-        # https://github.com/m-lab/operator/issues/154
-        for tyo in ['tyo01', 'tyo02', 'tyo03']:
-            sitestats.append({
-                'site': tyo,
-                'metro': [tyo, tyo[:-2]],
-                'city': 'Tokyo',
-                'country': 'JP',
-                'latitude': 35.552200,
-                'longitude': 139.780000,
-                'roundrobin': False
-            })
-
         json.dump(sitestats, sys.stdout, indent=2)
 
     elif options.format == 'server-network-config':
