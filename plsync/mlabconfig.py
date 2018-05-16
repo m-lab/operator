@@ -162,6 +162,12 @@ def parse_flags():
                       default='sites',
                       help='The name of the module with Site() definitions.')
     parser.add_option('',
+                      '--extra_sites_config',
+                      metavar='extra_sites',
+                      dest='extra_sites_config',
+                      default='',
+                      help='The name of an additional module with Site() definitions. May be empty.')
+    parser.add_option('',
                       '--experiments_config',
                       metavar='slices',
                       dest='experiments_config',
@@ -786,25 +792,10 @@ def main():
     experiments = getattr(
         __import__(options.experiments_config), options.experiments)
 
-    # TODO: define these in a separate file, so plsync continues to work for PLC.
-    sites.extend([
-        # The following sites represent GCE VMs that only run NDT tests. The
-        # IPv4 "prefix" is the VM public IPv4 address. The attribute
-        # `gcenet=True` changes how the site treats the IP address for node
-        # and experiment configuration.
-        #
-        # Temporary workaround for HND01 load issues. Remove or generalize:
-        # https://github.com/m-lab/operator/issues/154
-        model.makesite('tyo01', '35.200.102.226', None, 'Tokyo', 'JP',
-                       35.552200, 139.780000, [], exclude=[1], count=1,
-                       arch='x86_64', nodegroup='GCEVM', gcenet=True),
-        model.makesite('tyo02', '35.200.34.149', None, 'Tokyo', 'JP',
-                       35.552200, 139.780000, [], exclude=[1], count=1,
-                       arch='x86_64', nodegroup='GCEVM', gcenet=True),
-        model.makesite('tyo03', '35.200.112.17', None, 'Tokyo', 'JP',
-                       35.552200, 139.780000, [], exclude=[1], count=1,
-                       arch='x86_64', nodegroup='GCEVM', gcenet=True),
-    ])
+    if options.extra_sites_config:
+        # Load additional sites.
+        sites.extend(getattr(
+                __import__(options.extra_sites_config), options.sites))
 
     # Assign every slice to every node.
     for experiment in experiments:
