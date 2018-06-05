@@ -601,9 +601,13 @@ def export_mlab_server_network_config(output, sites, name_tmpl, input_tmpl,
             # TODO(soltesz): support multiple (or all) object types.
             if select_regex and not re.search(select_regex, hostname):
                 continue
+            # Get IPv4 settings.
             i = node.interface()
             # Add 'hostname' so that it is available to templates.
             i['hostname'] = hostname
+            # Add IPv6 settings.
+            i.update(node.interface_ipv6())
+            # Add extra provided labels.
             i.update(labels)
             filename = output_name.safe_substitute(i)
             with open(filename, 'w') as f:

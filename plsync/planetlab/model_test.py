@@ -168,6 +168,20 @@ class ModelTest(unittest.TestCase):
 
         self.assertItemsEqual(expected_names, names)
 
+    def test_node_interface_ipv6(self):
+        expected = {
+            'ipv6_prefix': '2400:1002:4008::',
+            'ipv6_address': '2400:1002:4008::9',
+            'ipv6_gateway': '2400:1002:4008::1',
+            'ipv6_dns1': '2001:4860:4860::8888',
+            'ipv6_dns2': '2001:4860:4860::8844',
+        }
+        node = self.sites[0]['nodes']['mlab1.abc01.measurement-lab.org']
+
+        actual = node.interface_ipv6()
+
+        self.assertItemsEqual(expected, actual)
+
 
 if __name__ == '__main__':
     unittest.main()

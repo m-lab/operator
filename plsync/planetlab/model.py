@@ -134,6 +134,16 @@ class NetworkIPv6(dict):
 
         super(NetworkIPv6, self).__init__(**kwargs)
 
+    def interface(self, index):
+        """Returns a dict of typical interface values for IPv6."""
+        return {
+            'ipv6_prefix': self['prefix'],
+            'ipv6_address': self.ipv6addr(index),
+            'ipv6_gateway': self.ipv6_defaultgw(),
+            'ipv6_dns1': '2001:4860:4860::8888',
+            'ipv6_dns2': '2001:4860:4860::8844',
+        }
+
     def ipv6_defaultgw(self):
         """ Returns the IPv6 gateway as calculated from prefix & v6gw """
         return pl_v6gw(self['prefix'], self['v6gw'])
@@ -381,6 +391,8 @@ class Node(dict):
 
     def interface(self):
         return self['net']['v4'].interface(self['index'])
+    def interface_ipv6(self):
+        return self['net']['v6'].interface(self['index'])
     def iplist(self):
         return self['net']['v4'].iplist(self['index'])
     def iplistv6(self):
