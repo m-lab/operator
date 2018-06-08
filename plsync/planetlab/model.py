@@ -137,6 +137,7 @@ class NetworkIPv6(dict):
     def interface(self, index):
         """Returns a dict of typical interface values for IPv6."""
         return {
+            'ipv6_enabled': 'true',
             'ipv6_prefix': self['prefix'],
             'ipv6_address': self.ipv6addr(index),
             'ipv6_gateway': self.ipv6_defaultgw(),
@@ -392,7 +393,11 @@ class Node(dict):
     def interface(self):
         return self['net']['v4'].interface(self['index'])
     def interface_ipv6(self):
-        return self['net']['v6'].interface(self['index'])
+        if self.ipv6_is_enabled():
+            return self['net']['v6'].interface(self['index'])
+        else:
+            # TODO: create a NetworkIPv6 instance that returns this.
+            return {'ipv6_enabled': 'false'}
     def iplist(self):
         return self['net']['v4'].iplist(self['index'])
     def iplistv6(self):

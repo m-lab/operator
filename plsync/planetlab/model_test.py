@@ -11,6 +11,10 @@ class ModelTest(unittest.TestCase):
         self.sites = [model.makesite(
             'abc01', '192.168.1.0', '2400:1002:4008::', 'Some City', 'US',
             36.850000, 74.783000, self.users, nodegroup='MeasurementLabCentos')]
+        self.sites_without_ipv6 = [model.makesite(
+            'abc01', '192.168.1.0', None, 'Some City', 'US',
+            36.850000, 74.783000, self.users, exclude=[1,2,3],
+            nodegroup='MeasurementLabCentos')]
         self.attrs = [model.Attr('MeasurementLabCentos', disk_max='60000000')]
         # Setup synthetic user, site, and experiment configuration data.
         self.experiments = [
@@ -170,6 +174,7 @@ class ModelTest(unittest.TestCase):
 
     def test_node_interface_ipv6(self):
         expected = {
+            'ipv6_enabled': 'true',
             'ipv6_prefix': '2400:1002:4008::',
             'ipv6_address': '2400:1002:4008::9',
             'ipv6_gateway': '2400:1002:4008::1',
@@ -177,6 +182,16 @@ class ModelTest(unittest.TestCase):
             'ipv6_dns2': '2001:4860:4860::8844',
         }
         node = self.sites[0]['nodes']['mlab1.abc01.measurement-lab.org']
+
+        actual = node.interface_ipv6()
+
+        self.assertItemsEqual(expected, actual)
+
+    def test_node_interface_ipv6_when_ipv6_disabled(self):
+        expected = {
+            'ipv6_enabled': 'false',
+        }
+        node = self.sites_without_ipv6[0]['nodes']['mlab1.abc01.measurement-lab.org']
 
         actual = node.interface_ipv6()
 
