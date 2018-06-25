@@ -175,8 +175,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
       # snmp_exporter on port 9116.
       ./mlabconfig.py --format=prom-targets-sites \
           --template_target=s1.{{sitename}}.measurement-lab.org \
-          --label service=snmp \
-          --label __exporter_project=${project} > \
+          --label service=snmp > \
               ${output}/snmp-targets/snmpexporter.json
 
       # inotify_exporter for NDT on port 9393.
@@ -192,6 +191,12 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --label service=nodeexporter \
           --select "${!pattern}" > \
               ${output}/legacy-targets/nodeexporter.json
+
+      # ICMP probe for platform switches
+      ./mlabconfig.py --format=prom-targets-sites \
+          --template_target=s1.{{sitename}}.measurement-lab.org \
+          --label module=icmp > \
+              ${output}/blackbox-targets/switches_ping.json
 
     else
       echo "Unknown group name: ${GROUP} for ${project}"
