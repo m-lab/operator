@@ -124,6 +124,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
       ./mlabconfig.py --format=prom-targets \
           --template_target={{hostname}} \
           --label service=ndt_e2e \
+          --use_flatnames \
           --select "ndt.iupui.(${!pattern})" > \
               ${output}/script-targets/ndt_e2e.json
 
@@ -131,6 +132,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
       ./mlabconfig.py --format=prom-targets \
           --template_target={{hostname}} \
           --label service=ndt_queue \
+          --use_flatnames \
           --select "ndt.iupui.(${!pattern})" > \
               ${output}/script-targets/ndt_queue.json
 
