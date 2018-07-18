@@ -795,20 +795,40 @@ def main():
 
     if options.format in ['hostips', 'hostips-json']:
         hostips = export_mlab_host_ips(sites, experiments)
-        # Temporary workaround for HND01 load issues. Remove or generalize:
+        # Temporary workaround for load issues. Remove or generalize:
         # https://github.com/m-lab/operator/issues/154
         hostips.extend(
             [
+                {'hostname': 'mlab1.chs0c.measurement-lab.org',
+                     'ipv4': '35.237.214.243', 'ipv6': ''},
+                {'hostname': 'ndt.iupui.mlab1.chs0c.measurement-lab.org',
+                     'ipv4': '35.237.214.243', 'ipv6': ''},
+                {'hostname': 'mlab1.iad0c.measurement-lab.org',
+                     'ipv4': '35.236.226.12', 'ipv6': ''},
+                {'hostname': 'ndt.iupui.mlab1.iad0c.measurement-lab.org',
+                     'ipv4': '35.236.226.12', 'ipv6': ''},
+                {'hostname': 'mlab1.lax0c.measurement-lab.org',
+                     'ipv4': '35.235.125.164', 'ipv6': ''},
+                {'hostname': 'ndt.iupui.mlab1.lax0c.measurement-lab.org',
+                     'ipv4': '35.235.125.164', 'ipv6': ''},
+                {'hostname': 'mlab1.oma0c.measurement-lab.org',
+                     'ipv4': '35.226.110.109', 'ipv6': ''},
+                {'hostname': 'ndt.iupui.mlab1.oma0c.measurement-lab.org',
+                     'ipv4': '35.226.110.109', 'ipv6': ''},
+                {'hostname': 'mlab1.pdx0c.measurement-lab.org',
+                     'ipv4': '35.230.97.78', 'ipv6': ''},
+                {'hostname': 'ndt.iupui.mlab1.pdx0c.measurement-lab.org',
+                     'ipv4': '35.230.97.78', 'ipv6': ''},
                 {'hostname': 'mlab1.tyo01.measurement-lab.org',
+                     'ipv4': '35.200.102.226', 'ipv6': ''},
+                {'hostname': 'ndt.iupui.mlab1.tyo01.measurement-lab.org',
                      'ipv4': '35.200.102.226', 'ipv6': ''},
                 {'hostname': 'mlab1.tyo02.measurement-lab.org',
                      'ipv4': '35.200.34.149', 'ipv6': ''},
-                {'hostname': 'mlab1.tyo03.measurement-lab.org',
-                     'ipv4': '35.200.112.17', 'ipv6': ''},
-                {'hostname': 'ndt.iupui.mlab1.tyo01.measurement-lab.org',
-                     'ipv4': '35.200.102.226', 'ipv6': ''},
                 {'hostname': 'ndt.iupui.mlab1.tyo02.measurement-lab.org',
                      'ipv4': '35.200.34.149', 'ipv6': ''},
+                {'hostname': 'mlab1.tyo03.measurement-lab.org',
+                     'ipv4': '35.200.112.17', 'ipv6': ''},
                 {'hostname': 'ndt.iupui.mlab1.tyo03.measurement-lab.org',
                      'ipv4': '35.200.112.17', 'ipv6': ''}
             ]
@@ -824,8 +844,54 @@ def main():
 
     elif options.format == 'sitestats':
         sitestats = export_mlab_site_stats(sites)
-        # Temporary workaround for HND01 load issues. Remove or generalize:
+        # Temporary cloud VMs for use when regular platform capacity is
+        # overextended.
         # https://github.com/m-lab/operator/issues/154
+        sitestats.append({
+            'site': 'chs0c',
+            'metro': ['chs', 'chs0c'],
+            'city': 'Charleston_SC',
+            'country': 'US',
+            'latitude': 32.896663,
+            'longitude': -80.039184,
+            'roundrobin': False
+        })
+        sitestats.append({
+            'site': 'iad0c',
+            'metro': ['iad', 'iad0c'],
+            'city': 'Washington_DC',
+            'country': 'US',
+            'latitude': 38.944400,
+            'longitude': -77.455800,
+            'roundrobin': False
+        })
+        sitestats.append({
+            'site': 'lax0c',
+            'metro': ['lax', 'lax0c'],
+            'city': 'Los Angeles_CA',
+            'country': 'US',
+            'latitude': 33.942500,
+            'longitude': -118.407200,
+            'roundrobin': False
+        })
+        sitestats.append({
+            'site': 'oma0c',
+            'metro': ['oma', 'oma0c'],
+            'city': 'Omaha_NE',
+            'country': 'US',
+            'latitude': 41.303760,
+            'longitude': -95.893282,
+            'roundrobin': False
+        })
+        sitestats.append({
+            'site': 'pdx0c',
+            'metro': ['pdx', 'pdx0c'],
+            'city': 'Portland_OR',
+            'country': 'US',
+            'latitude': 45.589191,
+            'longitude': -122.600228,
+            'roundrobin': False
+        })
         for tyo in ['tyo01', 'tyo02', 'tyo03']:
             sitestats.append({
                 'site': tyo,

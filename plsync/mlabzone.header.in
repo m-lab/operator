@@ -36,22 +36,40 @@ donar   IN      NS      utility.mlab.mlab1.syd01.measurement-lab.org.
 donar   IN      NS      utility.mlab.mlab1.hnd01.measurement-lab.org.
 
 ; These are TEMPORARY records to enable a workaround for load problems we are
-; experiencing in Japan at the site HND01. As of this writing, 2017-09-22, we
-; expect a more long term solution to be in place within a month or two. These
-; records, and this comment, should be removed once the HND01 issues are
-; resolved.
+; experiencing in Japan and other places. These records should be removed onces
+; have a more generalized solution for integrating cloud VMs into the platform.
 ;
 ; hosts v4
+mlab1.chs0c                       IN  A         35.237.214.243
+mlab1.iad0c                       IN  A         35.236.226.128
+mlab1.lax0c                       IN  A         35.235.125.164
+mlab1.oma0c                       IN  A         35.226.110.109
+mlab1.pdx0c                       IN  A         35.230.97.78
 mlab1.tyo01                       IN  A         35.200.102.226
 mlab1.tyo02                       IN  A         35.200.34.149
 mlab1.tyo03                       IN  A         35.200.112.17
 
 ; hosts v4 decorated
+mlab1v4.chs0c                     IN  A         35.237.214.243
+mlab1v4.iad0c                     IN  A         35.236.226.128
+mlab1v4.lax0c                     IN  A         35.235.125.164
+mlab1v4.oma0c                     IN  A         35.226.110.109
+mlab1v4.pdx0c                     IN  A         35.230.97.78
 mlab1v4.tyo01                     IN  A         35.200.102.226
 mlab1v4.tyo02                     IN  A         35.200.34.149
 mlab1v4.tyo03                     IN  A         35.200.112.17
 
 ; ndt.iupui v4
+ndt.iupui.chs0c                   IN  A         35.237.214.243
+ndt.iupui.mlab1.chs0c             IN  A         35.237.214.243
+ndt.iupui.iad0c                   IN  A         35.236.226.128
+ndt.iupui.mlab1.iad0c             IN  A         35.236.226.128
+ndt.iupui.lax0c                   IN  A         35.235.125.164
+ndt.iupui.mlab1.lax0c             IN  A         35.235.125.164
+ndt.iupui.oma0c                   IN  A         35.226.110.109
+ndt.iupui.mlab1.oma0c             IN  A         35.226.110.109
+ndt.iupui.pdx0c                   IN  A         35.230.97.78
+ndt.iupui.mlab1.pdx0c             IN  A         35.230.97.78
 ndt.iupui.tyo01                   IN  A         35.200.102.226
 ndt.iupui.mlab1.tyo01             IN  A         35.200.102.226
 ndt.iupui.tyo02                   IN  A         35.200.34.149
@@ -60,6 +78,16 @@ ndt.iupui.tyo03                   IN  A         35.200.112.17
 ndt.iupui.mlab1.tyo03             IN  A         35.200.112.17
 
 ; ndt.iupui v4 decorated
+ndt.iupuiv4.chs0c                 IN  A         35.237.214.243
+ndt.iupui.mlab1v4.chs0c           IN  A         35.237.214.243
+ndt.iupuiv4.iad0c                 IN  A         35.236.226.128
+ndt.iupui.mlab1v4.iad0c           IN  A         35.236.226.128
+ndt.iupuiv4.lax0c                 IN  A         35.235.125.164
+ndt.iupui.mlab1v4.lax0c           IN  A         35.235.125.164
+ndt.iupuiv4.pdx0c                 IN  A         35.230.97.78
+ndt.iupui.mlab1v4.pdx0c           IN  A         35.230.97.78
+ndt.iupuiv4.oma0c                 IN  A         35.226.110.109
+ndt.iupui.mlab1v4.oma0c           IN  A         35.226.110.109
 ndt.iupuiv4.tyo01                 IN  A         35.200.102.226
 ndt.iupui.mlab1v4.tyo01           IN  A         35.200.102.226
 ndt.iupuiv4.tyo02                 IN  A         35.200.34.149
@@ -68,11 +96,21 @@ ndt.iupuiv4.tyo03                 IN  A         35.200.112.17
 ndt.iupui.mlab1v4.tyo03           IN  A         35.200.112.17
 
 ; ndt.iupui v4 flattened
+ndt-iupui-mlab1-chs0c             IN  A         35.237.214.243
+ndt-iupui-mlab1-iad0c             IN  A         35.236.226.128
+ndt-iupui-mlab1-lax0c             IN  A         35.235.125.164
+ndt-iupui-mlab1-oma0c             IN  A         35.226.110.109
+ndt-iupui-mlab1-pdx0c             IN  A         35.230.97.78
 ndt-iupui-mlab1-tyo01             IN  A         35.200.102.226
 ndt-iupui-mlab1-tyo02             IN  A         35.200.34.149
 ndt-iupui-mlab1-tyo03             IN  A         35.200.112.17
 
 ; ndt.iupui v4 decorated flattened
+ndt-iupui-mlab1v4-chs0c           IN  A         35.237.214.243
+ndt-iupui-mlab1v4-iad0c           IN  A         35.236.226.128
+ndt-iupui-mlab1v4-lax0c           IN  A         35.235.125.164
+ndt-iupui-mlab1v4-oma0c           IN  A         35.226.110.109
+ndt-iupui-mlab1v4-pdx0c           IN  A         35.230.97.78
 ndt-iupui-mlab1v4-tyo01           IN  A         35.200.102.226
 ndt-iupui-mlab1v4-tyo02           IN  A         35.200.32.43
 ndt-iupui-mlab1v4-tyo03           IN  A         35.200.112.17
