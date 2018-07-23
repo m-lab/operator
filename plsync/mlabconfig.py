@@ -779,11 +779,69 @@ def select_prometheus_site_targets(sites, select_regex, target_templates,
     return records
 
 
+def format_relabel_config(
+    source_labels=(), action='', regex='', target_label='', replacement=''):
+    """Formats a prometheus relabel_config action using the given args."""
+    return (
+        '      - source_labels: [{0}]\n'
+        '        action: {1}\n'
+        '        regex: {2}\n'
+        '        target_label: {3}\n'
+        '        replacement: {4}'
+    ).format(
+        ', '.join(source_labels),
+        action,
+        regex,
+        target_label,
+        replacement,
+    )
+
+def export_prometheus_metric_relabel_configs(site_remap, experiments):
+    """Creates metric relabel_configs for experiments with legacy networks."""
+    output = []
+
+    # Create a dict mapping experiment index to experiment name.
+    index_names = {}
+    for e in experiments:
+        if e['index'] is None:
+            continue
+        index_names[e['index']] = e.dnsname()
+
+    # For every site in the legacy site map, generate relabel rules based on
+    # machine name and index.
+    for site, legacy_map in site_remap.items():
+        for machine_index, machine_legacy_map in legacy_map.items():
+            for i, current in enumerate(machine_legacy_map.split(',')):
+                actual = index_names.get(i, 'unknown-%d' % i)
+                output.append(format_relabel_config(
+                    source_labels=['machine', 'index'],
+                    action='replace',
+                    regex='mlab{0}.{1}.measurement-lab.org;{2}'.format(
+                        machine_index, site, current),
+                    target_label='index',
+                    replacement=actual))
+
+    # For all sites without legacy site maps, generate relabel rules based only
+    # on index.
+    for i in range(0, 12):
+        actual = index_names.get(i, 'unknown-%d' % i)
+        output.append(format_relabel_config(
+            source_labels=['index'],
+            action='replace',
+            regex=i,
+            target_label='index',
+            replacement=actual))
+
+    return output
+
+
 def main():
     (options, _) = parse_flags()
 
     # TODO: consider alternate formats for configuration information, e.g. yaml.
     sites = getattr(__import__(options.sites_config), options.sites)
+    legacy_network_remap = getattr(
+        __import__(options.sites_config), 'legacy_network_remap')
     experiments = getattr(
         __import__(options.experiments_config), options.experiments)
 
@@ -941,6 +999,12 @@ def main():
         records = select_prometheus_site_targets(
             sites, options.select, options.template_target, options.labels)
         json.dump(records, sys.stdout, indent=4)
+
+    elif options.format == 'prom-metric-relabel':
+        output = export_prometheus_metric_relabel_configs(
+            legacy_network_remap, experiments)
+        sys.stdout.write('\n'.join(output))
+        # print output
 
     else:
         logging.error('Sorry, unknown format: %s', options.format)
