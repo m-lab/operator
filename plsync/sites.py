@@ -175,7 +175,7 @@ site_list = [
     makesite('svg01','81.167.39.0',    '2a01:798:0:13::',      'Stavanger', 'NO', 58.876700, 5.63780, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=False),
     makesite('syd01','203.5.76.128',   '2001:388:d0::',        'Sydney', 'AU', -33.946100, 151.177000, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=False),
     makesite('syd02','175.45.79.0',    '2402:7800:0:12::',     'Sydney', 'AU', -33.946100, 151.177000, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=False),
-    makesite('tgd01','213.149.127.0',   '2a00:fe80:0:104::',   'Podgorica', 'ME', 42.107764, 18.761649, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=False),
+    makesite('tgd01','213.149.127.0',   '2a00:fe80:0:104::',   'Podgorica', 'ME', 42.107764, 18.761649, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
     makesite('tnr01','41.188.12.64',   None,                   'Antananarivo', 'MG', -18.7969, 47.4788, user_list, exclude=[1,2,3,4], count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=False),
     makesite('tpe01','163.22.28.0',    '2001:e10:6840:28::',   'Taipei', 'TW', 25.077800, 121.224000, user_list, nodegroup='MeasurementLabCentos', roundrobin=False),
     makesite('trn01','194.116.85.192', '2001:7f8:23:307::',    'Turin', 'IT', 45.200800, 7.649720, user_list, nodegroup='MeasurementLabCentos', roundrobin=False),
