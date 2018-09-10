@@ -75,7 +75,7 @@ site_list = [
     makesite('atl04','173.205.0.192',  '2001:668:1f:1c::',     'Atlanta_GA', 'US', 33.636700, -84.428100, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
     makesite('atl05','67.106.215.192', '2610:18:111:c002::',   'Atlanta_GA', 'US', 33.636700, -84.428100, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
     makesite('atl06','70.42.177.64',   '2600:c0b:2002:5::',    'Atlanta_GA', 'US', 33.636700, -84.428100, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
-    makesite('ath03','193.201.166.128', '2001:648:25e0::',     'Athens', 'GR', 37.936400, 23.944400, user_list, count=4, v6gw='2001:648:25e0::129', nodegroup='MeasurementLabCentos', roundrobin=False),
+    makesite('ath03','193.201.166.128', '2001:648:25e0::',     'Athens', 'GR', 37.936400, 23.944400, user_list, count=4, arch='x86_64-r630', v6gw='2001:648:25e0::129', nodegroup='MeasurementLabCentos', roundrobin=True),
     makesite('bcn01','91.213.30.192',   '2001:67c:137c:5::',   'Barcelona', 'ES', 41.297445, 2.081105, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
     makesite('beg01','188.120.127.0',  '2001:7f8:1e:6::',      'Belgrade', 'RS', 44.821600, 20.292100, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
     makesite('bom01','125.18.112.64',  '2404:a800:2000:217::', 'Mumbai', 'IN', 19.088611, 72.868056, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
