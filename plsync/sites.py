@@ -100,7 +100,7 @@ site_list = [
     makesite('fra02','77.67.114.0',    '2001:668:1f:5e::',     'Frankfurt', 'DE', 50.037932, 8.562151, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
     makesite('fra03','195.89.146.64',  '2001:5001:200:30::',   'Frankfurt', 'DE', 50.037932, 8.562151, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
     makesite('fra04','62.67.198.192',  '2001:4c08:2003:40::',  'Frankfurt', 'DE', 50.037932, 8.562151, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
-    makesite('ham01','80.239.142.192', '2001:2030:0:19::',     'Hamburg', 'DE', 53.633300, 9.983330, user_list, nodegroup='MeasurementLabCentos', roundrobin=False),
+    makesite('ham01','80.239.142.192', '2001:2030:0:19::',     'Hamburg', 'DE', 53.633300, 9.983330, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=False),
     # NOTE: hnd01's arch is 'x86_64-r630', but they are actually R620s. The boot flags and CD for the R630s works for the R620s, whereas the arch 'x86_64' does not.
     makesite('hnd01','203.178.130.192','2001:200:0:b801::',    'Tokyo', 'JP', 35.552200, 139.780000, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
     makesite('hnd02','210.151.179.128','2001:260:8a::',        'Tokyo', 'JP', 35.552200, 139.780000, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
