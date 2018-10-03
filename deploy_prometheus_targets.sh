@@ -17,6 +17,8 @@ BASEDIR=${PWD}
 # Generate the configs.
 ${SCRIPTDIR}/generate_prometheus_targets.sh ${GROUP} > /dev/null
 
+# Be sure that gcloud is PATH
+source "${HOME}/google-cloud-sdk/path.bash.inc"
 
 # Authenticate all operations using the given service account.
 if [[ -f /tmp/${PROJECT}.json ]] ; then
