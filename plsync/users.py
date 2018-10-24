@@ -9,4 +9,5 @@ user_list = [('Stephen', 'Stuart', 'sstuart@google.com'),
              ('Greg', 'Russell', 'gfr@google.com'),
              ('Josh', 'King', 'jking@chambana.net'),
              ('Ross', 'Schulman', 'ross@opentechinstitute.org'),
+             ('Roberto', 'DAuria', 'roberto@measurementlab.net'),
              ('M-Lab', 'Automation', 'support@measurementlab.net')]
