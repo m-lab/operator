@@ -67,6 +67,22 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --select "${!pattern}" \
           --decoration "v6" > ${output}/blackbox-targets-ipv6/ssh806_ipv6.json
 
+      # SSH on port 22 over IPv4
+      ./mlabconfig.py --format=prom-targets-nodes \
+          --template_target={{hostname}}:22 \
+          --label service=ssh \
+          --label module=ssh_v4_online \
+          --select "${!pattern}" > ${output}/blackbox-targets/ssh.json
+
+      # SSH on port 22 over IPv6
+      ./mlabconfig.py --format=prom-targets-nodes \
+          --template_target={{hostname}}:22 \
+          --label service=ssh \
+          --label module=ssh_v6_online \
+          --label __blackbox_port=${!bbe_port} \
+          --select "${!pattern}" \
+          --decoration "v6" > ${output}/blackbox-targets-ipv6/ssh_ipv6.json
+
       # Sidestream exporter in the npad experiment.
       ./mlabconfig.py --format=prom-targets \
           --template_target={{hostname}}:9090 \
