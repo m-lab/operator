@@ -174,11 +174,31 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --select "neubot.mlab.(${!pattern})" \
           --decoration "v6" > ${output}/blackbox-targets-ipv6/neubot_ipv6.json
 
-      # snmp_exporter on port 9116.
-      ./mlabconfig.py --format=prom-targets-sites \
+      if [[ ${project} == mlab-oti ]] ; then
+        # snmp_exporter on port 9116.
+        ./mlabconfig.py --format=prom-targets-sites \
+            --select '[a-z]{3}[0-9c]{2}' \
+            --template_target=s1.{{sitename}}.measurement-lab.org \
+            --label service=snmp > \
+                ${output}/snmp-targets/snmpexporter.json
+        # ICMP probe for platform switches
+        ./mlabconfig.py --format=prom-targets-sites \
+          --select '[a-z]{3}[0-9c]{2}' \
           --template_target=s1.{{sitename}}.measurement-lab.org \
-          --label service=snmp > \
-              ${output}/snmp-targets/snmpexporter.json
+          --label module=icmp > \
+              ${output}/blackbox-targets/switches_ping.json
+      else
+        # snmp_exporter on port 9116.
+        ./mlabconfig.py --format=prom-targets-sites \
+            --template_target=s1.{{sitename}}.measurement-lab.org \
+            --label service=snmp > \
+                ${output}/snmp-targets/snmpexporter.json
+        # ICMP probe for platform switches
+        ./mlabconfig.py --format=prom-targets-sites \
+          --template_target=s1.{{sitename}}.measurement-lab.org \
+          --label module=icmp > \
+              ${output}/blackbox-targets/switches_ping.json
+      fi
 
       # inotify_exporter for NDT on port 9393.
       ./mlabconfig.py --format=prom-targets \
@@ -193,12 +213,6 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --label service=nodeexporter \
           --select "${!pattern}" > \
               ${output}/legacy-targets/nodeexporter.json
-
-      # ICMP probe for platform switches
-      ./mlabconfig.py --format=prom-targets-sites \
-          --template_target=s1.{{sitename}}.measurement-lab.org \
-          --label module=icmp > \
-              ${output}/blackbox-targets/switches_ping.json
 
       # SSH on port 22 over IPv4
       ./mlabconfig.py --format=prom-targets-nodes \
