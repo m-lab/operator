@@ -176,6 +176,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
 
       # snmp_exporter on port 9116.
       ./mlabconfig.py --format=prom-targets-sites \
+          --select "${!pattern}" \
           --template_target=s1.{{sitename}}.measurement-lab.org \
           --label service=snmp > \
               ${output}/snmp-targets/snmpexporter.json
@@ -196,6 +197,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
 
       # ICMP probe for platform switches
       ./mlabconfig.py --format=prom-targets-sites \
+          --select "${!pattern}" \
           --template_target=s1.{{sitename}}.measurement-lab.org \
           --label module=icmp > \
               ${output}/blackbox-targets/switches_ping.json
