@@ -341,17 +341,6 @@ def main():
     VERBOSE=options.verbose
     confirm_cmd_exists("expect")
 
-    ## NOTE: Make sure the session is setup correctly.
-    ## Use os.system() b/c the custom system() function
-    ## doesn't flush stdout correctly. :-/
-    if not options.promptpassword:
-        print "Verifying PLC Session...\n"
-        cmd=PREFIX+"/plcquery.py --action=checksession"
-        if DEBUG:
-            print cmd
-        else:
-            os.system(cmd)
-
     if command == "shell":
         pcu_fields = get_pcu_fields(host_spec, options)
         print "Login can be slow. When you receive a prompt, try typing"
@@ -433,7 +422,7 @@ def main():
         ## NOTE: be extra verbose for password resets, in case something goes
         ##       wrong, to see where.
         if options.promptpassword:
-            print "Password resets are not supported without updating PLC db."
+            print "Password resets are not supported."
             print "Do not specify password prompt, and try again."
             sys.exit(1)
 
