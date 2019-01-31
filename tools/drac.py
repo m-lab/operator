@@ -6,6 +6,8 @@ import subprocess
 import time
 import getpass
 
+from google.cloud import datastore
+
 DEBUG=False
 VERBOSE=False
 cookies = "--insecure --cookie-jar .cookies.txt --cookie .cookies.txt"
@@ -308,21 +310,26 @@ def get_pcu_fields(host_spec, options, return_ip=False):
         passwd = getpass.getpass("DRAC passwd: ")
         ret = [(pcuname, options.user, passwd, "DRAC")]
     else:
-        cmd=(PREFIX+"/plcquery.py --action=get --type pcu --filter hostname=%s "+
-             "--fields hostname,username,password,model,ip") % pcuname
-        if DEBUG: print cmd
-        lines= os.popen(cmd, 'r').readlines()
-        for line in lines:
-            h_u_pw_model= line.strip().split()
-            hostname = h_u_pw_model[0]
-            user     = h_u_pw_model[1]
-            passwd   = h_u_pw_model[2]
-            model    = h_u_pw_model[3]
-            ip       = h_u_pw_model[4]
+        # Connect to Datastore to fetch credentials
+        if DEBUG:
+            print "Fetching credentials from Datastore..."
+
+        ds = datastore.Client("mlab-sandbox")
+        query = ds.query(kind="Credentials")
+        query.add_filter('hostname', "=", pcuname)
+        query_iter = query.fetch()
+
+        for cred in query_iter:
+            hostname = cred["hostname"]
+            user = cred["username"]
+            passwd = cred["password"]
+            model = "n/a"
+            ip = "n/a"
             if return_ip:
                 ret.append((hostname, user, passwd, model, ip))
             else:
                 ret.append((hostname, user, passwd, model))
+
     return ret
 
 def main():
