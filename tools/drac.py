@@ -323,8 +323,8 @@ def get_pcu_fields(host_spec, options, return_ip=False):
             hostname = cred["hostname"]
             user = cred["username"]
             passwd = cred["password"]
-            model = "n/a"
-            ip = "n/a"
+            model = cred["model"]
+            ip = cred["address"]
             if return_ip:
                 ret.append((hostname, user, passwd, model, ip))
             else:
