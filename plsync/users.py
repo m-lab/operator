@@ -1,7 +1,7 @@
 
 # NOTE: User roles are not managed here.  Visit PlanetLab to change user roles.
 user_list = [('Stephen', 'Stuart', 'sstuart@google.com'),
-             ('Chris',   'Ritzo', 'critzo@opentechinstitute.org'),
+             ('Chris',   'Ritzo', 'critzo@measurementlab.net'),
              ('Josh',    'Bailey', 'joshb@google.com'),
              ('Nathan', 'Kinkade', 'kinkade@measurementlab.net'),
              ('Matt', 'Mathis', 'mattmathis@google.com'),
