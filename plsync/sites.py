@@ -131,7 +131,6 @@ site_list = [
     makesite('lis01','213.242.96.192',  '2001:4c08:2003:3d::', 'Lisbon', 'PT', 38.775600, -9.135400, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
     makesite('lis02','195.89.147.128',  '2001:500d:200:3::',   'Lisbon', 'PT', 38.775600, -9.135400, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
     makesite('lju01','91.239.96.64',   '2001:67c:27e4:100::',  'Ljubljana', 'SI', 46.223600, 14.457500, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
-    makesite('los01','196.216.149.64', None,                   'Lagos', 'NG', 6.5821, 3.3211, user_list, exclude=[1,2,3], arch='x86_64', nodegroup='MeasurementLabCentos', roundrobin=False),
     makesite('mad02','213.242.96.128','2001:4c08:2003:3e::',   'Madrid', 'ES', 40.466700, -3.566670, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
     makesite('mad03','80.239.229.128','2001:2030:34::',        'Madrid', 'ES', 40.466700, -3.566670, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
     makesite('mad04','77.67.115.64',  '2001:668:1f:63::',      'Madrid', 'ES', 40.466700, -3.566670, user_list, count=4, arch='x86_64-r630', nodegroup='MeasurementLabCentos', roundrobin=True),
