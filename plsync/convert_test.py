@@ -141,3 +141,79 @@ class ConvertTest(unittest.TestCase):
             }
             """)
         self.assertEqual(actual, expected)
+
+    @mock.patch.object(ipinfo, 'getHandler')
+    def test_generate_physical_with_v6(self, mock_gethandler):
+        class d:
+            org = 'AS4567 Foo2 ISP'
+            country = 'CA'
+        mock_gethandler.return_value.getDetails.return_value = d
+        switch = {
+            "yyz02": {
+                "auto_negotiation": "yes",
+                "community": "fake12345678",
+                "flow_control": "no",
+                "switch_make": "hp",
+                "uplink_port": "24",
+                "uplink_speed": "10g"
+            },
+        }
+        sites = [
+            {
+                'name': 'yyz02',
+                'location': {
+                    'latitude': 43.6767,
+                    'longitude': -79.6306,
+                    'city': 'Toronto',
+                },
+                'net': {
+                    'v4': {
+                        'prefix': '216.66.68.128',
+                    },
+                    'v6': {
+                        'prefix': '2001:470:1:70a::',
+                    }
+                }
+            }
+        ]
+
+        outdir = tempfile.mkdtemp()
+        convert.generate_physical(sites, switch, outdir)
+
+        actual = open(outdir + '/yyz02.jsonnet').read()
+        expected = textwrap.dedent("""\
+            local sitesDefault = import 'sites/_default.jsonnet';
+
+            sitesDefault {
+              name: 'yyz02',
+              annotations+: {
+                type: 'physical',
+              },
+              network+: {
+                ipv4+: {
+                  prefix: '216.66.68.128/26',
+                },
+                ipv6+: {
+                  prefix: '2001:470:1:70a::/64',
+                },
+              },
+              transit+: {
+                provider: 'Foo2 ISP',
+                uplink: '10g',
+                asn: 'AS4567',
+              },
+              location+: {
+                continent_code: 'NA',
+                country_code: 'CA',
+                metro: 'yyz',
+                city: 'Toronto',
+                state: '',
+                latitude: 43.6767,
+                longitude: -79.6306,
+              },
+              lifecycle+: {
+                created: '2019-01-01',
+              },
+            }
+            """)
+        self.assertEqual(actual, expected)
