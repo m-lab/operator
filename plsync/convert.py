@@ -333,7 +333,7 @@ def main():
     options, _ = parse_flags()
     switch = json.loads(open(options.switch).read())
     generate_physical(sites.site_list, switch, options.outdir)
-    #generate_cloud(sitestats, options.outdir)
+    generate_cloud(sitestats, options.outdir)
 
 
 if __name__ == '__main__':
