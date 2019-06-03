@@ -224,6 +224,7 @@ def generate_physical(sitelist, switch, outdir):
         v = {}
         lat = site['location']['latitude']
         lon = site['location']['longitude']
+        country = site['location']['country']
         v4 = site['net']['v4']['prefix']
         if site['net']['v6']:
             v6 = site['net']['v6']['prefix']
@@ -249,8 +250,8 @@ def generate_physical(sitelist, switch, outdir):
         v['metro'] = site['name'][0:3]
         v['city'] = city
         v['state'] = state
-        v['country'] = d.country
-        v['continent'] = continent[d.country]
+        v['country'] = country
+        v['continent'] = continent[country]
         v['provider'] = provider
         if v['name'] not in switch:
             print 'skipping', v['name']

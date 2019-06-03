@@ -13,7 +13,6 @@ class ConvertTest(unittest.TestCase):
     def test_generate_physical(self, mock_gethandler):
         class d:
             org = 'AS1234 Foo ISP'
-            country = 'GH'
         mock_gethandler.return_value.getDetails.return_value = d
         switch = {
             "acc02": {
@@ -31,6 +30,7 @@ class ConvertTest(unittest.TestCase):
                 'location': {
                     'latitude': 5.6060,
                     'longitude': -0.1681,
+                    'country': 'GH',
                     'city': 'Accra',
                 },
                 'net': {
@@ -146,7 +146,6 @@ class ConvertTest(unittest.TestCase):
     def test_generate_physical_with_v6(self, mock_gethandler):
         class d:
             org = 'AS4567 Foo2 ISP'
-            country = 'CA'
         mock_gethandler.return_value.getDetails.return_value = d
         switch = {
             "yyz02": {
@@ -164,6 +163,7 @@ class ConvertTest(unittest.TestCase):
                 'location': {
                     'latitude': 43.6767,
                     'longitude': -79.6306,
+                    'country': 'CA',
                     'city': 'Toronto',
                 },
                 'net': {
