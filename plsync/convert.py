@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# /usr/bin/python
+#!/usr/bin/python
 
 import json
 import ipinfo
