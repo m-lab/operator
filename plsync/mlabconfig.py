@@ -163,6 +163,13 @@ def parse_flags():
         help='Adds key/value labels to a resulting prometheus targets file.')
     parser.add_option(
         '',
+        '--rsync',
+        dest='rsync',
+        action='store_true',
+        default=False,
+        help='Only process experiments that have rsync modules defined.')
+    parser.add_option(
+        '',
         '--use_flatnames',
         dest='use_flatnames',
         action='store_true',
@@ -276,7 +283,8 @@ def export_mlab_server_network_config(output, sites, name_tmpl, input_tmpl,
 
 def select_prometheus_experiment_targets(sites, select_regex,
                                          target_templates, common_labels,
-                                         use_flatnames, decoration):
+                                         rsync_only, use_flatnames,
+                                         decoration):
     """Selects and formats targets from experiments.
 
     Args:
@@ -286,6 +294,7 @@ def select_prometheus_experiment_targets(sites, select_regex,
       target_templates: list of templates for formatting the target(s) from the
           hostname. e.g. {{hostname}}:7999, https://{{hostname}}/some/path
       common_labels: dict of str, a set of labels to apply to all targets.
+      rsync_only: bool, skip experiments without rsync_modules.
       use_flatnames: bool, return "flattened" hostnames suitable for TLS/SSL
           wildcard certificates.
       decoration: str, return protocol 'decorated' host names
@@ -303,12 +312,16 @@ def select_prometheus_experiment_targets(sites, select_regex,
                 labels['experiment'] = experiment['name']
                 labels['machine'] = node['hostname']
 
-                # Consider all experiments.
+                # Skip if rsync_only is true but the experiment has no modules.
+                if rsync_only and not experiment['rsync_modules']:
+                    continue
+
+                # Skip if the given regex doesn't match the experiment hostname.
                 if select_regex and \
                     not re.search(select_regex, experiment['hostname']):
                     continue
-                targets = []
 
+                # Add decoration, if needed.
                 prefix = experiment['hostname'][:len(experiment['name'])+6]
                 suffix = experiment['hostname'][len(experiment['name'])+6:]
                 hostname = prefix + decoration + suffix
@@ -316,6 +329,7 @@ def select_prometheus_experiment_targets(sites, select_regex,
                 if use_flatnames:
                     hostname = hostname.replace('.', '-', 3)
 
+                targets = []
                 for tmpl in target_templates:
                     target_tmpl = BracketTemplate(tmpl)
                     target = target_tmpl.safe_substitute({'hostname': hostname})
