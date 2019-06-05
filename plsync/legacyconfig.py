@@ -725,7 +725,7 @@ def select_prometheus_node_targets(sites, select_regex, target_templates,
     """
     records = []
     for site in sites:
-        for _, node in site['nodes'].iteritems():
+        for _, node in sorted(site['nodes'].iteritems(), key=lambda x: x[1].hostname()):
             if select_regex and not re.search(select_regex, node.hostname()):
                 continue
             labels = common_labels.copy()
@@ -848,7 +848,7 @@ def main():
     # Assign every slice to every node.
     for experiment in experiments:
         for site in sites:
-            for node in site['nodes'].values():
+            for node in sorted(site['nodes'].values(), key=lambda x: x.hostname()):
                 experiment.add_node_address(node)
 
     if options.format in ['hostips', 'hostips-json']:
