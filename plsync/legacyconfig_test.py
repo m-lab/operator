@@ -1,8 +1,8 @@
-"""Tests for mlabconfig."""
+"""Tests for legacyconfig."""
 
 import contextlib
 import logging
-import mlabconfig
+import legacyconfig
 import mock
 import optparse
 import os
@@ -45,22 +45,22 @@ class BracketTemplateTest(unittest.TestCase):
         self.vars = {'var1': 'Spot', 'var2': 'Dog'}
 
     def test_substitute_when_template_is_correct(self):
-        tmpl = mlabconfig.BracketTemplate('{{var1}} is a {{var2}}')
+        tmpl = legacyconfig.BracketTemplate('{{var1}} is a {{var2}}')
 
         actual = tmpl.safe_substitute(self.vars)
 
         self.assertEqual(actual, 'Spot is a Dog')
 
     def test_substitute_when_template_is_broken(self):
-        tmpl = mlabconfig.BracketTemplate('var1}} is a {{var2')
+        tmpl = legacyconfig.BracketTemplate('var1}} is a {{var2')
 
         actual = tmpl.safe_substitute(self.vars)
 
         self.assertEqual(actual, 'var1}} is a {{var2')
 
     def test_substitute_when_template_is_shell(self):
-        tmpl1 = mlabconfig.BracketTemplate('$var1 == {{var1}}')
-        tmpl2 = mlabconfig.BracketTemplate('${var2} == {{var2}}')
+        tmpl1 = legacyconfig.BracketTemplate('$var1 == {{var1}}')
+        tmpl2 = legacyconfig.BracketTemplate('${var2} == {{var2}}')
 
         actual1 = tmpl1.safe_substitute(self.vars)
         actual2 = tmpl2.safe_substitute(self.vars)
@@ -69,7 +69,7 @@ class BracketTemplateTest(unittest.TestCase):
         self.assertEqual(actual2, '${var2} == Dog')
 
     def test_substitute_without_value_returns_unchanged_template(self):
-        tmpl = mlabconfig.BracketTemplate('{{evaluated}} {{unevaluated}}')
+        tmpl = legacyconfig.BracketTemplate('{{evaluated}} {{unevaluated}}')
 
         actual = tmpl.safe_substitute({'evaluated': 'okay'})
 
@@ -123,7 +123,7 @@ class MlabconfigTest(unittest.TestCase):
             {'hostname': 'bar.abc.mlab3.abc01.measurement-lab.org', 'ipv4': '192.168.1.37', 'ipv6': '2400:1002:4008::37'},
         ]
 
-        results = mlabconfig.export_mlab_host_ips(self.sites, experiments)
+        results = legacyconfig.export_mlab_host_ips(self.sites, experiments)
 
         self.assertItemsEqual(results, expected_results)
 
@@ -136,18 +136,18 @@ class MlabconfigTest(unittest.TestCase):
                              "latitude": 36.85,
                              "roundrobin": False}]
 
-        sitestats = mlabconfig.export_mlab_site_stats(self.sites)
+        sitestats = legacyconfig.export_mlab_site_stats(self.sites)
 
         self.assertItemsEqual(sitestats, expected_results)
 
     def test_export_router_and_switch_records(self):
         output = StringIO.StringIO()
         expected_results = [
-            mlabconfig.format_a_record('r1.abc01', '192.168.1.1'),
-            mlabconfig.format_a_record('s1.abc01', '192.168.1.2'),
+            legacyconfig.format_a_record('r1.abc01', '192.168.1.1'),
+            legacyconfig.format_a_record('s1.abc01', '192.168.1.2'),
         ]
 
-        mlabconfig.export_router_and_switch_records(output, self.sites)
+        legacyconfig.export_router_and_switch_records(output, self.sites)
 
         results = output.getvalue().split('\n')
         self.assertContainsItems(results, expected_results)
@@ -155,12 +155,12 @@ class MlabconfigTest(unittest.TestCase):
     def test_export_pcu_records(self):
         output = StringIO.StringIO()
         expected_results = [
-            mlabconfig.format_a_record('mlab1d.abc01', '192.168.1.4'),
-            mlabconfig.format_a_record('mlab2d.abc01', '192.168.1.5'),
-            mlabconfig.format_a_record('mlab3d.abc01', '192.168.1.6'),
+            legacyconfig.format_a_record('mlab1d.abc01', '192.168.1.4'),
+            legacyconfig.format_a_record('mlab2d.abc01', '192.168.1.5'),
+            legacyconfig.format_a_record('mlab3d.abc01', '192.168.1.6'),
         ]
 
-        mlabconfig.export_pcu_records(output, self.sites)
+        legacyconfig.export_pcu_records(output, self.sites)
 
         results = output.getvalue().split('\n')
         self.assertContainsItems(results, expected_results)
@@ -169,13 +169,13 @@ class MlabconfigTest(unittest.TestCase):
         output = StringIO.StringIO()
         # This is a subset of expected results.
         expected_results = [
-            mlabconfig.format_a_record('mlab1.abc01', '192.168.1.9'),
-            mlabconfig.format_a_record('mlab2v4.abc01', '192.168.1.22'),
-            mlabconfig.format_aaaa_record('mlab3.abc01', '2400:1002:4008::35'),
-            mlabconfig.format_aaaa_record('mlab1v6.abc01', '2400:1002:4008::9')
+            legacyconfig.format_a_record('mlab1.abc01', '192.168.1.9'),
+            legacyconfig.format_a_record('mlab2v4.abc01', '192.168.1.22'),
+            legacyconfig.format_aaaa_record('mlab3.abc01', '2400:1002:4008::35'),
+            legacyconfig.format_aaaa_record('mlab1v6.abc01', '2400:1002:4008::9')
         ]
 
-        mlabconfig.export_server_records(output, self.sites)
+        legacyconfig.export_server_records(output, self.sites)
 
         results = output.getvalue().split('\n')
         self.assertContainsItems(results, expected_results)
@@ -189,23 +189,23 @@ class MlabconfigTest(unittest.TestCase):
                                    use_initscript=True,
                                    ipv6='all')]
         expected_results = [
-            mlabconfig.format_a_record('bar.abc.abc01', '192.168.1.11'),
-            mlabconfig.format_a_record('bar.abc.mlab2.abc01', '192.168.1.24'),
-            mlabconfig.format_a_record('bar.abcv4.abc01', '192.168.1.11'),
-            mlabconfig.format_a_record('bar.abc.mlab2v4.abc01', '192.168.1.24'),
-            mlabconfig.format_aaaa_record('bar.abc.abc01',
+            legacyconfig.format_a_record('bar.abc.abc01', '192.168.1.11'),
+            legacyconfig.format_a_record('bar.abc.mlab2.abc01', '192.168.1.24'),
+            legacyconfig.format_a_record('bar.abcv4.abc01', '192.168.1.11'),
+            legacyconfig.format_a_record('bar.abc.mlab2v4.abc01', '192.168.1.24'),
+            legacyconfig.format_aaaa_record('bar.abc.abc01',
                                           '2400:1002:4008::11'),
-            mlabconfig.format_aaaa_record('bar.abc.abc01',
+            legacyconfig.format_aaaa_record('bar.abc.abc01',
                                           '2400:1002:4008::37'),
-            mlabconfig.format_aaaa_record('bar.abc.mlab3.abc01',
+            legacyconfig.format_aaaa_record('bar.abc.mlab3.abc01',
                                           '2400:1002:4008::37'),
-            mlabconfig.format_aaaa_record('bar.abcv6.abc01',
+            legacyconfig.format_aaaa_record('bar.abcv6.abc01',
                                           '2400:1002:4008::11'),
-            mlabconfig.format_aaaa_record('bar.abc.mlab1v6.abc01',
+            legacyconfig.format_aaaa_record('bar.abc.mlab1v6.abc01',
                                           '2400:1002:4008::11'),
         ]
 
-        mlabconfig.export_experiment_records(output, self.sites, experiments)
+        legacyconfig.export_experiment_records(output, self.sites, experiments)
 
         results = output.getvalue().split('\n')
         self.assertContainsItems(results, expected_results)
@@ -219,25 +219,25 @@ class MlabconfigTest(unittest.TestCase):
                                    use_initscript=True,
                                    ipv6='all')]
         expected_results = [
-            mlabconfig.format_a_record('foo-abc-mlab2-abc01', '192.168.1.24'),
-            mlabconfig.format_a_record('foo-abc-mlab2v4-abc01', '192.168.1.24'),
-            mlabconfig.format_aaaa_record('foo-abc-mlab3-abc01',
+            legacyconfig.format_a_record('foo-abc-mlab2-abc01', '192.168.1.24'),
+            legacyconfig.format_a_record('foo-abc-mlab2v4-abc01', '192.168.1.24'),
+            legacyconfig.format_aaaa_record('foo-abc-mlab3-abc01',
                                           '2400:1002:4008::37'),
-            mlabconfig.format_aaaa_record('foo-abc-mlab1v6-abc01',
+            legacyconfig.format_aaaa_record('foo-abc-mlab1v6-abc01',
                                           '2400:1002:4008::11'),
         ]
 
         unexpected_results = [
-            mlabconfig.format_a_record('foo-abc-abc01', '192.168.1.24'),
-            mlabconfig.format_a_record('foo-abcv4-abc01', '192.168.1.24'),
-            mlabconfig.format_aaaa_record('foo-abc-abc01',
+            legacyconfig.format_a_record('foo-abc-abc01', '192.168.1.24'),
+            legacyconfig.format_a_record('foo-abcv4-abc01', '192.168.1.24'),
+            legacyconfig.format_aaaa_record('foo-abc-abc01',
                                           '2400:1002:4008::37'),
-            mlabconfig.format_aaaa_record('foo-abcv6-abc01',
+            legacyconfig.format_aaaa_record('foo-abcv6-abc01',
                                           '2400:1002:4008::11'),
         ]
 
-        mlabconfig.SSL_EXPERIMENTS = ['abc_foo']
-        mlabconfig.export_experiment_records(output, self.sites, experiments)
+        legacyconfig.SSL_EXPERIMENTS = ['abc_foo']
+        legacyconfig.export_experiment_records(output, self.sites, experiments)
 
         results = output.getvalue().split('\n')
         # We are using custom functions here because of the size of the results
@@ -250,14 +250,14 @@ class MlabconfigTest(unittest.TestCase):
         self.assertContainsItems(results, expected_results)
         self.assertDoesNotContainsItems(results, unexpected_results)
 
-    @mock.patch.object(mlabconfig, 'get_revision')
+    @mock.patch.object(legacyconfig, 'get_revision')
     def test_serial_rfc1912(self, mock_get_revision):
         # Fri Oct 31 00:45:00 2015 UTC.
         # 45-minutes should result in 03.
         ts = 1446252300
         mock_get_revision.return_value = '03'
 
-        serial = mlabconfig.serial_rfc1912(time.gmtime(ts))
+        serial = legacyconfig.serial_rfc1912(time.gmtime(ts))
 
         self.assertEqual('2015103103', serial)
 
@@ -279,7 +279,7 @@ class MlabconfigTest(unittest.TestCase):
             mock_writer.return_value
         ]
 
-        s = mlabconfig.get_revision(prefix, '/tmp/fakepath')
+        s = legacyconfig.get_revision(prefix, '/tmp/fakepath')
 
         self.assertEqual(s, '00')
         mock_writer.return_value.write.assert_called_once_with(
@@ -302,7 +302,7 @@ class MlabconfigTest(unittest.TestCase):
             mock_writer.return_value
         ]
 
-        s = mlabconfig.get_revision(prefix, '/tmp/fakepath')
+        s = legacyconfig.get_revision(prefix, '/tmp/fakepath')
 
         self.assertEqual(s, '02')
         mock_writer.return_value.write.assert_called_once_with(
@@ -324,7 +324,7 @@ class MlabconfigTest(unittest.TestCase):
             mock_writer.return_value
         ]
 
-        s = mlabconfig.get_revision(prefix, '/tmp/fakepath')
+        s = legacyconfig.get_revision(prefix, '/tmp/fakepath')
 
         self.assertEqual(s, '00')
         mock_writer.return_value.write.assert_called_once_with(
@@ -336,7 +336,7 @@ class MlabconfigTest(unittest.TestCase):
         output = StringIO.StringIO()
         header = StringIO.StringIO('before; %(value)s; after')
 
-        mlabconfig.export_mlab_zone_header(output, header, options)
+        legacyconfig.export_mlab_zone_header(output, header, options)
 
         self.assertEqual(output.getvalue(), 'before; middle; after')
 
@@ -348,7 +348,7 @@ class MlabconfigTest(unittest.TestCase):
         file_output = StringIO.StringIO()
         mock_open.return_value = OpenStringIO(file_output)
 
-        mlabconfig.export_mlab_server_network_config(
+        legacyconfig.export_mlab_server_network_config(
             stdout, self.sites, name_tmpl, input_tmpl, 'mlab1.abc01',
             {'extra': 'value'})
 
@@ -380,7 +380,7 @@ class MlabconfigTest(unittest.TestCase):
         """)
         filename_template = ('deployment/{{site_safe}}-{{node_safe}}-'
                              '{{experiment_safe}}-{{rsync_module}}.yml')
-        mlabconfig.export_scraper_kubernetes_config(filename_template,
+        legacyconfig.export_scraper_kubernetes_config(filename_template,
                                                     experiments,
                                                     output_template,
                                                     None)
@@ -455,7 +455,7 @@ class MlabconfigTest(unittest.TestCase):
         """)
         filename_template = ('deployment/{{site}}-{{node}}-'
                              '{{experiment_safe}}-{{rsync_module}}.yml')
-        mlabconfig.export_scraper_kubernetes_config(filename_template,
+        legacyconfig.export_scraper_kubernetes_config(filename_template,
                                                     experiments,
                                                     output_template,
                                                     ".*mlab3.*")
@@ -524,7 +524,7 @@ class MlabconfigTest(unittest.TestCase):
             }
         ]
 
-        actual_targets = mlabconfig.select_prometheus_experiment_targets(
+        actual_targets = legacyconfig.select_prometheus_experiment_targets(
             experiments, None, ['{{hostname}}:9090'], {}, False, False, '')
 
         self.assertEqual(len(actual_targets), 3)
@@ -553,7 +553,7 @@ class MlabconfigTest(unittest.TestCase):
             }
         ]
 
-        actual_targets = mlabconfig.select_prometheus_experiment_targets(
+        actual_targets = legacyconfig.select_prometheus_experiment_targets(
             experiments, "bar.abc.mlab2.*", ['{{hostname}}:9090'], {}, False,
             False, '')
 
@@ -583,7 +583,7 @@ class MlabconfigTest(unittest.TestCase):
             }
         ]
 
-        actual_targets = mlabconfig.select_prometheus_experiment_targets(
+        actual_targets = legacyconfig.select_prometheus_experiment_targets(
             experiments, "bar.abc.mlab2.*", ['{{hostname}}:9090'], {}, False,
             True, '')
 
@@ -613,7 +613,7 @@ class MlabconfigTest(unittest.TestCase):
             }
         ]
 
-        actual_targets = mlabconfig.select_prometheus_experiment_targets(
+        actual_targets = legacyconfig.select_prometheus_experiment_targets(
             experiments, "bar.abc.mlab2.*", ['{{hostname}}:9090'], {}, False,
             False, 'v4')
 
@@ -632,7 +632,7 @@ class MlabconfigTest(unittest.TestCase):
             }
         ]
 
-        actual_targets = mlabconfig.select_prometheus_node_targets(
+        actual_targets = legacyconfig.select_prometheus_node_targets(
             self.sites, "mlab2.*", ['{{hostname}}:9090'], {}, '')
 
         self.assertEqual(len(actual_targets), 1)
@@ -650,7 +650,7 @@ class MlabconfigTest(unittest.TestCase):
             }
         ]
 
-        actual_targets = mlabconfig.select_prometheus_node_targets(
+        actual_targets = legacyconfig.select_prometheus_node_targets(
             self.sites, "mlab2.*", ['{{hostname}}:9090'], {}, 'v6')
 
         self.assertEqual(len(actual_targets), 1)
@@ -669,7 +669,7 @@ class MlabconfigTest(unittest.TestCase):
             }
         ]
 
-        actual_targets = mlabconfig.select_prometheus_node_targets(
+        actual_targets = legacyconfig.select_prometheus_node_targets(
             self.sites, "mlab2.*", ['{{hostname}}:9090', '{{hostname}}:8080'],
             {}, '')
 
@@ -688,7 +688,7 @@ class MlabconfigTest(unittest.TestCase):
             }
         ]
 
-        actual_targets = mlabconfig.select_prometheus_site_targets(
+        actual_targets = legacyconfig.select_prometheus_site_targets(
             self.sites, None, ['s1.{{sitename}}.measurement-lab.org:9116'], {})
 
         self.assertEqual(len(actual_targets), 1)
