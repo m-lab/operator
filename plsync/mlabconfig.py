@@ -125,7 +125,7 @@ def parse_flags():
         '--sites',
         metavar='sites',
         dest='sites',
-        default='https://siteinfo.mlab-sandbox.measurementlab.net/v1/sites/sites.json',
+        default='https://siteinfo.mlab-oti.measurementlab.net/v1/sites/sites.json',
         help='The URL of sites configuration.')
     parser.add_option('',
                       '--format',
