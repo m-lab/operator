@@ -189,6 +189,13 @@ def parse_flags():
         default=None,
         help=('A regular expression used to select a subset of hostnames. If '
               'not specified, all machine names are selected.'))
+    parser.add_option(
+        '',
+        '--physical',
+        dest='physical',
+        action='store_true',
+        default=False,
+        help='Only process physical sites.')
 
     (options, args) = parser.parse_args()
 
@@ -221,7 +228,7 @@ def parse_flags():
 # Replace this function with a more general interface for accessing
 # configuration information for a site, node, slice, or otherwise.
 def export_mlab_server_network_config(output, sites, name_tmpl, input_tmpl,
-                                      select_regex, labels):
+                                      select_regex, labels, only_physical):
     """Evaluates input_tmpl with values from the server network configuration.
 
     NOTE: Only fields returned by the model.Node.interface function and any
@@ -252,6 +259,7 @@ def export_mlab_server_network_config(output, sites, name_tmpl, input_tmpl,
         input_tmpl: open file for reading, contains the template content.
         select_regex: str, a regular expression used to select node hostnames.
         labels: dict, extra key values available in the templates.
+        only_physical: bool, whether to restrict targets to physical sites.
 
     Raises:
         IOError, could not create or write to a file.
@@ -259,6 +267,8 @@ def export_mlab_server_network_config(output, sites, name_tmpl, input_tmpl,
     template = BracketTemplate(input_tmpl.read())
     output_name = BracketTemplate(name_tmpl)
     for site in sites:
+        if only_physical and site['annotations']['type'] != 'physical':
+            continue
         for node in site['nodes']:
             # TODO(soltesz): support multiple (or all) object types.
             if select_regex and not re.search(select_regex, node['hostname']):
@@ -284,7 +294,7 @@ def export_mlab_server_network_config(output, sites, name_tmpl, input_tmpl,
 def select_prometheus_experiment_targets(sites, select_regex,
                                          target_templates, common_labels,
                                          rsync_only, use_flatnames,
-                                         decoration):
+                                         decoration, only_physical):
     """Selects and formats targets from experiments.
 
     Args:
@@ -299,6 +309,7 @@ def select_prometheus_experiment_targets(sites, select_regex,
           wildcard certificates.
       decoration: str, return protocol 'decorated' host names
           (e.g., mlab1v6.abc01).
+      only_physical: bool, whether to restrict targets to physical sites.
 
     Returns:
       list of dict, each element is a dict with 'labels' (a dict of key/values)
@@ -306,6 +317,8 @@ def select_prometheus_experiment_targets(sites, select_regex,
     """
     records = []
     for site in sites:
+        if only_physical and site['annotations']['type'] != 'physical':
+            continue
         for node in site['nodes']:
             for experiment in node['experiments']:
                 labels = common_labels.copy()
@@ -342,7 +355,7 @@ def select_prometheus_experiment_targets(sites, select_regex,
 
 
 def select_prometheus_node_targets(sites, select_regex, target_templates,
-                                   common_labels, decoration):
+                                   common_labels, decoration, only_physical):
     """Selects and formats targets from site nodes.
 
     Args:
@@ -354,6 +367,7 @@ def select_prometheus_node_targets(sites, select_regex, target_templates,
       common_labels: dict of str, a set of labels to apply to all targets.
       decoration: str, used to "decorate" the hostname with a protocol
           (e.g., mlab1v6.abc01).
+      only_physical: bool, whether to restrict targets to physical sites.
 
     Returns:
       list of dict, each element is a dict with 'labels' (a dict of key/values)
@@ -361,6 +375,8 @@ def select_prometheus_node_targets(sites, select_regex, target_templates,
     """
     records = []
     for site in sites:
+        if only_physical and site['annotations']['type'] != 'physical':
+            continue
         for node in site['nodes']:
             if select_regex and not re.search(select_regex, node['hostname']):
                 continue
@@ -384,7 +400,7 @@ def select_prometheus_node_targets(sites, select_regex, target_templates,
 
 
 def select_prometheus_site_targets(sites, select_regex, target_templates,
-                                   common_labels):
+                                   common_labels, only_physical):
     """Selects and formats site targets.
 
     Args:
@@ -394,6 +410,7 @@ def select_prometheus_site_targets(sites, select_regex, target_templates,
       target_templates: list of templates for formatting the target(s) from the
           hostname. e.g. s1.{{sitename}}.measurement-lab.org:9116
       common_labels: dict of str, a set of labels to apply to all targets.
+      only_physical: bool, whether to restrict targets to physical sites.
 
     Returns:
       list of dict, each element is a dict with 'labels' (a dict of key/values)
@@ -402,6 +419,8 @@ def select_prometheus_site_targets(sites, select_regex, target_templates,
     records = []
     for site in sites:
         if select_regex and not re.search(select_regex, site['name']):
+            continue
+        if only_physical and site['annotations']['type'] != 'physical':
             continue
         labels = common_labels.copy()
         labels['site'] = site['name']
@@ -426,24 +445,25 @@ def main():
         with open(options.template_input) as template:
             export_mlab_server_network_config(
                 sys.stdout, sites, options.filename, template, options.select,
-                options.labels)
+                options.labels, options.physical)
 
     elif options.format == 'prom-targets':
         records = select_prometheus_experiment_targets(
             sites, options.select, options.template_target,
-            options.labels, options.use_flatnames,
-            options.decoration)
+            options.labels, options.rsync, options.use_flatnames,
+            options.decoration, options.physical)
         json.dump(records, sys.stdout, indent=4)
 
     elif options.format == 'prom-targets-nodes':
         records = select_prometheus_node_targets(
             sites, options.select, options.template_target, options.labels,
-            options.decoration)
+            options.decoration, options.physical)
         json.dump(records, sys.stdout, indent=4)
 
     elif options.format == 'prom-targets-sites':
         records = select_prometheus_site_targets(
-            sites, options.select, options.template_target, options.labels)
+            sites, options.select, options.template_target, options.labels,
+            options.physical)
         json.dump(records, sys.stdout, indent=4)
 
     else:

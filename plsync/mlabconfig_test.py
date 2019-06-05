@@ -176,7 +176,7 @@ class MlabconfigTest(unittest.TestCase):
 
         mlabconfig.export_mlab_server_network_config(
             stdout, self.sites, name_tmpl, input_tmpl, 'mlab1.abc01',
-            {'extra': 'value'})
+            {'extra': 'value'}, False)
 
         self.assertEqual(
             file_output.getvalue(), 'ip=192.168.1.9 ; echo ${ip} value')
@@ -196,7 +196,8 @@ class MlabconfigTest(unittest.TestCase):
         ]
 
         actual_targets = mlabconfig.select_prometheus_experiment_targets(
-            self.sites, None, ['{{hostname}}:9090'], {}, False, False, '')
+            self.sites, None, ['{{hostname}}:9090'], {}, False, False, '',
+            False)
 
         self.assertEqual(len(actual_targets), 1)
         self.assertItemsEqual(expected_targets, actual_targets)
@@ -216,7 +217,7 @@ class MlabconfigTest(unittest.TestCase):
 
         actual_targets = mlabconfig.select_prometheus_experiment_targets(
             self.sites, "bar.abc.mlab1.*", ['{{hostname}}:9090'], {},
-            False, False, '')
+            False, False, '', False)
 
         self.assertEqual(len(actual_targets), 1)
         self.assertItemsEqual(expected_targets, actual_targets)
@@ -236,7 +237,7 @@ class MlabconfigTest(unittest.TestCase):
 
         actual_targets = mlabconfig.select_prometheus_experiment_targets(
             self.sites, "bar.abc.mlab1.*", ['{{hostname}}:9090'], {},
-            False, True, '')
+            False, True, '', False)
 
         self.assertEqual(len(actual_targets), 1)
         self.assertItemsEqual(expected_targets, actual_targets)
@@ -256,7 +257,7 @@ class MlabconfigTest(unittest.TestCase):
 
         actual_targets = mlabconfig.select_prometheus_experiment_targets(
             self.sites, "bar.abc.mlab1.*", ['{{hostname}}:9090'], {}, False,
-            False, 'v4')
+            False, 'v4', False)
 
         self.assertEqual(len(actual_targets), 1)
         self.assertItemsEqual(expected_targets, actual_targets)
@@ -274,7 +275,7 @@ class MlabconfigTest(unittest.TestCase):
         ]
 
         actual_targets = mlabconfig.select_prometheus_node_targets(
-            self.sites, "mlab1.*", ['{{hostname}}:9090'], {}, '')
+            self.sites, "mlab1.*", ['{{hostname}}:9090'], {}, '', False)
 
         self.assertEqual(len(actual_targets), 1)
         self.assertItemsEqual(actual_targets, expected_targets)
@@ -292,7 +293,7 @@ class MlabconfigTest(unittest.TestCase):
         ]
 
         actual_targets = mlabconfig.select_prometheus_node_targets(
-            self.sites, "mlab1.*", ['{{hostname}}:9090'], {}, 'v6')
+            self.sites, "mlab1.*", ['{{hostname}}:9090'], {}, 'v6', False)
 
         self.assertEqual(len(actual_targets), 1)
         self.assertItemsEqual(actual_targets, expected_targets)
@@ -312,7 +313,7 @@ class MlabconfigTest(unittest.TestCase):
 
         actual_targets = mlabconfig.select_prometheus_node_targets(
             self.sites, "mlab1.*", ['{{hostname}}:9090', '{{hostname}}:8080'],
-            {}, '')
+            {}, '', False)
 
         self.assertEqual(len(actual_targets), 1)
         self.assertItemsEqual(actual_targets, expected_targets)
@@ -330,7 +331,8 @@ class MlabconfigTest(unittest.TestCase):
         ]
 
         actual_targets = mlabconfig.select_prometheus_site_targets(
-            self.sites, None, ['s1.{{sitename}}.measurement-lab.org:9116'], {})
+            self.sites, None, ['s1.{{sitename}}.measurement-lab.org:9116'], {},
+            False)
 
         self.assertEqual(len(actual_targets), 1)
         self.assertItemsEqual(actual_targets, expected_targets)
