@@ -82,7 +82,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
       # production.
       ########################################################################
 
-      # NDT7 SSL on port 443 over IPv4
+      # ndt7 SSL on port 443 over IPv4
       ./mlabconfig.py --format=prom-targets \
           --template_target={{hostname}}:443 \
           --label service=ndt7 \
@@ -90,7 +90,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --select "ndt.iupui.(${!pattern})" > \
               ${output}/blackbox-targets/ndt7.json
 
-      # NDT7 SSL on port 443 over IPv6
+      # ndt7 SSL on port 443 over IPv6
       ./mlabconfig.py --format=prom-targets \
           --template_target={{hostname}}:443 \
           --label service=ndt7_ipv6 \
