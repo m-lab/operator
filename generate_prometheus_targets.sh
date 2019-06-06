@@ -49,6 +49,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --label service=rsyncd \
           --label module=rsyncd_online \
           --rsync \
+          --physical \
           --select "${!pattern}" > ${output}/blackbox-targets/rsyncd.json
 
       # SSH on port 806 over IPv4
@@ -56,6 +57,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --template_target={{hostname}}:806 \
           --label service=ssh806 \
           --label module=ssh_v4_online \
+          --physical \
           --select "${!pattern}" > ${output}/blackbox-targets/ssh806.json
 
       # SSH on port 806 over IPv6
@@ -64,6 +66,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --label service=ssh806 \
           --label module=ssh_v6_online \
           --label __blackbox_port=${!bbe_port} \
+          --physical \
           --select "${!pattern}" \
           --decoration "v6" > ${output}/blackbox-targets-ipv6/ssh806_ipv6.json
 
@@ -71,6 +74,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
       ./mlabconfig.py --format=prom-targets \
           --template_target={{hostname}}:9090 \
           --label service=sidestream \
+          --physical \
           --select "npad.iupui.(${!pattern})" > \
               ${output}/legacy-targets/sidestream.json
 
@@ -161,6 +165,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --template_target={{hostname}}:6003 \
           --label service=mobiperf \
           --label module=tcp_v4_online \
+          --physical \
           --select "1.michigan.(${!pattern})" > \
               ${output}/blackbox-targets/mobiperf.json
 
@@ -172,6 +177,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --label service=mobiperf_ipv6 \
           --label module=tcp_v6_online \
           --label __blackbox_port=${!bbe_port} \
+          --physical \
           --select "1.michigan.(${!pattern})" \
           --decoration "v6" > ${output}/blackbox-targets-ipv6/mobiperf_ipv6.json
 
@@ -180,6 +186,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --template_target={{hostname}}:9773/sapi/state \
           --label service=neubot \
           --label module=neubot_online_v4 \
+          --physical \
           --select "neubot.mlab.(${!pattern})" > \
               ${output}/blackbox-targets/neubot.json
 
@@ -189,11 +196,13 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --label service=neubot_ipv6 \
           --label module=neubot_online_v6 \
           --label __blackbox_port=${!bbe_port} \
+          --physical \
           --select "neubot.mlab.(${!pattern})" \
           --decoration "v6" > ${output}/blackbox-targets-ipv6/neubot_ipv6.json
 
       # snmp_exporter on port 9116.
       ./mlabconfig.py --format=prom-targets-sites \
+          --physical \
           --select "${!pattern}" \
           --template_target=s1.{{sitename}}.measurement-lab.org \
           --label service=snmp > \
@@ -203,6 +212,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
       ./mlabconfig.py --format=prom-targets \
           --template_target={{hostname}}:9393 \
           --label service=inotify \
+          --physical \
           --select "ndt.iupui.(${!pattern})" > \
               ${output}/legacy-targets/ndt_inotify.json
 
@@ -215,6 +225,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
 
       # ICMP probe for platform switches
       ./mlabconfig.py --format=prom-targets-sites \
+          --physical \
           --select "${!pattern}" \
           --template_target=s1.{{sitename}}.measurement-lab.org \
           --label module=icmp > \
@@ -225,6 +236,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --template_target={{hostname}}:22 \
           --label service=ssh \
           --label module=ssh_v4_online \
+          --physical \
           --select "${!pattern}" > ${output}/blackbox-targets/ssh.json
 
       # SSH on port 22 over IPv6
@@ -233,6 +245,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --label service=ssh \
           --label module=ssh_v6_online \
           --label __blackbox_port=${!bbe_port} \
+          --physical \
           --select "${!pattern}" \
           --decoration "v6" > ${output}/blackbox-targets-ipv6/ssh_ipv6.json
 
