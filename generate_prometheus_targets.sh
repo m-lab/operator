@@ -82,6 +82,14 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
       # production.
       ########################################################################
 
+      # NDT7 SSL on port 443
+      ./mlabconfig.py --format=prom-targets \
+          --template_target={{hostname}}:443 \
+          --label service=ndt7_ssl \
+          --label module=tcp_v4_online \
+          --select "ndt.iupui.(${!pattern})" > \
+              ${output}/blackbox-targets/ndt7_ssl.json
+
       # NDT "raw" on port 3001 over IPv4
       ./mlabconfig.py --format=prom-targets \
           --template_target={{hostname}}:3001 \
