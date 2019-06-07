@@ -465,6 +465,13 @@ def main():
             sites, options.select, options.template_target, options.labels,
             options.physical)
         json.dump(records, sys.stdout, indent=4)
+    elif options.format == 'hostips':
+        # TODO: Added temporarily to work-around-dependency in script-exporter-support.
+        # TODO: Remove after script-exporter-support no longer depends on this.
+        # NOTE: using metadata/v0 b/c that respects legacy-network-remap.
+        hostnames = urllib2.urlopen(
+            'https://storage.googleapis.com/operator-mlab-oti/metadata/v0/current/mlab-host-ips.txt').read()
+        sys.stdout.write(hostnames)
 
     else:
         logging.error('Sorry, unknown format: %s', options.format)
