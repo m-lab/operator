@@ -44,7 +44,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
 
     if [[ ${GROUP} == scraper ]] ; then
       # Rsyncd on port 7999.
-      ./mlabconfig.py --format=prom-targets \
+      ./legacyconfig.py --format=prom-targets \
           --template_target={{hostname}}:7999 \
           --label service=rsyncd \
           --label module=rsyncd_online \
@@ -53,7 +53,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --select "${!pattern}" > ${output}/blackbox-targets/rsyncd.json
 
       # SSH on port 806 over IPv4
-      ./mlabconfig.py --format=prom-targets-nodes \
+      ./legacyconfig.py --format=prom-targets-nodes \
           --template_target={{hostname}}:806 \
           --label service=ssh806 \
           --label module=ssh_v4_online \
@@ -61,7 +61,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --select "${!pattern}" > ${output}/blackbox-targets/ssh806.json
 
       # SSH on port 806 over IPv6
-      ./mlabconfig.py --format=prom-targets-nodes \
+      ./legacyconfig.py --format=prom-targets-nodes \
           --template_target={{hostname}}:806 \
           --label service=ssh806 \
           --label module=ssh_v6_online \
@@ -71,7 +71,7 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --decoration "v6" > ${output}/blackbox-targets-ipv6/ssh806_ipv6.json
 
       # Sidestream exporter in the npad experiment.
-      ./mlabconfig.py --format=prom-targets \
+      ./legacyconfig.py --format=prom-targets \
           --template_target={{hostname}}:9090 \
           --label service=sidestream \
           --physical \
