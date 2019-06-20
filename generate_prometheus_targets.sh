@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -euxo pipefail
 
 # Root directory of this script.
 SCRIPTDIR=$( dirname "${BASH_SOURCE[0]}" )
@@ -49,7 +50,6 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --label service=rsyncd \
           --label module=rsyncd_online \
           --rsync \
-          --physical \
           --select "${!pattern}" > ${output}/blackbox-targets/rsyncd.json
 
       # SSH on port 806 over IPv4
@@ -57,7 +57,6 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --template_target={{hostname}}:806 \
           --label service=ssh806 \
           --label module=ssh_v4_online \
-          --physical \
           --select "${!pattern}" > ${output}/blackbox-targets/ssh806.json
 
       # SSH on port 806 over IPv6
@@ -66,7 +65,6 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
           --label service=ssh806 \
           --label module=ssh_v6_online \
           --label __blackbox_port=${!bbe_port} \
-          --physical \
           --select "${!pattern}" \
           --decoration "v6" > ${output}/blackbox-targets-ipv6/ssh806_ipv6.json
 
@@ -74,7 +72,6 @@ for project in mlab-sandbox mlab-staging mlab-oti ; do
       ./legacyconfig.py --format=prom-targets \
           --template_target={{hostname}}:9090 \
           --label service=sidestream \
-          --physical \
           --select "npad.iupui.(${!pattern})" > \
               ${output}/legacy-targets/sidestream.json
 
