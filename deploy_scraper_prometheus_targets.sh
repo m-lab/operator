@@ -8,14 +8,13 @@ CACHE_CONTROL="Cache-Control:private, max-age=0, no-transform"
 
 USAGE="Usage: $0 <project>"
 PROJECT=${1:?Please provide project name: $USAGE}
-GROUP=${2:?Please provide monitoring group name: $USAGE}
 
 # Root directory of this script.
 SCRIPTDIR=$( dirname "${BASH_SOURCE[0]}" )
 BASEDIR=${PWD}
 
 # Generate the configs.
-${SCRIPTDIR}/generate_prometheus_targets.sh ${GROUP} > /dev/null
+${SCRIPTDIR}/generate_scraper_prometheus_targets.sh > /dev/null
 
 # Be sure that gcloud is PATH
 source "${HOME}/google-cloud-sdk/path.bash.inc"

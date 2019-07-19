@@ -44,7 +44,7 @@ deploy:
 ############################################################################
 # Sandbox.
 - provider: script
-  script: $TRAVIS_BUILD_DIR/deploy_prometheus_targets.sh mlab-sandbox global
+  script: $TRAVIS_BUILD_DIR/deploy_scraper_prometheus_targets.sh mlab-sandbox
   skip_cleanup: true
   on:
     repo: m-lab/operator
@@ -54,7 +54,7 @@ deploy:
 ############################################################################
 # Staging, on master.
 - provider: script
-  script: $TRAVIS_BUILD_DIR/deploy_prometheus_targets.sh mlab-staging global
+  script: $TRAVIS_BUILD_DIR/deploy_scraper_prometheus_targets.sh mlab-staging
   skip_cleanup: true
   on:
     repo: m-lab/operator
@@ -63,7 +63,7 @@ deploy:
 ############################################################################
 # Production, on tags.
 - provider: script
-  script: $TRAVIS_BUILD_DIR/deploy_prometheus_targets.sh mlab-oti global
+  script: $TRAVIS_BUILD_DIR/deploy_scraper_prometheus_targets.sh mlab-oti
   skip_cleanup: true
   on:
     repo: m-lab/operator
